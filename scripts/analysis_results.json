@@ -1,0 +1,33 @@
+{
+  "errors": [
+    "Total Expenses 2024: Reported 1,430,787,456 != Calculated 1,430,787,729 (difference: 273)",
+    "Revenue for Cash Flow Purposes 2025: Reported 1,154,809,495 != 1,299,680,159 - Rev in Kind 31,100,000 = 1,268,580,159 (difference: 113,770,664)",
+    "Revenue for Cash Flow Purposes 2024: Reported 1,358,801,633 != 1,473,458,157 - Rev in Kind 19,800,000 = 1,453,658,157 (difference: 94,856,524)",
+    "Cross-Reference CF Revenue 2024: Table 6 (1,358,801,633) != Table 5 operating revenue (1,366,001,633). Difference: (7,200,000)",
+    "Cash Note 2024 (105,668,500) != Balance Sheet Cash (105,668,594). Difference: (94)",
+    "SFP Revenue in Table 6 (1,241,729,534) != Total Revenue in Table 2 (1,144,235,244). Difference: 97,494,290",
+    "Goods & Services in CF 2024 (826,047,422) != SFP (904,259,070). Difference: (78,211,648)",
+    "Budget Variance (Treasury UCF): Variance is shown as 0 but should be (11,604,518) (Revised 156,316,860 - Actual 167,921,378)",
+    "Depreciation Note 2025 (0) != SFP (3,708,438). Difference: (3,708,438)",
+    "Revenue Classification 2025: Non-Tax Revenue-Exchange is 1,300,000 but the second Sub-total Revenue from exchange transactions is 0. The subtotal should include this figure."
+  ],
+  "warnings": [],
+  "total_errors": 10,
+  "total_warnings": 0,
+  "key_figures": {
+    "total_revenue_2025": 1144235244,
+    "total_revenue_2024": 1449952907,
+    "total_expenses_2025": 1119064101,
+    "total_expenses_2024": 1430787456,
+    "surplus_2025": 25171143,
+    "surplus_2024": 19165451,
+    "total_assets_2025": 275036401,
+    "total_assets_2024": 193325118,
+    "total_liabilities_2025": 59215130,
+    "total_liabilities_2024": 58411375,
+    "net_assets_2025": 215821271,
+    "net_assets_2024": 134913743,
+    "cash_2025": 102448606,
+    "cash_2024": 105668594
+  }
+}
