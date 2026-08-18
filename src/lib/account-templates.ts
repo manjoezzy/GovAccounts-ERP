@@ -1,0 +1,125 @@
+// Pre-defined account templates matching the Madera financial statements structure
+
+export const CLASSIFICATION_OPTIONS = [
+  { value: 'revenue-non-exchange', label: 'Revenue (Non-Exchange)' },
+  { value: 'revenue-exchange', label: 'Revenue (Exchange)' },
+  { value: 'expense', label: 'Expense' },
+  { value: 'asset', label: 'Asset' },
+  { value: 'liability', label: 'Liability' },
+  { value: 'equity', label: 'Equity / Net Assets' },
+];
+
+export const CATEGORY_OPTIONS: Record<string, { value: string; label: string }[]> = {
+  'revenue-non-exchange': [
+    { value: 'taxes', label: 'Taxes' },
+    { value: 'external_assistance', label: 'External Assistance' },
+    { value: 'transfers_treasury_ucf', label: 'Transfers from Treasury-UCF' },
+    { value: 'transfers_contingencies', label: 'Transfers from Contingencies Fund' },
+    { value: 'transfers_other_govt', label: 'Transfers from other Govt Units' },
+    { value: 'revenue_in_kind', label: 'Revenue in Kind' },
+  ],
+  'revenue-exchange': [
+    { value: 'sub_exchange', label: 'Sub-total Revenue from Exchange (e.g. Student Fees)' },
+    { value: 'non_tax_revenue_exchange', label: 'Non-Tax Revenue-Exchange' },
+  ],
+  'expense': [
+    { value: 'compensation', label: 'Compensation of Employees' },
+    { value: 'goods_services', label: 'Goods and Services Consumed' },
+    { value: 'depreciation', label: 'Depreciation Expense' },
+    { value: 'impairment', label: 'Impairment of PPE' },
+    { value: 'subsidies', label: 'Subsidies' },
+    { value: 'grants_transfers', label: 'Grants and Other Transfers' },
+    { value: 'social_benefits', label: 'Social Benefits' },
+    { value: 'finance_costs', label: 'Finance Costs' },
+    { value: 'bad_debts', label: 'Bad Debts Expense' },
+    { value: 'other_expenses', label: 'Other Expenses' },
+  ],
+  'asset': [
+    { value: 'cash', label: 'Cash and Cash Equivalents' },
+    { value: 'prepayments_current', label: 'Prepayments and Advances (Current)' },
+    { value: 'receivables_current', label: 'Receivables (Current)' },
+    { value: 'inventories', label: 'Inventories' },
+    { value: 'prepayments_nc', label: 'Prepayments and Advances (Non-Current)' },
+    { value: 'receivables_nc', label: 'Receivables (Non-Current)' },
+    { value: 'investments', label: 'Investments' },
+    { value: 'ppe', label: 'Property, Plant and Equipment' },
+    { value: 'investment_property', label: 'Investment Property' },
+    { value: 'intangible', label: 'Intangible Assets' },
+    { value: 'non_produced', label: 'Non-Produced Assets' },
+  ],
+  'liability': [
+    { value: 'payables_current', label: 'Payables (Current)' },
+    { value: 'deposits_current', label: 'Deposits (Current)' },
+    { value: 'short_borrowings', label: 'Short-term Borrowings' },
+    { value: 'pensions_current', label: 'Pensions (Current)' },
+    { value: 'payables_nc', label: 'Payables (Non-Current)' },
+    { value: 'deposits_nc', label: 'Deposits (Non-Current)' },
+    { value: 'long_borrowings', label: 'Long-term Borrowings' },
+    { value: 'pensions_nc', label: 'Pensions (Non-Current)' },
+  ],
+  'equity': [],
+};
+
+// Note references per category
+export const NOTE_REFS: Record<string, string> = {
+  'taxes': '2', 'external_assistance': '3', 'transfers_treasury_ucf': '4',
+  'transfers_contingencies': '5', 'transfers_other_govt': '6', 'non_tax_exchange': '7',
+  'sub_exchange': '8', 'revenue_in_kind': '8(b)',
+  'compensation': '9', 'goods_services': '10', 'depreciation': '11', 'impairment': '12',
+  'subsidies': '13', 'grants_transfers': '14', 'social_benefits': '15',
+  'finance_costs': '16', 'bad_debts': '17', 'other_expenses': '18',
+  'cash': '21', 'prepayments_current': '22(a)', 'receivables_current': '23(d)',
+  'inventories': '24', 'prepayments_nc': '22(b)', 'receivables_nc': '23(e)',
+  'investments': '25', 'ppe': '26(a)', 'investment_property': '26(b)',
+  'intangible': '26(c)', 'non_produced': '27',
+  'payables_current': '28(a)', 'payables_nc': '28(b)',
+  'deposits_current': '29(a)', 'deposits_nc': '29(b)',
+  'short_borrowings': '30(a)', 'long_borrowings': '30(b)',
+  'pensions_current': '31(a)', 'pensions_nc': '31(b)',
+};
+
+// Default trial balance template for quick start
+export const DEFAULT_TB_TEMPLATE = [
+  // Revenue
+  { accountCode: 'R001', accountName: 'Taxes', classification: 'revenue-non-exchange', category: 'taxes', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'R002', accountName: 'External Assistance', classification: 'revenue-non-exchange', category: 'external_assistance', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'R003', accountName: 'Transfers received from Treasury-UCF', classification: 'revenue-non-exchange', category: 'transfers_treasury_ucf', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'R004', accountName: 'Transfers from Contingencies Fund', classification: 'revenue-non-exchange', category: 'transfers_contingencies', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'R005', accountName: 'Transfers from other Government Units', classification: 'revenue-non-exchange', category: 'transfers_other_govt', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'R006', accountName: 'Non-Tax revenue-Exchange Transaction', classification: 'revenue-non-exchange', category: 'non_tax_exchange', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'R007', accountName: 'Students Fees / Exchange Revenue', classification: 'revenue-exchange', category: 'sub_exchange', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'R008', accountName: 'Revenue in Kind', classification: 'revenue-non-exchange', category: 'revenue_in_kind', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'R009', accountName: 'Non-Tax Revenue-Exchange', classification: 'revenue-exchange', category: 'non_tax_revenue_exchange', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  // Expenses
+  { accountCode: 'E001', accountName: 'Compensation of Employees', classification: 'expense', category: 'compensation', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'E002', accountName: 'Goods and Services Consumed', classification: 'expense', category: 'goods_services', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'E003', accountName: 'Depreciation Expense', classification: 'expense', category: 'depreciation', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'E004', accountName: 'Impairment of PPE', classification: 'expense', category: 'impairment', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'E005', accountName: 'Subsidies', classification: 'expense', category: 'subsidies', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'E006', accountName: 'Grants and Other Transfers', classification: 'expense', category: 'grants_transfers', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'E007', accountName: 'Social Benefits', classification: 'expense', category: 'social_benefits', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'E008', accountName: 'Finance Costs', classification: 'expense', category: 'finance_costs', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'E009', accountName: 'Bad Debts Expense', classification: 'expense', category: 'bad_debts', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'E010', accountName: 'Other Expenses', classification: 'expense', category: 'other_expenses', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  // Assets
+  { accountCode: 'A001', accountName: 'Cash and Cash Equivalents', classification: 'asset', category: 'cash', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'A002', accountName: 'Prepayments and Advances (Current)', classification: 'asset', category: 'prepayments_current', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'A003', accountName: 'Receivables (Current)', classification: 'asset', category: 'receivables_current', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'A004', accountName: 'Inventories', classification: 'asset', category: 'inventories', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'A005', accountName: 'Prepayments and Advances (Non-Current)', classification: 'asset', category: 'prepayments_nc', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'A006', accountName: 'Receivables (Non-Current)', classification: 'asset', category: 'receivables_nc', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'A007', accountName: 'Investments', classification: 'asset', category: 'investments', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'A008', accountName: 'Property, Plant and Equipment', classification: 'asset', category: 'ppe', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'A009', accountName: 'Investment Property', classification: 'asset', category: 'investment_property', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'A010', accountName: 'Intangible Assets', classification: 'asset', category: 'intangible', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'A011', accountName: 'Non-Produced Assets', classification: 'asset', category: 'non_produced', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  // Liabilities
+  { accountCode: 'L001', accountName: 'Payables (Current)', classification: 'liability', category: 'payables_current', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'L002', accountName: 'Deposits (Current)', classification: 'liability', category: 'deposits_current', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'L003', accountName: 'Short-term Borrowings', classification: 'liability', category: 'short_borrowings', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'L004', accountName: 'Pensions (Current)', classification: 'liability', category: 'pensions_current', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'L005', accountName: 'Payables (Non-Current)', classification: 'liability', category: 'payables_nc', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'L006', accountName: 'Deposits (Non-Current)', classification: 'liability', category: 'deposits_nc', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'L007', accountName: 'Long-term Borrowings', classification: 'liability', category: 'long_borrowings', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+  { accountCode: 'L008', accountName: 'Pensions (Non-Current)', classification: 'liability', category: 'pensions_nc', debitCurrent: 0, creditCurrent: 0, debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0 },
+];

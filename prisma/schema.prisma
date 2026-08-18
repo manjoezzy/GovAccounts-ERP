@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model FinancialReport {
+  id          String   @id @default(cuid())
+  entityName  String   @default("Government Entity")
+  periodEnd   String   // e.g. "2025-06-30"
+  periodLabel String   @default("30 June 2025")
+  currency    String   @default("Shs")
+  status      String   @default("draft") // draft, complete, generated
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  entries     TrialBalanceEntry[]
+}
+
+model TrialBalanceEntry {
+  id        String  @id @default(cuid())
+  reportId  String
+  report    FinancialReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  
+  accountCode String
+  accountName String
+  // Classification: revenue, expense, asset, liability, equity
+  classification String
+  // Sub-classification for mapping to specific statement lines
+  category     String @default("")
+  noteRef      String @default("")
+  
+  debitCurrent  Float @default(0)
+  creditCurrent Float @default(0)
+  debitPrior    Float @default(0)
+  creditPrior   Float @default(0)
+  
+  // Budget data
+  budgetInitial   Float @default(0)
+  budgetAdjusted  Float @default(0)
+  
+  sortOrder Int @default(0)
+}
