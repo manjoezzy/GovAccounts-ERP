@@ -8,38 +8,103 @@ datasource db {
 }
 
 model FinancialReport {
-  id          String   @id @default(cuid())
-  entityName  String   @default("Government Entity")
-  periodEnd   String   // e.g. "2025-06-30"
-  periodLabel String   @default("30 June 2025")
-  currency    String   @default("Shs")
-  status      String   @default("draft") // draft, complete, generated
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  entries     TrialBalanceEntry[]
+  id             String   @id @default(cuid())
+  entityName     String   @default("Government Entity")
+  periodEnd      String
+  periodLabel    String   @default("30 June 2025")
+  currency       String   @default("Shs")
+  status         String   @default("draft")
+  version        Int      @default(1)
+  versionLabel   String   @default("")
+  parentVersionId String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  entries        TrialBalanceEntry[]
+  auditLog       AuditLog[]
+  supplementary  SupplementaryData?
+  approvalWorkflow ApprovalWorkflow?
 }
 
 model TrialBalanceEntry {
-  id        String  @id @default(cuid())
+  id            String  @id @default(cuid())
+  reportId      String
+  report        FinancialReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  accountCode   String
+  accountName   String
+  classification String
+  category      String  @default("")
+  noteRef       String  @default("")
+  debitCurrent  Float   @default(0)
+  creditCurrent Float   @default(0)
+  debitPrior    Float   @default(0)
+  creditPrior   Float   @default(0)
+  budgetInitial  Float   @default(0)
+  budgetAdjusted Float   @default(0)
+  sortOrder     Int     @default(0)
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
   reportId  String
   report    FinancialReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
-  
-  accountCode String
-  accountName String
-  // Classification: revenue, expense, asset, liability, equity
-  classification String
-  // Sub-classification for mapping to specific statement lines
-  category     String @default("")
-  noteRef      String @default("")
-  
-  debitCurrent  Float @default(0)
-  creditCurrent Float @default(0)
-  debitPrior    Float @default(0)
-  creditPrior   Float @default(0)
-  
-  // Budget data
-  budgetInitial   Float @default(0)
-  budgetAdjusted  Float @default(0)
-  
-  sortOrder Int @default(0)
+  action    String
+  field     String   @default("")
+  oldValue  String   @default("")
+  newValue  String   @default("")
+  userId    String   @default("system")
+  timestamp DateTime @default(now())
+}
+
+model SupplementaryData {
+  id                        String  @id @default(cuid())
+  reportId                  String  @unique
+  report                    FinancialReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  advancesRecovered         Float   @default(0)
+  advancesRecoveredPrior    Float   @default(0)
+  depositsReceived          Float   @default(0)
+  depositsReceivedPrior     Float   @default(0)
+  transfersToTreasury       Float   @default(0)
+  transfersToTreasuryPrior  Float   @default(0)
+  revenueInKindTaxWaivers       Float   @default(0)
+  revenueInKindTaxWaiversPrior  Float   @default(0)
+  ppeOpeningCurrent         Float   @default(0)
+  ppeAdditionsCurrent       Float   @default(0)
+  ppeDisposalsCurrent       Float   @default(0)
+  ppeOpeningPrior           Float   @default(0)
+  ppeAdditionsPrior         Float   @default(0)
+  ppeDisposalsPrior         Float   @default(0)
+  depreciationRate          Float   @default(0)
+  depreciationMethod        String  @default("straight-line")
+  employeeCount             Int     @default(0)
+  salariesWages             Float   @default(0)
+  pensionContributions      Float   @default(0)
+  payrollTaxes              Float   @default(0)
+  otherEmployeeBenefits     Float   @default(0)
+  priorYearAdjustments      Float   @default(0)
+  revaluationReserves       Float   @default(0)
+  transfersToUCF            Float   @default(0)
+  accountingOfficer         String  @default("")
+  chiefFinanceOfficer       String  @default("")
+  internalAuditHead         String  @default("")
+  signatoryDate             String  @default("")
+  ipsasBasis                String  @default("IPSAS Accrual Basis")
+  accountingPolicies        String  @default("")
+  exchangeRateUSD           Float   @default(1)
+  exchangeRateEUR           Float   @default(1)
+}
+
+model ApprovalWorkflow {
+  id                String    @id @default(cuid())
+  reportId          String    @unique
+  report            FinancialReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  currentStep       String    @default("draft")
+  preparerName      String    @default("")
+  preparerApprovedAt DateTime?
+  reviewerName      String    @default("")
+  reviewerApprovedAt DateTime?
+  cfoName           String    @default("")
+  cfoApprovedAt     DateTime?
+  comments          String    @default("")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 }

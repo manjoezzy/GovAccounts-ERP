@@ -203,7 +203,18 @@ function sumByCategory(entries: TBEntry[], categoryKey: string, year: 'current' 
     .reduce((sum, e) => sum + getAmount(e, year), 0);
 }
 
-export function generateStatements(entries: TBEntry[]): GeneratedStatements {
+export interface SupplementaryInput {
+  advancesRecovered?: number;
+  advancesRecoveredPrior?: number;
+  depositsReceived?: number;
+  depositsReceivedPrior?: number;
+  transfersToTreasury?: number;
+  transfersToTreasuryPrior?: number;
+  revenueInKindTaxWaivers?: number;
+  revenueInKindTaxWaiversPrior?: number;
+}
+
+export function generateStatements(entries: TBEntry[], supp?: SupplementaryInput): GeneratedStatements {
   const errors: string[] = [];
 
   // Validate trial balance balances
@@ -405,31 +416,30 @@ export function generateStatements(entries: TBEntry[]): GeneratedStatements {
   };
 
   // ===== REVENUE RECONCILIATION =====
-  const totalRevenueCFCurrent = totalRevenueCurrent + revenueReceivableCurrent;
-  const totalRevenueCFPrior = totalRevenuePrior + revenueReceivablePrior;
-  const totalRevenueCashFlowCurrent = totalRevenueCFCurrent - revenueInKindCurrent;
-  const totalRevenueCashFlowPrior = totalRevenueCFPrior - revenueInKindPrior;
-
   const revenueReconciliation: RevenueReconciliationData = {
     sfpRevenueCurrent: totalRevenueCurrent,
     sfpRevenuePrior: totalRevenuePrior,
-    advancesRecoveredCurrent: 0,
-    advancesRecoveredPrior: 0,
+    advancesRecoveredCurrent: supp?.advancesRecovered ?? 0,
+    advancesRecoveredPrior: supp?.advancesRecoveredPrior ?? 0,
     revenueReceivableCollectedCurrent: revenueReceivableCurrent,
     revenueReceivableCollectedPrior: revenueReceivablePrior,
-    depositsReceivedCurrent: 0,
-    depositsReceivedPrior: 0,
-    totalRevenueCFCurrent,
-    totalRevenueCFPrior,
+    depositsReceivedCurrent: supp?.depositsReceived ?? 0,
+    depositsReceivedPrior: supp?.depositsReceivedPrior ?? 0,
+    totalRevenueCFCurrent: totalRevenueCurrent + (supp?.advancesRecovered ?? 0) + revenueReceivableCurrent + (supp?.depositsReceived ?? 0),
+    totalRevenueCFPrior: totalRevenuePrior + (supp?.advancesRecoveredPrior ?? 0) + revenueReceivablePrior + (supp?.depositsReceivedPrior ?? 0),
     grantsInKindCurrent: revenueInKindCurrent,
     grantsInKindPrior: revenueInKindPrior,
-    transfersToTreasuryCurrent: 0,
-    transfersToTreasuryPrior: 0,
+    transfersToTreasuryCurrent: supp?.transfersToTreasury ?? 0,
+    transfersToTreasuryPrior: supp?.transfersToTreasuryPrior ?? 0,
     revenueReceivablePeriodCurrent: receivablesCurrent,
     revenueReceivablePeriodPrior: receivablesPrior,
-    totalRevenueCashFlowCurrent,
-    totalRevenueCashFlowPrior,
+    totalRevenueCashFlowCurrent: 0,
+    totalRevenueCashFlowPrior: 0,
   };
+
+  // Compute final cash flow revenue totals
+  revenueReconciliation.totalRevenueCashFlowCurrent = revenueReconciliation.totalRevenueCFCurrent - revenueInKindCurrent - (supp?.revenueInKindTaxWaivers ?? 0) - (supp?.transfersToTreasury ?? 0);
+  revenueReconciliation.totalRevenueCashFlowPrior = revenueReconciliation.totalRevenueCFPrior - revenueInKindPrior - (supp?.revenueInKindTaxWaiversPrior ?? 0) - (supp?.transfersToTreasuryPrior ?? 0);
 
   // ===== CASH RECONCILIATION =====
   const cashReconciliation: CashReconciliationData = {

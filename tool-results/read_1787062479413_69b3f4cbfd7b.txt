@@ -1,0 +1,501 @@
+    50→    50→    50→
+    51→    51→    51→# ========================================
+    52→    52→    52→# TABLE 2: Statement of Financial Performance
+    53→    53→    53→# ========================================
+    54→    54→    54→t2 = tables[1]  # Table 2 (0-indexed, Table 1 is blank)
+    55→    55→    55→
+    56→    56→    56→# Revenue items
+    57→    57→    57→rev_2025 = {
+    58→    58→    58→    'Taxes': parse_num(t2[3][2]),
+    59→    59→    59→    'External Assistance': parse_num(t2[4][2]),
+    60→    60→    60→    'Transfers from Treasury-UCF': parse_num(t2[5][2]),
+    61→    61→    61→    'Transfers from Contingencies Fund': parse_num(t2[6][2]),
+    62→    62→    62→    'Transfers from other Govt Units': parse_num(t2[7][2]),
+    63→    63→    63→    'Non-Tax revenue-Exchange Transaction': parse_num(t2[8][2]),
+    64→    64→    64→    'Sub-total Exchange transactions': parse_num(t2[9][2]),
+    65→    65→    65→    'Revenue in kind': parse_num(t2[10][2]),
+    66→    66→    66→    'Non-Tax Revenue-Exchange': parse_num(t2[11][2]),
+    67→    67→    67→    'Sub-total exchange transactions (2)': parse_num(t2[12][2]),
+    68→    68→    68→}
+    69→    69→    69→
+    70→    70→    70→rev_2024 = {
+    71→    71→    71→    'Taxes': parse_num(t2[3][3]),
+    72→    72→    72→    'External Assistance': parse_num(t2[4][3]),
+    73→    73→    73→    'Transfers from Treasury-UCF': parse_num(t2[5][3]),
+    74→    74→    74→    'Transfers from Contingencies Fund': parse_num(t2[6][3]),
+    75→    75→    75→    'Transfers from other Govt Units': parse_num(t2[7][3]),
+    76→    76→    76→    'Non-Tax revenue-Exchange Transaction': parse_num(t2[8][3]),
+    77→    77→    77→    'Sub-total Exchange transactions': parse_num(t2[9][3]),
+    78→    78→    78→    'Revenue in kind': parse_num(t2[10][3]),
+    79→    79→    79→    'Non-Tax Revenue-Exchange': parse_num(t2[11][3]),
+    80→    80→    80→    'Sub-total exchange transactions (2)': parse_num(t2[12][3]),
+    81→    81→    81→}
+    82→    82→    82→
+    83→    83→    83→reported_total_rev_2025 = parse_num(t2[13][2])  # 1,144,235,244
+    84→    84→    84→reported_total_rev_2024 = parse_num(t2[13][3])  # 1,449,952,907
+    85→    85→    85→
+    86→    86→    86→# Non-exchange revenue subtotal
+    87→    87→    87→non_exch_2025 = rev_2025['Taxes'] + rev_2025['External Assistance'] + rev_2025['Transfers from Treasury-UCF'] + rev_2025['Transfers from Contingencies Fund'] + rev_2025['Transfers from other Govt Units'] + rev_2025['Non-Tax revenue-Exchange Transaction']
+    88→    88→    88→non_exch_2024 = rev_2024['Taxes'] + rev_2024['External Assistance'] + rev_2024['Transfers from Treasury-UCF'] + rev_2024['Transfers from Contingencies Fund'] + rev_2024['Transfers from other Govt Units'] + rev_2024['Non-Tax revenue-Exchange Transaction']
+    89→    89→    89→
+    90→    90→    90→# CHECK 1: Total Revenue 2025
+    91→    91→    91→calc_total_rev_2025 = non_exch_2025 + rev_2025['Sub-total Exchange transactions'] + rev_2025['Revenue in kind'] + rev_2025['Non-Tax Revenue-Exchange'] + rev_2025['Sub-total exchange transactions (2)']
+    92→    92→    92→if calc_total_rev_2025 != reported_total_rev_2025:
+    93→    93→    93→    errors.append(f"Total Revenue 2025: Reported {fmt(reported_total_rev_2025)} != Calculated {fmt(calc_total_rev_2025)} (difference: {fmt(calc_total_rev_2025 - reported_total_rev_2025)})")
+    94→    94→    94→
+    95→    95→    95→# CHECK 1b: Total Revenue 2024
+    96→    96→    96→calc_total_rev_2024 = non_exch_2024 + rev_2024['Sub-total Exchange transactions'] + rev_2024['Revenue in kind'] + rev_2024['Non-Tax Revenue-Exchange'] + rev_2024['Sub-total exchange transactions (2)']
+    97→    97→    97→if calc_total_rev_2024 != reported_total_rev_2024:
+    98→    98→    98→    errors.append(f"Total Revenue 2024: Reported {fmt(reported_total_rev_2024)} != Calculated {fmt(calc_total_rev_2024)} (difference: {fmt(calc_total_rev_2024 - reported_total_rev_2024)})")
+    99→    99→    99→
+   100→   100→   100→# Expenses
+   101→   101→   101→exp_2025 = {
+   102→   102→   102→    'Compensation of employees': parse_num(t2[16][2]),
+   103→   103→   103→    'Goods and services consumed': parse_num(t2[17][2]),
+   104→   104→   104→    'Depreciation expense': parse_num(t2[18][2]),
+   105→   105→   105→    'Impairment of PPE': parse_num(t2[19][2]),
+   106→   106→   106→    'Subsidies': parse_num(t2[20][2]),
+   107→   107→   107→    'Grants and other transfers': parse_num(t2[21][2]),
+   108→   108→   108→    'Social benefits': parse_num(t2[22][2]),
+   109→   109→   109→    'Finance costs': parse_num(t2[23][2]),
+   110→   110→   110→    'Bad debts expense': parse_num(t2[24][2]),
+   111→   111→   111→    'Other expenses': parse_num(t2[25][2]),
+   112→   112→   112→}
+   113→   113→   113→
+   114→   114→   114→exp_2024 = {
+   115→   115→   115→    'Compensation of employees': parse_num(t2[16][3]),
+   116→   116→   116→    'Goods and services consumed': parse_num(t2[17][3]),
+   117→   117→   117→    'Depreciation expense': parse_num(t2[18][3]),
+   118→   118→   118→    'Impairment of PPE': parse_num(t2[19][3]),
+   119→   119→   119→    'Subsidies': parse_num(t2[20][3]),
+   120→   120→   120→    'Grants and other transfers': parse_num(t2[21][3]),
+   121→   121→   121→    'Social benefits': parse_num(t2[22][3]),
+   122→   122→   122→    'Finance costs': parse_num(t2[23][3]),
+   123→   123→   123→    'Bad debts expense': parse_num(t2[24][3]),
+   124→   124→   124→    'Other expenses': parse_num(t2[25][3]),
+   125→   125→   125→}
+   126→   126→   126→
+   127→   127→   127→reported_total_exp_2025 = parse_num(t2[26][2])
+   128→   128→   128→reported_total_exp_2024 = parse_num(t2[26][3])
+   129→   129→   129→
+   130→   130→   130→# CHECK 2: Total Expenses
+   131→   131→   131→calc_total_exp_2025 = sum(exp_2025.values())
+   132→   132→   132→if calc_total_exp_2025 != reported_total_exp_2025:
+   133→   133→   133→    errors.append(f"Total Expenses 2025: Reported {fmt(reported_total_exp_2025)} != Calculated {fmt(calc_total_exp_2025)} (difference: {fmt(calc_total_exp_2025 - reported_total_exp_2025)})")
+   134→   134→   134→
+   135→   135→   135→# CHECK 2b
+   136→   136→   136→calc_total_exp_2024 = sum(exp_2024.values())
+   137→   137→   137→if calc_total_exp_2024 != reported_total_exp_2024:
+   138→   138→   138→    errors.append(f"Total Expenses 2024: Reported {fmt(reported_total_exp_2024)} != Calculated {fmt(calc_total_exp_2024)} (difference: {fmt(calc_total_exp_2024 - reported_total_exp_2024)})")
+   139→   139→   139→
+   140→   140→   140→# CHECK 3: Surplus/Deficit
+   141→   141→   141→reported_surplus_2025 = parse_num(t2[30][2])
+   142→   142→   142→reported_surplus_2024 = parse_num(t2[30][3])
+   143→   143→   143→
+   144→   144→   144→calc_surplus_2025 = reported_total_rev_2025 - reported_total_exp_2025
+   145→   145→   145→calc_surplus_2024 = reported_total_rev_2024 - reported_total_exp_2024
+   146→   146→   146→
+   147→   147→   147→if calc_surplus_2025 != reported_surplus_2025:
+   148→   148→   148→    errors.append(f"Surplus/Deficit 2025: Reported {fmt(reported_surplus_2025)} != Revenue {fmt(reported_total_rev_2025)} - Expenses {fmt(reported_total_exp_2025)} = {fmt(calc_surplus_2025)} (difference: {fmt(calc_surplus_2025 - reported_surplus_2025)})")
+   149→   149→   149→
+   150→   150→   150→if calc_surplus_2024 != reported_surplus_2024:
+   151→   151→   151→    errors.append(f"Surplus/Deficit 2024: Reported {fmt(reported_surplus_2024)} != Revenue {fmt(reported_total_rev_2024)} - Expenses {fmt(reported_total_exp_2024)} = {fmt(calc_surplus_2024)} (difference: {fmt(calc_surplus_2024 - reported_surplus_2024)})")
+   152→   152→   152→
+   153→   153→   153→# ========================================
+   154→   154→   154→# TABLE 3: Statement of Financial Position
+   155→   155→   155→# ========================================
+   156→   156→   156→t3 = tables[2]
+   157→   157→   157→
+   158→   158→   158→assets_2025 = {
+   159→   159→   159→    'Cash': parse_num(t3[3][2]),
+   160→   160→   160→    'Prepayments (current)': parse_num(t3[4][2]),
+   161→   161→   161→    'Receivables (current)': parse_num(t3[5][2]),
+   162→   162→   162→    'Inventories': parse_num(t3[6][2]),
+   163→   163→   163→    'Prepayments (non-current)': parse_num(t3[9][2]),
+   164→   164→   164→    'Receivables (non-current)': parse_num(t3[10][2]),
+   165→   165→   165→    'Investments': parse_num(t3[11][2]),
+   166→   166→   166→    'PPE': parse_num(t3[12][2]),
+   167→   167→   167→    'Investment property': parse_num(t3[13][2]),
+   168→   168→   168→    'Intangible assets': parse_num(t3[14][2]),
+   169→   169→   169→    'Non-Produced Assets': parse_num(t3[15][2]),
+   170→   170→   170→}
+   171→   171→   171→
+   172→   172→   172→assets_2024 = {
+   173→   173→   173→    'Cash': parse_num(t3[3][3]),
+   174→   174→   174→    'Prepayments (current)': parse_num(t3[4][3]),
+   175→   175→   175→    'Receivables (current)': parse_num(t3[5][3]),
+   176→   176→   176→    'Inventories': parse_num(t3[6][3]),
+   177→   177→   177→    'Prepayments (non-current)': parse_num(t3[9][3]),
+   178→   178→   178→    'Receivables (non-current)': parse_num(t3[10][3]),
+   179→   179→   179→    'Investments': parse_num(t3[11][3]),
+   180→   180→   180→    'PPE': parse_num(t3[12][3]),
+   181→   181→   181→    'Investment property': parse_num(t3[13][3]),
+   182→   182→   182→    'Intangible assets': parse_num(t3[14][3]),
+   183→   183→   183→    'Non-Produced Assets': parse_num(t3[15][3]),
+   184→   184→   184→}
+   185→   185→   185→
+   186→   186→   186→reported_total_assets_2025 = parse_num(t3[16][2])
+   187→   187→   187→reported_total_assets_2024 = parse_num(t3[16][3])
+   188→   188→   188→
+   189→   189→   189→calc_total_assets_2025 = sum(v for v in assets_2025.values() if v is not None)
+   190→   190→   190→calc_total_assets_2024 = sum(v for v in assets_2024.values() if v is not None)
+   191→   191→   191→
+   192→   192→   192→if calc_total_assets_2025 != reported_total_assets_2025:
+   193→   193→   193→    errors.append(f"Total Assets 2025: Reported {fmt(reported_total_assets_2025)} != Sum of asset items {fmt(calc_total_assets_2025)} (difference: {fmt(calc_total_assets_2025 - reported_total_assets_2025)})")
+   194→   194→   194→
+   195→   195→   195→if calc_total_assets_2024 != reported_total_assets_2024:
+   196→   196→   196→    errors.append(f"Total Assets 2024: Reported {fmt(reported_total_assets_2024)} != Sum of asset items {fmt(calc_total_assets_2024)} (difference: {fmt(calc_total_assets_2024 - reported_total_assets_2024)})")
+   197→   197→   197→
+   198→   198→   198→# Liabilities
+   199→   199→   199→liabilities_2025 = {
+   200→   200→   200→    'Payables (current)': parse_num(t3[20][2]),
+   201→   201→   201→    'Deposits (current)': parse_num(t3[21][2]),
+   202→   202→   202→    'Short-term borrowings': parse_num(t3[22][2]),
+   203→   203→   203→    'Pensions (current)': parse_num(t3[23][2]),
+   204→   204→   204→    'Payables (non-current)': parse_num(t3[26][2]),
+   205→   205→   205→    'Deposits (non-current)': parse_num(t3[27][2]),
+   206→   206→   206→    'Long-term borrowings': parse_num(t3[28][2]),
+   207→   207→   207→    'Pensions (non-current)': parse_num(t3[29][2]),
+   208→   208→   208→}
+   209→   209→   209→
+   210→   210→   210→liabilities_2024 = {
+   211→   211→   211→    'Payables (current)': parse_num(t3[20][3]),
+   212→   212→   212→    'Deposits (current)': parse_num(t3[21][3]),
+   213→   213→   213→    'Short-term borrowings': parse_num(t3[22][3]),
+   214→   214→   214→    'Pensions (current)': parse_num(t3[23][3]),
+   215→   215→   215→    'Payables (non-current)': parse_num(t3[26][3]),
+   216→   216→   216→    'Deposits (non-current)': parse_num(t3[27][3]),
+   217→   217→   217→    'Long-term borrowings': parse_num(t3[28][3]),
+   218→   218→   218→    'Pensions (non-current)': parse_num(t3[29][3]),
+   219→   219→   219→}
+   220→   220→   220→
+   221→   221→   221→reported_total_liab_2025 = parse_num(t3[30][2])
+   222→   222→   222→reported_total_liab_2024 = parse_num(t3[30][3])
+   223→   223→   223→
+   224→   224→   224→calc_total_liab_2025 = sum(v for v in liabilities_2025.values() if v is not None)
+   225→   225→   225→calc_total_liab_2024 = sum(v for v in liabilities_2024.values() if v is not None)
+   226→   226→   226→
+   227→   227→   227→if calc_total_liab_2025 != reported_total_liab_2025:
+   228→   228→   228→    errors.append(f"Total Liabilities 2025: Reported {fmt(reported_total_liab_2025)} != Sum of liability items {fmt(calc_total_liab_2025)} (difference: {fmt(calc_total_liab_2025 - reported_total_liab_2025)})")
+   229→   229→   229→
+   230→   230→   230→if calc_total_liab_2024 != reported_total_liab_2024:
+   231→   231→   231→    errors.append(f"Total Liabilities 2024: Reported {fmt(reported_total_liab_2024)} != Sum of liability items {fmt(calc_total_liab_2024)} (difference: {fmt(calc_total_liab_2024 - reported_total_liab_2024)})")
+   232→   232→   232→
+   233→   233→   233→# Net Assets
+   234→   234→   234→reported_net_assets_2025 = parse_num(t3[31][2])
+   235→   235→   235→reported_net_assets_2024 = parse_num(t3[31][3])
+   236→   236→   236→reported_reserves_2025 = parse_num(t3[34][2])
+   237→   237→   237→reported_reserves_2024 = parse_num(t3[34][3])
+   238→   238→   238→
+   239→   239→   239→calc_net_assets_2025 = reported_total_assets_2025 - reported_total_liab_2025
+   240→   240→   240→calc_net_assets_2024 = reported_total_assets_2024 - reported_total_liab_2024
+   241→   241→   241→
+   242→   242→   242→if calc_net_assets_2025 != reported_net_assets_2025:
+   243→   243→   243→    errors.append(f"Net Assets 2025: Reported {fmt(reported_net_assets_2025)} != Assets {fmt(reported_total_assets_2025)} - Liabilities {fmt(reported_total_liab_2025)} = {fmt(calc_net_assets_2025)}")
+   244→   244→   244→
+   245→   245→   245→if calc_net_assets_2024 != reported_net_assets_2024:
+   246→   246→   246→    errors.append(f"Net Assets 2024: Reported {fmt(reported_net_assets_2024)} != Assets {fmt(reported_total_assets_2024)} - Liabilities {fmt(reported_total_liab_2024)} = {fmt(calc_net_assets_2024)}")
+   247→   247→   247→
+   248→   248→   248→if reported_reserves_2025 != reported_net_assets_2025:
+   249→   249→   249→    errors.append(f"Reserves 2025: Reported {fmt(reported_reserves_2025)} != Net Assets {fmt(reported_net_assets_2025)}")
+   250→   250→   250→
+   251→   251→   251→if reported_reserves_2024 != reported_net_assets_2024:
+   252→   252→   252→    errors.append(f"Reserves 2024: Reported {fmt(reported_reserves_2024)} != Net Assets {fmt(reported_net_assets_2024)}")
+   253→   253→   253→
+   254→   254→   254→# ========================================
+   255→   255→   255→# TABLE 4: Statement of Changes in Net Assets
+   256→   256→   256→# ========================================
+   257→   257→   257→t4 = tables[3]
+   258→   258→   258→
+   259→   259→   259→bf_2025 = parse_num(t4[1][2])
+   260→   260→   260→adj_2025 = parse_num(t4[3][2])
+   261→   261→   261→surplus_add_2025 = parse_num(t4[5][2])
+   262→   262→   262→closing_na_2025 = parse_num(t4[6][2])
+   263→   263→   263→
+   264→   264→   264→bf_2024 = parse_num(t4[1][3])
+   265→   265→   265→adj_2024 = parse_num(t4[3][3])
+   266→   266→   266→surplus_add_2024 = parse_num(t4[5][3])
+   267→   267→   267→closing_na_2024 = parse_num(t4[6][3])
+   268→   268→   268→
+   269→   269→   269→# Closing = B/F + Adjustments + Surplus
+   270→   270→   270→calc_closing_2025 = bf_2025 + (adj_2025 if adj_2025 else 0) + surplus_add_2025
+   271→   271→   271→if calc_closing_2025 != closing_na_2025:
+   272→   272→   272→    errors.append(f"Closing Net Assets 2025: Reported {fmt(closing_na_2025)} != B/F {fmt(bf_2025)} + Adj {fmt(adj_2025)} + Surplus {fmt(surplus_add_2025)} = {fmt(calc_closing_2025)} (difference: {fmt(calc_closing_2025 - closing_na_2025)})")
+   273→   273→   273→
+   274→   274→   274→calc_closing_2024 = bf_2024 + (adj_2024 if adj_2024 else 0) + surplus_add_2024
+   275→   275→   275→if calc_closing_2024 != closing_na_2024:
+   276→   276→   276→    errors.append(f"Closing Net Assets 2024: Reported {fmt(closing_na_2024)} != B/F {fmt(bf_2024)} + Adj {fmt(adj_2024)} + Surplus {fmt(surplus_add_2024)} = {fmt(calc_closing_2024)} (difference: {fmt(calc_closing_2024 - closing_na_2024)})")
+   277→   277→   277→
+   278→   278→   278→# B/F 2025 = Closing 2024
+   279→   279→   279→if bf_2025 != closing_na_2024:
+   280→   280→   280→    errors.append(f"Opening Net Assets 2025 (B/F {fmt(bf_2025)}) != Closing Net Assets 2024 ({fmt(closing_na_2024)}). Discrepancy: {fmt(bf_2025 - closing_na_2024)}")
+   281→   281→   281→
+   282→   282→   282→# ========================================
+   283→   283→   283→# TABLE 5: Cash Flow Statement
+   284→   284→   284→# ========================================
+   285→   285→   285→t5 = tables[4]
+   286→   286→   286→
+   287→   287→   287→rev_operating_2025 = parse_num(t5[2][2])
+   288→   288→   288→comp_emp_cf_2025 = parse_num(t5[4][2])
+   289→   289→   289→goods_cf_2025 = parse_num(t5[5][2])
+   290→   290→   290→other_exp_cf_2025 = parse_num(t5[8][2])
+   291→   291→   291→other_advances_cf_2025 = parse_num(t5[10][2])
+   292→   292→   292→reported_net_operating_2025 = parse_num(t5[17][2])
+   293→   293→   293→
+   294→   294→   294→rev_operating_2024 = parse_num(t5[2][3])
+   295→   295→   295→comp_emp_cf_2024 = parse_num(t5[4][3])
+   296→   296→   296→goods_cf_2024 = parse_num(t5[5][3])
+   297→   297→   297→other_exp_cf_2024 = parse_num(t5[8][3])
+   298→   298→   298→other_advances_cf_2024 = parse_num(t5[10][3])
+   299→   299→   299→reported_net_operating_2024 = parse_num(t5[17][3])
+   300→   300→   300→
+   301→   301→   301→# Net cash from operating = Revenue - Payments
+   302→   302→   302→calc_net_op_2025 = rev_operating_2025 - comp_emp_cf_2025 - goods_cf_2025 - other_exp_cf_2025 - (other_advances_cf_2025 if other_advances_cf_2025 else 0)
+   303→   303→   303→if calc_net_op_2025 != reported_net_operating_2025:
+   304→   304→   304→    errors.append(f"Net Cash from Operating 2025: Reported {fmt(reported_net_operating_2025)} != Revenue {fmt(rev_operating_2025)} - Compensation {fmt(comp_emp_cf_2025)} - Goods {fmt(goods_cf_2025)} - Other {fmt(other_exp_cf_2025)} = {fmt(calc_net_op_2025)} (difference: {fmt(calc_net_op_2025 - reported_net_operating_2025)})")
+   305→   305→   305→
+   306→   306→   306→calc_net_op_2024 = rev_operating_2024 - comp_emp_cf_2024 - goods_cf_2024 - other_exp_cf_2024 - (other_advances_cf_2024 if other_advances_cf_2024 else 0)
+   307→   307→   307→if calc_net_op_2024 != reported_net_operating_2024:
+   308→   308→   308→    errors.append(f"Net Cash from Operating 2024: Reported {fmt(reported_net_operating_2024)} != Revenue {fmt(rev_operating_2024)} - Compensation {fmt(comp_emp_cf_2024)} - Goods {fmt(goods_cf_2024)} - Other {fmt(other_exp_cf_2024)} - Advances {fmt(other_advances_cf_2024)} = {fmt(calc_net_op_2024)} (difference: {fmt(calc_net_op_2024 - reported_net_operating_2024)})")
+   309→   309→   309→
+   310→   310→   310→# Investing
+   311→   311→   311→purchase_ppe_2025 = parse_num(t5[19][2])
+   312→   312→   312→reported_net_investing_2025 = parse_num(t5[25][2])
+   313→   313→   313→
+   314→   314→   314→# Financing
+   315→   315→   315→reported_net_financing_2025 = parse_num(t5[32][2])
+   316→   316→   316→
+   317→   317→   317→# Net change
+   318→   318→   318→reported_net_change_2025 = parse_num(t5[33][2])
+   319→   319→   319→reported_net_change_2024 = parse_num(t5[33][3])
+   320→   320→   320→
+   321→   321→   321→# CHECK: Net change = Operating + Investing + Financing
+   322→   322→   322→calc_net_change_2025 = reported_net_operating_2025 + (purchase_ppe_2025 if purchase_ppe_2025 else 0) + (reported_net_financing_2025 if reported_net_financing_2025 else 0)
+   323→   323→   323→if calc_net_change_2025 != reported_net_change_2025:
+   324→   324→   324→    errors.append(f"Net Cash Change 2025: Reported {fmt(reported_net_change_2025)} != Operating {fmt(reported_net_operating_2025)} + Investing {fmt(purchase_ppe_2025)} + Financing {fmt(reported_net_financing_2025)} = {fmt(calc_net_change_2025)} (difference: {fmt(calc_net_change_2025 - reported_net_change_2025)})")
+   325→   325→   325→
+   326→   326→   326→# ========================================
+   327→   327→   327→# TABLE 6: Revenue Reconciliation for Cash Flow
+   328→   328→   328→# ========================================
+   329→   329→   329→t6 = tables[5]
+   330→   330→   330→
+   331→   331→   331→sfp_rev_2025 = parse_num(t6[1][2])
+   332→   332→   332→advances_2025 = parse_num(t6[2][2])
+   333→   333→   333→rev_receivable_2025 = parse_num(t6[3][2])
+   334→   334→   334→deposits_2025 = parse_num(t6[4][2])
+   335→   335→   335→total_rev_cf_2025 = parse_num(t6[5][2])
+   336→   336→   336→rev_in_kind_2025 = parse_num(t6[7][2])
+   337→   337→   337→transfers_treasury_2025 = parse_num(t6[8][2])
+   338→   338→   338→rev_receivable_period_2025 = parse_num(t6[9][2])
+   339→   339→   339→total_rev_cashflow_2025 = parse_num(t6[10][2])
+   340→   340→   340→
+   341→   341→   341→sfp_rev_2024 = parse_num(t6[1][3])
+   342→   342→   342→advances_2024 = parse_num(t6[2][3])
+   343→   343→   343→rev_receivable_2024 = parse_num(t6[3][3])
+   344→   344→   344→deposits_2024 = parse_num(t6[4][3])
+   345→   345→   345→total_rev_cf_2024 = parse_num(t6[5][3])
+   346→   346→   346→rev_in_kind_2024 = parse_num(t6[7][3])
+   347→   347→   347→rev_receivable_period_2024 = parse_num(t6[9][3])
+   348→   348→   348→total_rev_cashflow_2024 = parse_num(t6[10][3])
+   349→   349→   349→
+   350→   350→   350→# CHECK: Total Revenue CF = SFP Revenue + Advances + Receivable + Deposits
+   351→   351→   351→calc_total_rev_cf_2025 = sfp_rev_2025 + (advances_2025 if advances_2025 else 0) + (rev_receivable_2025 if rev_receivable_2025 else 0) + (deposits_2025 if deposits_2025 else 0)
+   352→   352→   352→if calc_total_rev_cf_2025 != total_rev_cf_2025:
+   353→   353→   353→    errors.append(f"Total Revenue for CF 2025: Reported {fmt(total_rev_cf_2025)} != SFP Rev {fmt(sfp_rev_2025)} + Advances {fmt(advances_2025)} + Rev Receivable {fmt(rev_receivable_2025)} = {fmt(calc_total_rev_cf_2025)} (difference: {fmt(calc_total_rev_cf_2025 - total_rev_cf_2025)})")
+   354→   354→   354→
+   355→   355→   355→calc_total_rev_cf_2024 = sfp_rev_2024 + (advances_2024 if advances_2024 else 0) + (rev_receivable_2024 if rev_receivable_2024 else 0) + (deposits_2024 if deposits_2024 else 0)
+   356→   356→   356→if calc_total_rev_cf_2024 != total_rev_cf_2024:
+   357→   357→   357→    errors.append(f"Total Revenue for CF 2024: Reported {fmt(total_rev_cf_2024)} != SFP Rev {fmt(sfp_rev_2024)} + Rev Receivable {fmt(rev_receivable_2024)} = {fmt(calc_total_rev_cf_2024)} (difference: {fmt(calc_total_rev_cf_2024 - total_rev_cf_2024)})")
+   358→   358→   358→
+   359→   359→   359→# CHECK: Revenue for Cash Flow = Total Rev CF - Rev in Kind - Transfers
+   360→   360→   360→calc_cf_rev_2025 = total_rev_cf_2025 - (rev_in_kind_2025 if rev_in_kind_2025 else 0) - (transfers_treasury_2025 if transfers_treasury_2025 else 0)
+   361→   361→   361→if calc_cf_rev_2025 != total_rev_cashflow_2025:
+   362→   362→   362→    errors.append(f"Revenue for Cash Flow Purposes 2025: Reported {fmt(total_rev_cashflow_2025)} != {fmt(total_rev_cf_2025)} - Rev in Kind {fmt(rev_in_kind_2025)} = {fmt(calc_cf_rev_2025)} (difference: {fmt(calc_cf_rev_2025 - total_rev_cashflow_2025)})")
+   363→   363→   363→
+   364→   364→   364→calc_cf_rev_2024 = total_rev_cf_2024 - (rev_in_kind_2024 if rev_in_kind_2024 else 0)
+   365→   365→   365→if calc_cf_rev_2024 != total_rev_cashflow_2024:
+   366→   366→   366→    errors.append(f"Revenue for Cash Flow Purposes 2024: Reported {fmt(total_rev_cashflow_2024)} != {fmt(total_rev_cf_2024)} - Rev in Kind {fmt(rev_in_kind_2024)} = {fmt(calc_cf_rev_2024)} (difference: {fmt(calc_cf_rev_2024 - total_rev_cashflow_2024)})")
+   367→   367→   367→
+   368→   368→   368→# Cross-ref: Revenue for CF purposes vs CF statement
+   369→   369→   369→if total_rev_cashflow_2025 != rev_operating_2025:
+   370→   370→   370→    errors.append(f"Cross-Reference CF Revenue 2025: Table 6 ({fmt(total_rev_cashflow_2025)}) != Table 5 operating revenue ({fmt(rev_operating_2025)}). Difference: {fmt(total_rev_cashflow_2025 - rev_operating_2025)}")
+   371→   371→   371→
+   372→   372→   372→if total_rev_cashflow_2024 != rev_operating_2024:
+   373→   373→   373→    errors.append(f"Cross-Reference CF Revenue 2024: Table 6 ({fmt(total_rev_cashflow_2024)}) != Table 5 operating revenue ({fmt(rev_operating_2024)}). Difference: {fmt(total_rev_cashflow_2024 - rev_operating_2024)}")
+   374→   374→   374→
+   375→   375→   375→# ========================================
+   376→   376→   376→# TABLE 7: Cash Reconciliation
+   377→   377→   377→# ========================================
+   378→   378→   378→t7 = tables[6]
+   379→   379→   379→
+   380→   380→   380→opening_cash_2025 = parse_num(t7[1][2])
+   381→   381→   381→net_change_cf_2025 = parse_num(t7[4][2])
+   382→   382→   382→closing_cash_2025 = parse_num(t7[5][2])
+   383→   383→   383→
+   384→   384→   384→opening_cash_2024 = parse_num(t7[1][3])
+   385→   385→   385→net_change_cf_2024 = parse_num(t7[4][3])
+   386→   386→   386→closing_cash_2024 = parse_num(t7[5][3])
+   387→   387→   387→
+   388→   388→   388→calc_closing_cash_2025 = opening_cash_2025 + net_change_cf_2025
+   389→   389→   389→if calc_closing_cash_2025 != closing_cash_2025:
+   390→   390→   390→    errors.append(f"Cash Reconciliation 2025: Opening {fmt(opening_cash_2025)} + Net Change {fmt(net_change_cf_2025)} = {fmt(calc_closing_cash_2025)} != Closing {fmt(closing_cash_2025)}. Difference: {fmt(calc_closing_cash_2025 - closing_cash_2025)}")
+   391→   391→   391→
+   392→   392→   392→calc_closing_cash_2024 = opening_cash_2024 + net_change_cf_2024
+   393→   393→   393→if calc_closing_cash_2024 != closing_cash_2024:
+   394→   394→   394→    errors.append(f"Cash Reconciliation 2024: Opening {fmt(opening_cash_2024)} + Net Change {fmt(net_change_cf_2024)} = {fmt(calc_closing_cash_2024)} != Closing {fmt(closing_cash_2024)}. Difference: {fmt(calc_closing_cash_2024 - closing_cash_2024)}")
+   395→   395→   395→
+   396→   396→   396→# ========================================
+   397→   397→   397→# TABLE 8: Cash Note
+   398→   398→   398→# ========================================
+   399→   399→   399→t8 = tables[7]
+   400→   400→   400→cash_note_2025 = parse_num(t8[1][2])
+   401→   401→   401→cash_note_2024 = parse_num(t8[1][3])
+   402→   402→   402→
+   403→   403→   403→if cash_note_2025 != assets_2025['Cash']:
+   404→   404→   404→    errors.append(f"Cash Note 2025 ({fmt(cash_note_2025)}) != Balance Sheet Cash ({fmt(assets_2025['Cash'])}). Difference: {fmt(cash_note_2025 - assets_2025['Cash'])}")
+   405→   405→   405→
+   406→   406→   406→if cash_note_2024 != assets_2024['Cash']:
+   407→   407→   407→    errors.append(f"Cash Note 2024 ({fmt(cash_note_2024)}) != Balance Sheet Cash ({fmt(assets_2024['Cash'])}). Difference: {fmt(cash_note_2024 - assets_2024['Cash'])}")
+   408→   408→   408→
+   409→   409→   409→# ========================================
+   410→   410→   410→# Cross-checks
+   411→   411→   411→# ========================================
+   412→   412→   412→
+   413→   413→   413→# Opening cash 2025 should equal closing cash 2024 (from BS)
+   414→   414→   414→if opening_cash_2025 != assets_2024['Cash']:
+   415→   415→   415→    errors.append(f"Opening Cash 2025 ({fmt(opening_cash_2025)}) != Closing Cash 2024 per BS ({fmt(assets_2024['Cash'])}). Difference: {fmt(opening_cash_2025 - assets_2024['Cash'])}")
+   416→   416→   416→
+   417→   417→   417→# SFP Revenue in Table 6 vs Total Revenue in Table 2
+   418→   418→   418→if sfp_rev_2025 != reported_total_rev_2025:
+   419→   419→   419→    diff = sfp_rev_2025 - reported_total_rev_2025
+   420→   420→   420→    if rev_2025['Revenue in kind'] and diff == rev_2025['Revenue in kind']:
+   421→   421→   421→        errors.append(f"SFP Revenue in Table 6 ({fmt(sfp_rev_2025)}) != Total Revenue in Table 2 ({fmt(reported_total_rev_2025)}). The difference of {fmt(diff)} equals Revenue in Kind ({fmt(rev_2025['Revenue in kind'])}), suggesting Revenue in Kind is included in Table 6 but excluded from Table 2 total. This inconsistency needs resolution.")
+   422→   422→   422→    else:
+   423→   423→   423→        errors.append(f"SFP Revenue in Table 6 ({fmt(sfp_rev_2025)}) != Total Revenue in Table 2 ({fmt(reported_total_rev_2025)}). Difference: {fmt(diff)}")
+   424→   424→   424→
+   425→   425→   425→# Goods & Services in CF vs SFP
+   426→   426→   426→if goods_cf_2025 != exp_2025['Goods and services consumed']:
+   427→   427→   427→    errors.append(f"Goods & Services in CF 2025 ({fmt(goods_cf_2025)}) != SFP ({fmt(exp_2025['Goods and services consumed'])}). Difference: {fmt(goods_cf_2025 - exp_2025['Goods and services consumed'])}")
+   428→   428→   428→
+   429→   429→   429→if goods_cf_2024 != exp_2024['Goods and services consumed']:
+   430→   430→   430→    errors.append(f"Goods & Services in CF 2024 ({fmt(goods_cf_2024)}) != SFP ({fmt(exp_2024['Goods and services consumed'])}). Difference: {fmt(goods_cf_2024 - exp_2024['Goods and services consumed'])}")
+   431→   431→   431→
+   432→   432→   432→# Treasury Transfers Note vs SFP
+   433→   433→   433→if len(tables) > 16:
+   434→   434→   434→    t15 = tables[16]
+   435→   435→   435→    treasury_note_2025 = parse_num(t15[1][1]) if len(t15) > 1 else None
+   436→   436→   436→    treasury_note_2024 = parse_num(t15[1][2]) if len(t15) > 1 else None
+   437→   437→   437→    if treasury_note_2024 is not None and treasury_note_2024 != rev_2024['Transfers from Treasury-UCF']:
+   438→   438→   438→        errors.append(f"Treasury Transfers Note 2024 ({fmt(treasury_note_2024)}) != SFP ({fmt(rev_2024['Transfers from Treasury-UCF'])}). Difference: {fmt(treasury_note_2024 - rev_2024['Transfers from Treasury-UCF'])}")
+   439→   439→   439→
+   440→   440→   440→# Budget Variance check
+   441→   441→   441→if len(tables) > 8:
+   442→   442→   442→    t9 = tables[8]
+   443→   443→   443→    budget_actual_treasury = parse_num(t9[4][4])
+   444→   444→   444→    budget_revised_treasury = parse_num(t9[4][3])
+   445→   445→   445→    budget_variance_treasury = parse_num(t9[4][5])
+   446→   446→   446→    calc_variance = budget_revised_treasury - budget_actual_treasury
+   447→   447→   447→    if calc_variance != 0 and (budget_variance_treasury is None or budget_variance_treasury == 0):
+   448→   448→   448→        errors.append(f"Budget Variance (Treasury UCF): Variance is shown as {fmt(budget_variance_treasury)} but should be {fmt(calc_variance)} (Revised {fmt(budget_revised_treasury)} - Actual {fmt(budget_actual_treasury)})")
+   449→   449→   449→
+   450→   450→   450→# Employee costs note vs SFP
+   451→   451→   451→if len(tables) > 22:
+   452→   452→   452→    t21 = tables[22]
+   453→   453→   453→    for row in t21:
+   454→   454→   454→        if 'Total employee costs' in str(row[0]):
+   455→   455→   455→            emp_note_2025 = parse_num(row[1]) if len(row) > 1 else None
+   456→   456→   456→            emp_note_2024 = parse_num(row[2]) if len(row) > 2 else None
+   457→   457→   457→            if emp_note_2025 is not None and emp_note_2025 != exp_2025['Compensation of employees']:
+   458→   458→   458→                errors.append(f"Employee Costs Note 2025 ({fmt(emp_note_2025)}) != SFP ({fmt(exp_2025['Compensation of employees'])}). Difference: {fmt(emp_note_2025 - exp_2025['Compensation of employees'])}")
+   459→   459→   459→            if emp_note_2024 is not None and emp_note_2024 != exp_2024['Compensation of employees']:
+   460→   460→   460→                errors.append(f"Employee Costs Note 2024 ({fmt(emp_note_2024)}) != SFP ({fmt(exp_2024['Compensation of employees'])}). Difference: {fmt(emp_note_2024 - exp_2024['Compensation of employees'])}")
+   461→   461→   461→
+   462→   462→   462→# Goods & Services note vs SFP
+   463→   463→   463→if len(tables) > 23:
+   464→   464→   464→    t22 = tables[23]
+   465→   465→   465→    for row in t22:
+   466→   466→   466→        if 'Total cost of goods' in str(row[0]):
+   467→   467→   467→            goods_note_2025 = parse_num(row[1]) if len(row) > 1 else None
+   468→   468→   468→            goods_note_2024 = parse_num(row[2]) if len(row) > 2 else None
+   469→   469→   469→            if goods_note_2025 is not None and goods_note_2025 != exp_2025['Goods and services consumed']:
+   470→   470→   470→                errors.append(f"Goods & Services Note 2025 ({fmt(goods_note_2025)}) != SFP ({fmt(exp_2025['Goods and services consumed'])}). Difference: {fmt(goods_note_2025 - exp_2025['Goods and services consumed'])}")
+   471→   471→   471→            if goods_note_2024 is not None and goods_note_2024 != exp_2024['Goods and services consumed']:
+   472→   472→   472→                errors.append(f"Goods & Services Note 2024 ({fmt(goods_note_2024)}) != SFP ({fmt(exp_2024['Goods and services consumed'])}). Difference: {fmt(goods_note_2024 - exp_2024['Goods and services consumed'])}")
+   473→   473→   473→
+   474→   474→   474→# Depreciation note vs SFP
+   475→   475→   475→if len(tables) > 24:
+   476→   476→   476→    t23 = tables[24]
+   477→   477→   477→    for row in t23:
+   478→   478→   478→        if str(row[0]).strip() == 'Total':
+   479→   479→   479→            dep_note_2025 = parse_num(row[1]) if len(row) > 1 else None
+   480→   480→   480→            if dep_note_2025 is not None and dep_note_2025 != exp_2025['Depreciation expense']:
+   481→   481→   481→                errors.append(f"Depreciation Note 2025 ({fmt(dep_note_2025)}) != SFP ({fmt(exp_2025['Depreciation expense'])}). Difference: {fmt(dep_note_2025 - exp_2025['Depreciation expense'])}")
+   482→   482→   482→
+   483→   483→   483→# Revenue classification issue
+   484→   484→   484→if rev_2025['Non-Tax Revenue-Exchange'] != 0 and rev_2025['Sub-total exchange transactions (2)'] == 0:
+   485→   485→   485→    errors.append(f"Revenue Classification 2025: Non-Tax Revenue-Exchange is {fmt(rev_2025['Non-Tax Revenue-Exchange'])} but the second Sub-total Revenue from exchange transactions is {fmt(rev_2025['Sub-total exchange transactions (2)'])}. The subtotal should include this figure.")
+   486→   486→   486→
+   487→   487→   487→# Expenditure per CF statement vs SFP
+   488→   488→   488→if len(tables) > 11:
+   489→   489→   489→    t12 = tables[11]
+   490→   490→   490→    for row in t12:
+   491→   491→   491→        if 'Total Expenditure' in str(row[0]):
+   492→   492→   492→            total_exp_cf_2025 = parse_num(row[1]) if len(row) > 1 else None
+   493→   493→   493→            total_exp_cf_2024 = parse_num(row[2]) if len(row) > 2 else None
+   494→   494→   494→            # CF expenditure should be different from SFP (excludes depreciation)
+   495→   495→   495→            if total_exp_cf_2025 is not None:
+   496→   496→   496→                sfp_exp_less_dep = reported_total_exp_2025 - exp_2025['Depreciation expense']
+   497→   497→   497→                if total_exp_cf_2025 != sfp_exp_less_dep:
+   498→   498→   498→                    warnings.append(f"Total Expenditure per CF 2025 ({fmt(total_exp_cf_2025)}) vs SFP less Depreciation ({fmt(sfp_exp_less_dep)}). Difference: {fmt(total_exp_cf_2025 - sfp_exp_less_dep)}")
+   499→   499→   499→
+   500→   500→   500→# ========================================
+   501→   501→   501→# Summary
+   502→   502→   502→# ========================================
+   503→   503→   503→print("=" * 80)
+   504→   504→   504→print("MADERA ACCOUNTS - ACCURACY ANALYSIS")
+   505→   505→   505→print("=" * 80)
+   506→   506→   506→print(f"\nTotal ERRORS: {len(errors)}")
+   507→   507→   507→print(f"Total WARNINGS/NOTES: {len(warnings)}")
+   508→   508→   508→print()
+   509→   509→   509→
+   510→   510→   510→if errors:
+   511→   511→   511→    print("\n" + "#" * 80)
+   512→   512→   512→    print("# ERRORS")
+   513→   513→   513→    print("#" * 80)
+   514→   514→   514→    for i, e in enumerate(errors, 1):
+   515→   515→   515→        print(f"\n  {i}. {e}")
+   516→   516→   516→
+   517→   517→   517→if warnings:
+   518→   518→   518→    print("\n" + "#" * 80)
+   519→   519→   519→    print("# WARNINGS")
+   520→   520→   520→    print("#" * 80)
+   521→   521→   521→    for i, w in enumerate(warnings, 1):
+   522→   522→   522→        print(f"\n  {i}. {w}")
+   523→   523→   523→
+   524→   524→   524→results = {
+   525→   525→   525→    'errors': errors,
+   526→   526→   526→    'warnings': warnings,
+   527→   527→   527→    'total_errors': len(errors),
+   528→   528→   528→    'total_warnings': len(warnings),
+   529→   529→   529→    'key_figures': {
+   530→   530→   530→        'total_revenue_2025': reported_total_rev_2025,
+   531→   531→   531→        'total_revenue_2024': reported_total_rev_2024,
+   532→   532→   532→        'total_expenses_2025': reported_total_exp_2025,
+   533→   533→   533→        'total_expenses_2024': reported_total_exp_2024,
+   534→   534→   534→        'surplus_2025': reported_surplus_2025,
+   535→   535→   535→        'surplus_2024': reported_surplus_2024,
+   536→   536→   536→        'total_assets_2025': reported_total_assets_2025,
+   537→   537→   537→        'total_assets_2024': reported_total_assets_2024,
+   538→   538→   538→        'total_liabilities_2025': reported_total_liab_2025,
+   539→   539→   539→        'total_liabilities_2024': reported_total_liab_2024,
+   540→   540→   540→        'net_assets_2025': reported_net_assets_2025,
+   541→   541→   541→        'net_assets_2024': reported_net_assets_2024,
+   542→   542→   542→        'cash_2025': closing_cash_2025,
+   543→   543→   543→        'cash_2024': closing_cash_2024,
+   544→   544→   544→    }
+   545→   545→   545→}
+   546→   546→   546→
+   547→   547→   547→with open('/home/z/my-project/scripts/analysis_results.json', 'w') as f:
+   548→   548→   548→    json.dump(results, f, indent=2)
+   549→   549→   549→
+   550→   550→   550→print(f"\nResults saved to /home/z/my-project/scripts/analysis_results.json")

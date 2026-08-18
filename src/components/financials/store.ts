@@ -23,10 +23,109 @@ export interface Report {
   periodLabel: string
   currency: string
   status: string
+  version?: number
+  versionLabel?: string
   createdAt: string
   updatedAt: string
   entries: TBEntryUI[]
 }
+
+export interface SupplementaryData {
+  [key: string]: string | number
+  id?: string
+  reportId?: string
+  advancesRecovered: number
+  advancesRecoveredPrior: number
+  depositsReceived: number
+  depositsReceivedPrior: number
+  transfersToTreasury: number
+  transfersToTreasuryPrior: number
+  revenueInKindTaxWaivers: number
+  revenueInKindTaxWaiversPrior: number
+  ppeOpeningCurrent: number
+  ppeAdditionsCurrent: number
+  ppeDisposalsCurrent: number
+  ppeOpeningPrior: number
+  ppeAdditionsPrior: number
+  ppeDisposalsPrior: number
+  depreciationRate: number
+  depreciationMethod: string
+  employeeCount: number
+  salariesWages: number
+  pensionContributions: number
+  payrollTaxes: number
+  otherEmployeeBenefits: number
+  priorYearAdjustments: number
+  revaluationReserves: number
+  transfersToUCF: number
+  accountingOfficer: string
+  chiefFinanceOfficer: string
+  internalAuditHead: string
+  signatoryDate: string
+  ipsasBasis: string
+  accountingPolicies: string
+  exchangeRateUSD: number
+  exchangeRateEUR: number
+}
+
+export interface AuditLogEntry {
+  id: string
+  action: string
+  field: string
+  oldValue: string
+  newValue: string
+  userId: string
+  timestamp: string
+}
+
+export interface ComplianceItem {
+  id: string
+  requirement: string
+  ipsasReference: string
+  status: 'met' | 'not_met' | 'partial' | 'not_applicable'
+  details: string
+}
+
+export interface ComplianceData {
+  score: number
+  metCount: number
+  totalCount: number
+  checklist: ComplianceItem[]
+}
+
+export interface AnalyticsData {
+  ratios: Record<string, number>
+  trends: Record<string, number>
+  anomalies: { type: string; severity: 'info' | 'warning' | 'critical'; description: string; detail: string }[]
+}
+
+export interface ApprovalWorkflow {
+  id: string
+  reportId: string
+  currentStep: string
+  preparerName: string
+  preparerApprovedAt: string | null
+  reviewerName: string
+  reviewerApprovedAt: string | null
+  cfoName: string
+  cfoApprovedAt: string | null
+  comments: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface VersionEntry {
+  id: string
+  entityName: string
+  periodLabel: string
+  status: string
+  version: number
+  versionLabel: string
+  createdAt: string
+  _count: { entries: number }
+}
+
+export type WizardStep = 1 | 2 | 3 | 4 | 5
 
 export type TabType = 'dashboard' | 'trial-balance' | 'statements' | 'export'
 
@@ -48,6 +147,14 @@ interface FinancialStore {
   activeTab: TabType
   statementSubTab: StatementSubTab
   isLoading: boolean
+  wizardStep: WizardStep
+  supplementaryData: SupplementaryData | null
+  auditLog: AuditLogEntry[]
+  complianceData: ComplianceData | null
+  analyticsData: AnalyticsData | null
+  approvalWorkflow: ApprovalWorkflow | null
+  versions: VersionEntry[]
+  showAnalytics: boolean
 
   setActiveTab: (tab: TabType) => void
   setStatementSubTab: (tab: StatementSubTab) => void
@@ -57,6 +164,9 @@ interface FinancialStore {
   deleteEntry: (index: number) => void
   addEntry: () => void
   loadTemplate: () => void
+  setWizardStep: (step: WizardStep) => void
+  setShowAnalytics: (show: boolean) => void
+  setSupplementaryData: (data: SupplementaryData | null) => void
 
   fetchReports: () => Promise<void>
   createReport: () => Promise<void>
@@ -64,6 +174,32 @@ interface FinancialStore {
   deleteReport: (id: string) => Promise<void>
   saveTrialBalance: () => Promise<void>
   generateStatements: () => Promise<void>
+  fetchSupplementary: () => Promise<void>
+  saveSupplementary: (data: Record<string, unknown>) => Promise<void>
+  fetchAuditLog: () => Promise<void>
+  fetchCompliance: () => Promise<void>
+  fetchAnalytics: () => Promise<void>
+  fetchApprovalWorkflow: () => Promise<void>
+  advanceApproval: (userName: string) => Promise<void>
+  createVersion: (label: string) => Promise<void>
+  fetchVersions: () => Promise<void>
+  autoBalance: () => Promise<void>
+}
+
+const DEFAULT_SUPPLEMENTARY: SupplementaryData = {
+  advancesRecovered: 0, advancesRecoveredPrior: 0,
+  depositsReceived: 0, depositsReceivedPrior: 0,
+  transfersToTreasury: 0, transfersToTreasuryPrior: 0,
+  revenueInKindTaxWaivers: 0, revenueInKindTaxWaiversPrior: 0,
+  ppeOpeningCurrent: 0, ppeAdditionsCurrent: 0, ppeDisposalsCurrent: 0,
+  ppeOpeningPrior: 0, ppeAdditionsPrior: 0, ppeDisposalsPrior: 0,
+  depreciationRate: 0, depreciationMethod: 'straight-line',
+  employeeCount: 0, salariesWages: 0, pensionContributions: 0,
+  payrollTaxes: 0, otherEmployeeBenefits: 0,
+  priorYearAdjustments: 0, revaluationReserves: 0, transfersToUCF: 0,
+  accountingOfficer: '', chiefFinanceOfficer: '', internalAuditHead: '',
+  signatoryDate: '', ipsasBasis: 'IPSAS Accrual Basis', accountingPolicies: '',
+  exchangeRateUSD: 1, exchangeRateEUR: 1,
 }
 
 export const useFinancialStore = create<FinancialStore>((set, get) => ({
@@ -80,12 +216,23 @@ export const useFinancialStore = create<FinancialStore>((set, get) => ({
   activeTab: 'dashboard',
   statementSubTab: 'sfp',
   isLoading: false,
+  wizardStep: 1,
+  supplementaryData: null,
+  auditLog: [],
+  complianceData: null,
+  analyticsData: null,
+  approvalWorkflow: null,
+  versions: [],
+  showAnalytics: false,
 
   setActiveTab: (tab) => set({ activeTab: tab }),
   setStatementSubTab: (tab) => set({ statementSubTab: tab }),
   setEntityConfig: (config) =>
     set((state) => ({ entityConfig: { ...state.entityConfig, ...config } })),
   setEntries: (entries) => set({ entries }),
+  setWizardStep: (step) => set({ wizardStep: step }),
+  setShowAnalytics: (show) => set({ showAnalytics: show }),
+  setSupplementaryData: (data) => set({ supplementaryData: data }),
 
   updateEntry: (index, updates) =>
     set((state) => {
@@ -160,9 +307,15 @@ export const useFinancialStore = create<FinancialStore>((set, get) => ({
       set((state) => ({
         reports: [report, ...state.reports],
         activeReportId: report.id,
-        activeTab: 'trial-balance',
+        wizardStep: 1,
         entries: [],
         generatedStatements: null,
+        supplementaryData: null,
+        complianceData: null,
+        analyticsData: null,
+        approvalWorkflow: null,
+        auditLog: [],
+        versions: [],
         isLoading: false,
       }))
     } catch {
@@ -200,7 +353,14 @@ export const useFinancialStore = create<FinancialStore>((set, get) => ({
           periodLabel: report.periodLabel,
           currency: report.currency,
         },
-        activeTab: 'trial-balance',
+        wizardStep: entries.length > 0 ? 2 : 1,
+        generatedStatements: null,
+        supplementaryData: null,
+        complianceData: null,
+        analyticsData: null,
+        approvalWorkflow: null,
+        auditLog: [],
+        versions: [],
         isLoading: false,
       })
     } catch {
@@ -219,7 +379,8 @@ export const useFinancialStore = create<FinancialStore>((set, get) => ({
           state.activeReportId === id ? null : state.activeReportId,
         entries: state.activeReportId === id ? [] : state.entries,
         generatedStatements: state.activeReportId === id ? null : state.generatedStatements,
-        activeTab: state.activeReportId === id ? 'dashboard' : state.activeTab,
+        wizardStep: state.activeReportId === id ? 1 : state.wizardStep,
+        supplementaryData: state.activeReportId === id ? null : state.supplementaryData,
       }))
     } catch {
       throw new Error('Failed to delete report')
@@ -231,7 +392,6 @@ export const useFinancialStore = create<FinancialStore>((set, get) => ({
     if (!activeReportId) throw new Error('No active report')
     set({ isLoading: true })
     try {
-      // Update entity config first
       await fetch(`/api/reports/${activeReportId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -242,7 +402,6 @@ export const useFinancialStore = create<FinancialStore>((set, get) => ({
           currency: entityConfig.currency,
         }),
       })
-      // Save entries
       const cleanEntries = entries.map(({ _id, _dbId, ...rest }) => rest)
       const res = await fetch(`/api/reports/${activeReportId}/trial-balance`, {
         method: 'POST',
@@ -250,7 +409,6 @@ export const useFinancialStore = create<FinancialStore>((set, get) => ({
         body: JSON.stringify({ entries: cleanEntries }),
       })
       if (!res.ok) throw new Error('Failed to save')
-      // Refresh reports list
       await get().fetchReports()
       set({ isLoading: false })
     } catch {
@@ -269,15 +427,170 @@ export const useFinancialStore = create<FinancialStore>((set, get) => ({
       const data = await res.json()
       set({
         generatedStatements: data.statements,
-        activeTab: 'statements',
         statementSubTab: 'sfp',
         isLoading: false,
       })
-      // Refresh reports for updated status
       await get().fetchReports()
     } catch {
       set({ isLoading: false })
       throw new Error('Failed to generate statements')
     }
   },
+
+  fetchSupplementary: async () => {
+    const { activeReportId } = get()
+    if (!activeReportId) return
+    try {
+      const res = await fetch(`/api/reports/${activeReportId}/supplementary`)
+      if (!res.ok) return
+      const data = await res.json()
+      set({ supplementaryData: { ...DEFAULT_SUPPLEMENTARY, ...data } as SupplementaryData })
+    } catch {
+      // silent
+    }
+  },
+
+  saveSupplementary: async (data) => {
+    const { activeReportId } = get()
+    if (!activeReportId) throw new Error('No active report')
+    set({ isLoading: true })
+    try {
+      const res = await fetch(`/api/reports/${activeReportId}/supplementary`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) throw new Error('Failed to save')
+      const result = await res.json()
+      set({ supplementaryData: { ...DEFAULT_SUPPLEMENTARY, ...result.supplementary } as SupplementaryData, isLoading: false })
+    } catch {
+      set({ isLoading: false })
+      throw new Error('Failed to save supplementary data')
+    }
+  },
+
+  fetchAuditLog: async () => {
+    const { activeReportId } = get()
+    if (!activeReportId) return
+    try {
+      const res = await fetch(`/api/reports/${activeReportId}/audit`)
+      if (!res.ok) return
+      const data = await res.json()
+      set({ auditLog: data })
+    } catch {
+      // silent
+    }
+  },
+
+  fetchCompliance: async () => {
+    const { activeReportId } = get()
+    if (!activeReportId) return
+    set({ isLoading: true })
+    try {
+      const res = await fetch(`/api/reports/${activeReportId}/compliance`)
+      if (!res.ok) throw new Error('Failed to fetch compliance')
+      const data = await res.json()
+      set({ complianceData: data, isLoading: false })
+    } catch {
+      set({ isLoading: false })
+    }
+  },
+
+  fetchAnalytics: async () => {
+    const { activeReportId } = get()
+    if (!activeReportId) return
+    set({ isLoading: true })
+    try {
+      const res = await fetch(`/api/reports/${activeReportId}/analytics`)
+      if (!res.ok) throw new Error('Failed to fetch analytics')
+      const data = await res.json()
+      set({ analyticsData: data, isLoading: false })
+    } catch {
+      set({ isLoading: false })
+    }
+  },
+
+  fetchApprovalWorkflow: async () => {
+    const { activeReportId } = get()
+    if (!activeReportId) return
+    try {
+      const res = await fetch(`/api/reports/${activeReportId}/approval`)
+      if (!res.ok) return
+      const data = await res.json()
+      set({ approvalWorkflow: data })
+    } catch {
+      // silent
+    }
+  },
+
+  advanceApproval: async (userName) => {
+    const { activeReportId } = get()
+    if (!activeReportId) throw new Error('No active report')
+    set({ isLoading: true })
+    try {
+      const res = await fetch(`/api/reports/${activeReportId}/approval`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userName }),
+      })
+      if (!res.ok) throw new Error('Failed to advance approval')
+      const data = await res.json()
+      set({ approvalWorkflow: data.workflow, isLoading: false })
+      await get().fetchReports()
+    } catch {
+      set({ isLoading: false })
+      throw new Error('Failed to advance approval')
+    }
+  },
+
+  createVersion: async (label) => {
+    const { activeReportId } = get()
+    if (!activeReportId) throw new Error('No active report')
+    set({ isLoading: true })
+    try {
+      const res = await fetch(`/api/reports/${activeReportId}/versions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ versionLabel: label }),
+      })
+      if (!res.ok) throw new Error('Failed to create version')
+      set({ isLoading: false })
+      await get().fetchVersions()
+    } catch {
+      set({ isLoading: false })
+      throw new Error('Failed to create version')
+    }
+  },
+
+  fetchVersions: async () => {
+    const { activeReportId } = get()
+    if (!activeReportId) return
+    try {
+      const res = await fetch(`/api/reports/${activeReportId}/versions`)
+      if (!res.ok) return
+      const data = await res.json()
+      set({ versions: data })
+    } catch {
+      // silent
+    }
+  },
+
+  autoBalance: async () => {
+    const { activeReportId } = get()
+    if (!activeReportId) throw new Error('No active report')
+    set({ isLoading: true })
+    try {
+      const res = await fetch(`/api/reports/${activeReportId}/auto-balance`, {
+        method: 'POST',
+      })
+      if (!res.ok) throw new Error('Failed to auto-balance')
+      const data = await res.json()
+      await get().loadReport(activeReportId)
+      return data
+    } catch {
+      set({ isLoading: false })
+      throw new Error('Failed to auto-balance')
+    }
+  },
 }))
+
