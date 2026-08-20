@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
 
 const geistSans = Geist({
@@ -15,9 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FinStatements Pro - Government Financial Statements Generator",
-  description:
-    "Professional government financial statements generation tool. Create, validate, and export IPSAS-compliant financial statements.",
+  title: "GovAccounts ERP - Government Accounting System",
+  description: "Complete government accounting ERP with IPSAS-compliant financial statements, budgeting, ledgers, and full accounting cycle management.",
 };
 
 export default function RootLayout({
@@ -37,7 +35,6 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
-          <Toaster position="top-right" richColors />
         </ThemeProvider>
       </body>
     </html>
