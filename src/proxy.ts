@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// Simple session guard — checks for the next-auth JWT cookie.
-// With JWT strategy, no database call is needed in Edge Runtime.
-// The full session is validated server-side in layout.tsx via getServerSession().
-export function middleware(request: NextRequest) {
+/**
+ * Next.js 16 Proxy — replaces the deprecated middleware.ts convention.
+ *
+ * Runs in Edge Runtime before routes are rendered.
+ * Checks for the next-auth JWT session cookie to protect routes.
+ * Full session validation happens server-side in layout.tsx via getServerSession().
+ */
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Allow public routes
+  // Allow public routes without authentication
   if (
     pathname.startsWith('/login') ||
     pathname.startsWith('/api/auth') ||
@@ -35,6 +39,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!login|api/auth|_next|public|favicon\.ico|robots\.txt|logo\.svg).*)',
+    '/((?!login|api/auth|_next|public|favicon\\.ico|robots\\.txt|logo\\.svg).*)',
   ],
 }
