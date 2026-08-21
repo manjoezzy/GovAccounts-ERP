@@ -8,6 +8,47 @@ datasource db {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// AUTH: USER & ACCOUNT (NextAuth / Google OAuth)
+// ═══════════════════════════════════════════════════════════════
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  role          String    @default("accountant") // accountant | admin | viewer
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type              String  @default("oauth")
+  provider          String  @default("google")
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expiresAt    DateTime
+}
+
+// ═══════════════════════════════════════════════════════════════
 // CORE: FINANCIAL REPORT / PERIOD
 // ═══════════════════════════════════════════════════════════════
 

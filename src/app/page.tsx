@@ -3,8 +3,9 @@
 import { useState, useEffect, useCallback, useSyncExternalStore } from 'react'
 import { toast, Toaster } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useSession, signOut } from 'next-auth/react'
 import {
-  Sun, Moon, Menu, Landmark, Plus, Bell, X,
+  Sun, Moon, Menu, Landmark, Plus, Bell, X, LogOut, User,
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 
@@ -16,6 +17,14 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useIsMobile } from '@/hooks/use-mobile'
@@ -211,6 +220,7 @@ function ModuleRenderer({ activeModule, reportId, onNavigate }: { activeModule: 
 // ═══════════════════════════════════════════════════════════════════
 
 export default function AccountingERPPage() {
+  const { data: session } = useSession()
   const { theme, setTheme } = useTheme()
   const mounted = useSyncExternalStore(
     () => () => {},
@@ -395,6 +405,39 @@ export default function AccountingERPPage() {
                   </div>
                 )}
               </div>
+              {/* User Menu */ }
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                    <Avatar className="h-7 w-7">
+                      <AvatarImage src={session?.user?.image || ''} alt={session?.user?.name || ''} />
+                      <AvatarFallback className="text-xs font-semibold bg-primary/10 text-primary">
+                        {session?.user?.name
+                          ? session.user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+                          : <User className="h-3.5 w-3.5" />}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="px-2 py-1.5">
+                    <p className="text-sm font-medium truncate">{session?.user?.name || 'User'}</p>
+                    <p className="text-xs text-muted-foreground truncate">{session?.user?.email || ''}</p>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-xs text-muted-foreground cursor-default">
+                    Role: {(session?.user as any)?.role || 'accountant'}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-red-600 focus:text-red-600 cursor-pointer"
+                    onClick={() => signOut({ callbackUrl: '/login' })}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               {/* Theme toggle */}
               <Tooltip>
                 <TooltipTrigger asChild>

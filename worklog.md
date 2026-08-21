@@ -1,5 +1,29 @@
 # Worklog - IPSAS Financial Statement Generation System
 
+## Session: Google OAuth Login & Signup
+
+### Files Created/Modified
+
+1. **`prisma/schema.prisma`** — Added User, Account, Session models for NextAuth
+2. **`src/lib/auth.ts`** — Auth configuration with Google provider + PrismaAdapter
+3. **`src/app/api/auth/[...nextauth]/route.ts`** — NextAuth API route handler
+4. **`src/app/login/page.tsx`** — Polished login page with Google OAuth button
+5. **`src/components/auth-provider.tsx`** — Client-side SessionProvider wrapper
+6. **`src/app/layout.tsx`** — Server-side session fetch + AuthProvider
+7. **`src/middleware.ts`** — Route protection middleware (redirects to /login)
+8. **`src/app/page.tsx`** — Added user avatar dropdown with logout in header
+9. **`src/app/api/users/route.ts`** — Admin user management (list users, change roles)
+10. **`.env`** — Added NEXTAUTH_URL, NEXTAUTH_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+
+### Architecture Decisions
+- Strategy: database sessions (not JWT) for server-side invalidation
+- Adapter: @auth/prisma-adapter for User/Account/Session in SQLite
+- Auto-signup: First Google login auto-creates user record (no separate signup page)
+- Roles: admin, accountant, viewer (default: accountant)
+- Session expiry: 7 days
+
+---
+
 ## Session: API Route Expansion
 
 ### New API Routes Created (7 files)
