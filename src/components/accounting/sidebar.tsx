@@ -354,8 +354,8 @@ function SidebarContent({
           </AnimatePresence>
         </div>
 
-        {/* Navigation Scroll Area */}
-        <ScrollArea className="flex-1 px-2 py-1">
+        {/* Navigation Scroll Area — overflow-hidden ensures Radix ScrollArea can compute height */}
+        <ScrollArea className="flex-1 px-2 py-1 overflow-hidden">
           <nav className="flex flex-col" role="navigation" aria-label="Accounting modules">
             {NAV_GROUPS.map((group) => (
               <NavGroupSection

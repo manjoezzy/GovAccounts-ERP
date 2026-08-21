@@ -27,6 +27,7 @@ const MODULE_MAP: Record<string, ModuleConfig> = {
   'petty-cash':        { model: 'pettyCashTransaction', hasReportId: true },
   'imprest':           { model: 'imprest',              hasReportId: true },
   'cashbook':          { model: 'cashbookEntry',        hasReportId: true },
+  'cashbook-opening':  { model: 'cashbookOpeningBalance', hasReportId: true },
   'bank-recon':        { model: 'bankReconciliation',   hasReportId: true },
   'ledger-account':    { model: 'ledgerAccount',        hasReportId: true },
   'ledger-tx':         { model: 'ledgerTransaction',    hasReportId: false, nestedReportPath: 'account' },

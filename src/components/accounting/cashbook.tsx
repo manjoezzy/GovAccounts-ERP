@@ -11,6 +11,8 @@ import {
   ArrowUpRight,
   Wallet,
   AlertTriangle,
+  CalendarDays,
+  PencilLine,
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -62,6 +64,14 @@ interface CashbookEntry {
   bankAccount: string
 }
 
+interface OpeningBalance {
+  id: string
+  reportId: string
+  bankAccount: string
+  amount: number
+  asOfDate: string
+}
+
 interface ModuleProps {
   reportId: string
 }
@@ -92,12 +102,23 @@ const BANK_ACCOUNT_OPTIONS = [
   { value: 'petty', label: 'Petty Cash' },
 ] as const
 
+type BankAccountKey = (typeof BANK_ACCOUNT_OPTIONS)[number]['value']
+
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function Cashbook({ reportId }: ModuleProps) {
   // Data state
   const [entries, setEntries] = useState<CashbookEntry[]>([])
   const [loading, setLoading] = useState(true)
+
+  // Opening balances state
+  const [openingBalances, setOpeningBalances] = useState<Record<string, OpeningBalance>>({})
+  const [openingDialogOpen, setOpeningDialogOpen] = useState(false)
+  const [openingForm, setOpeningForm] = useState<Record<string, string>>({})
+  const [savingOpening, setSavingOpening] = useState(false)
+
+  // Active bank account filter
+  const [activeBank, setActiveBank] = useState<string>('all')
 
   // Dialog state
   const [formOpen, setFormOpen] = useState(false)
@@ -109,12 +130,6 @@ export default function Cashbook({ reportId }: ModuleProps) {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
-
-  // ── Summary computation ───────────────────────────────────────────────────
-
-  const totalReceipts = entries.reduce((sum, e) => sum + e.receipt, 0)
-  const totalPayments = entries.reduce((sum, e) => sum + e.payment, 0)
-  const closingBalance = entries.length > 0 ? entries[entries.length - 1].balance : 0
 
   // ── Fetch entries ─────────────────────────────────────────────────────────
 
@@ -133,15 +148,137 @@ export default function Cashbook({ reportId }: ModuleProps) {
     }
   }, [reportId])
 
+  // ── Fetch opening balances ────────────────────────────────────────────────
+
+  const fetchOpeningBalances = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/modules?module=cashbook-opening&reportId=${reportId}`)
+      if (!res.ok) return
+      const data = await res.json()
+      const map: Record<string, OpeningBalance> = {}
+      for (const ob of Array.isArray(data) ? data : []) {
+        map[ob.bankAccount] = ob
+      }
+      setOpeningBalances(map)
+    } catch (err) {
+      console.error(err)
+    }
+  }, [reportId])
+
   useEffect(() => {
     fetchEntries()
-  }, [fetchEntries])
+    fetchOpeningBalances()
+  }, [fetchEntries, fetchOpeningBalances])
+
+  // ── Computed: filtered entries + running balances with opening ─────────────
+
+  const filteredEntries = activeBank === 'all'
+    ? entries
+    : entries.filter((e) => e.bankAccount === activeBank)
+
+  // Build a map of bankAccount → opening balance amount
+  const getOpening = (bankAccount: string): number => {
+    return openingBalances[bankAccount]?.amount ?? 0
+  }
+
+  // Compute running balance for each entry, incorporating opening balance.
+  // When filter is 'all', each bank account track gets its own opening balance.
+  // We pre-compute running totals per bank account then assign.
+  const entriesWithBalance = (() => {
+    if (activeBank !== 'all') {
+      // Single bank: simple running total from opening
+      const ob = getOpening(activeBank)
+      let running = ob
+      return filteredEntries.map((e) => {
+        running += e.receipt - e.payment
+        return { ...e, computedBalance: running }
+      })
+    }
+    // All banks: track running per bank account
+    const runningMap: Record<string, number> = {}
+    for (const opt of BANK_ACCOUNT_OPTIONS) {
+      runningMap[opt.value] = getOpening(opt.value)
+    }
+    return filteredEntries.map((e) => {
+      const prev = runningMap[e.bankAccount] ?? 0
+      const next = prev + e.receipt - e.payment
+      runningMap[e.bankAccount] = next
+      return { ...e, computedBalance: next }
+    })
+  })()
+
+  // ── Summary computation ───────────────────────────────────────────────────
+
+  const totalReceipts = filteredEntries.reduce((sum, e) => sum + e.receipt, 0)
+  const totalPayments = filteredEntries.reduce((sum, e) => sum + e.payment, 0)
+
+  // Closing balance = opening + receipts - payments
+  const totalOpening = (() => {
+    if (activeBank !== 'all') return getOpening(activeBank)
+    let total = 0
+    for (const opt of BANK_ACCOUNT_OPTIONS) total += getOpening(opt.value)
+    return total
+  })()
+  const closingBalance = totalOpening + totalReceipts - totalPayments
+
+  // ── Opening balance dialog helpers ────────────────────────────────────────
+
+  const openOpeningDialog = () => {
+    const initial: Record<string, string> = {}
+    for (const opt of BANK_ACCOUNT_OPTIONS) {
+      const existing = openingBalances[opt.value]
+      initial[`${opt.value}-amount`] = existing ? String(existing.amount) : ''
+      initial[`${opt.value}-date`] = existing?.asOfDate || ''
+    }
+    setOpeningForm(initial)
+    setOpeningDialogOpen(true)
+  }
+
+  const saveOpeningBalances = async () => {
+    try {
+      setSavingOpening(true)
+      for (const opt of BANK_ACCOUNT_OPTIONS) {
+        const amount = parseFloat(openingForm[`${opt.value}-amount`]) || 0
+        const asOfDate = openingForm[`${opt.value}-date`] || ''
+        const existing = openingBalances[opt.value]
+
+        if (existing) {
+          // Update
+          await fetch(`/api/modules?module=cashbook-opening&id=${existing.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount, asOfDate }),
+          })
+        } else if (amount !== 0) {
+          // Create
+          await fetch(`/api/modules?module=cashbook-opening&reportId=${reportId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              reportId,
+              bankAccount: opt.value,
+              amount,
+              asOfDate,
+            }),
+          })
+        }
+      }
+      toast.success('Opening balances saved')
+      setOpeningDialogOpen(false)
+      fetchOpeningBalances()
+    } catch (err) {
+      console.error(err)
+      toast.error('Failed to save opening balances')
+    } finally {
+      setSavingOpening(false)
+    }
+  }
 
   // ── Form helpers ──────────────────────────────────────────────────────────
 
   const openAddDialog = () => {
     setEditingId(null)
-    setForm(EMPTY_FORM)
+    setForm({ ...EMPTY_FORM, bankAccount: activeBank !== 'all' ? activeBank : 'main' })
     setFormOpen(true)
   }
 
@@ -267,6 +404,10 @@ export default function Cashbook({ reportId }: ModuleProps) {
     }
   }
 
+  // ── Check if any opening balance is set ───────────────────────────────────
+
+  const hasAnyOpening = Object.values(openingBalances).some((ob) => ob.amount !== 0)
+
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
@@ -274,21 +415,78 @@ export default function Cashbook({ reportId }: ModuleProps) {
       {/* ── Header ────────────────────────────────────────────────────── */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+          <h2 className="text-2xl font-bold tracking-tight">
             Cashbook
           </h2>
           <p className="text-sm text-muted-foreground">
             Daily cash receipts and payments with running balance
           </p>
         </div>
-        <Button onClick={openAddDialog} size="sm">
-          <Plus className="mr-2 h-4 w-4" />
-          Add Entry
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={openOpeningDialog}>
+            <CalendarDays className="mr-2 h-4 w-4" />
+            Opening Balances
+          </Button>
+          <Button onClick={openAddDialog} size="sm">
+            <Plus className="mr-2 h-4 w-4" />
+            Add Entry
+          </Button>
+        </div>
+      </div>
+
+      {/* ── Bank Account Filter Tabs ──────────────────────────────────── */}
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <Button
+          variant={activeBank === 'all' ? 'default' : 'outline'}
+          size="sm"
+          className="h-8 text-xs"
+          onClick={() => setActiveBank('all')}
+        >
+          All Accounts
         </Button>
+        {BANK_ACCOUNT_OPTIONS.map((opt) => {
+          const ob = openingBalances[opt.value]
+          const obAmt = ob?.amount ?? 0
+          return (
+            <Button
+              key={opt.value}
+              variant={activeBank === opt.value ? 'default' : 'outline'}
+              size="sm"
+              className="h-8 text-xs gap-1.5"
+              onClick={() => setActiveBank(opt.value)}
+            >
+              {opt.label}
+              {obAmt !== 0 && (
+                <span className="text-[10px] opacity-70">
+                  OB: {formatNum(obAmt)}
+                </span>
+              )}
+            </Button>
+          )
+        })}
       </div>
 
       {/* ── Summary Cards ─────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Opening Balance
+            </CardTitle>
+            <CalendarDays className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-blue-600">
+              {formatNum(totalOpening)}
+            </p>
+            {hasAnyOpening && (
+              <p className="text-[11px] text-muted-foreground mt-1">
+                As at {Object.values(openingBalances).find((o) => o.asOfDate)?.asOfDate || 'N/A'}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -348,28 +546,35 @@ export default function Cashbook({ reportId }: ModuleProps) {
           <CardTitle className="flex items-center gap-2 text-base">
             <BookOpen className="h-5 w-5" />
             Cashbook Entries
+            {hasAnyOpening && (
+              <Badge variant="secondary" className="ml-auto text-xs font-normal">
+                Opening balances applied
+              </Badge>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="flex items-center justify-center py-16">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-slate-700" />
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground" />
             </div>
-          ) : entries.length === 0 ? (
+          ) : filteredEntries.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <BookOpen className="mb-4 h-12 w-12 text-slate-300" />
-              <p className="text-sm font-medium text-slate-500">
+              <BookOpen className="mb-4 h-12 w-12 text-muted-foreground/30" />
+              <p className="text-sm font-medium text-muted-foreground">
                 No cashbook entries yet
               </p>
-              <p className="mt-1 text-xs text-slate-400">
-                Click &quot;Add Entry&quot; to start recording cash receipts and payments.
+              <p className="mt-1 text-xs text-muted-foreground/70">
+                {hasAnyOpening
+                  ? 'Opening balance(s) set. Click "Add Entry" to start recording transactions.'
+                  : 'Set opening balances first, then click "Add Entry" to record transactions.'}
               </p>
             </div>
           ) : (
             <ScrollArea className="max-h-[480px]">
               <Table>
                 <TableHeader>
-                  <TableRow className="sticky top-0 z-10 bg-slate-50 hover:bg-slate-50">
+                  <TableRow className="sticky top-0 z-10 bg-muted hover:bg-muted">
                     <TableHead className="w-[110px]">Date</TableHead>
                     <TableHead>Description</TableHead>
                     <TableHead className="w-[100px]">Reference</TableHead>
@@ -381,12 +586,36 @@ export default function Cashbook({ reportId }: ModuleProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {entries.map((entry, index) => {
-                    const isNeg = entry.balance < 0
+                  {/* Opening balance row (shown for single-bank filter or when first entry per bank appears) */}
+                  {activeBank !== 'all' && getOpening(activeBank) !== 0 && (
+                    <TableRow className="bg-blue-50/50 dark:bg-blue-950/20 font-medium">
+                      <TableCell className="font-mono text-sm">
+                        {openingBalances[activeBank]?.asOfDate || ''}
+                      </TableCell>
+                      <TableCell className="italic text-muted-foreground">
+                        Opening Balance (b/f)
+                      </TableCell>
+                      <TableCell>—</TableCell>
+                      <TableCell className="text-right font-mono text-sm">—</TableCell>
+                      <TableCell className="text-right font-mono text-sm">—</TableCell>
+                      <TableCell className="text-right font-mono text-sm font-semibold text-blue-600">
+                        {formatNum(getOpening(activeBank))}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant={bankBadgeVariant(activeBank)}>
+                          {BANK_ACCOUNT_OPTIONS.find((o) => o.value === activeBank)?.label}
+                        </Badge>
+                      </TableCell>
+                      <TableCell />
+                    </TableRow>
+                  )}
+                  {entriesWithBalance.map((entry, index) => {
+                    const bal = entry.computedBalance ?? entry.balance
+                    const isNeg = bal < 0
                     return (
                       <TableRow
                         key={entry.id}
-                        className={index % 2 === 1 ? 'bg-slate-50/60' : ''}
+                        className={index % 2 === 1 ? 'bg-muted/30' : ''}
                       >
                         <TableCell className="font-mono text-sm whitespace-nowrap">
                           {entry.date}
@@ -403,7 +632,7 @@ export default function Cashbook({ reportId }: ModuleProps) {
                               {formatNum(entry.receipt)}
                             </span>
                           ) : (
-                            <span className="text-slate-300">—</span>
+                            <span className="text-muted-foreground/30">—</span>
                           )}
                         </TableCell>
                         <TableCell className="text-right font-mono text-sm">
@@ -412,13 +641,13 @@ export default function Cashbook({ reportId }: ModuleProps) {
                               {formatNum(entry.payment)}
                             </span>
                           ) : (
-                            <span className="text-slate-300">—</span>
+                            <span className="text-muted-foreground/30">—</span>
                           )}
                         </TableCell>
                         <TableCell className="text-right font-mono text-sm font-medium">
-                          <span className={isNeg ? 'text-red-600' : 'text-slate-900'}>
+                          <span className={isNeg ? 'text-red-600' : ''}>
                             {isNeg ? '(' : ''}
-                            {formatNum(entry.balance)}
+                            {formatNum(bal)}
                             {isNeg ? ')' : ''}
                           </span>
                         </TableCell>
@@ -438,7 +667,7 @@ export default function Cashbook({ reportId }: ModuleProps) {
                               onClick={() => openEditDialog(entry)}
                               aria-label={`Edit entry ${entry.reference || entry.description}`}
                             >
-                              <Edit className="h-3.5 w-3.5 text-slate-500" />
+                              <Edit className="h-3.5 w-3.5 text-muted-foreground" />
                             </Button>
                             <Button
                               variant="ghost"
@@ -454,12 +683,103 @@ export default function Cashbook({ reportId }: ModuleProps) {
                       </TableRow>
                     )
                   })}
+                  {/* Totals row */}
+                  <TableRow className="border-t-2 border-border font-semibold bg-muted/50">
+                    <TableCell colSpan={3} className="text-sm">
+                      Totals
+                    </TableCell>
+                    <TableCell className="text-right font-mono text-sm text-emerald-600">
+                      {formatNum(totalReceipts)}
+                    </TableCell>
+                    <TableCell className="text-right font-mono text-sm text-red-600">
+                      {formatNum(totalPayments)}
+                    </TableCell>
+                    <TableCell className="text-right font-mono text-sm">
+                      <span className={closingBalance < 0 ? 'text-red-600' : ''}>
+                        {closingBalance < 0 ? '(' : ''}
+                        {formatNum(closingBalance)}
+                        {closingBalance < 0 ? ')' : ''}
+                      </span>
+                    </TableCell>
+                    <TableCell colSpan={2} />
+                  </TableRow>
                 </TableBody>
               </Table>
             </ScrollArea>
           )}
         </CardContent>
       </Card>
+
+      {/* ── Opening Balances Dialog ───────────────────────────────────── */}
+      <Dialog open={openingDialogOpen} onOpenChange={setOpeningDialogOpen}>
+        <DialogContent className="sm:max-w-[560px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <PencilLine className="h-5 w-5" />
+              Set Opening Balances
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="py-2 space-y-5">
+            <p className="text-sm text-muted-foreground">
+              Enter the opening (brought forward) balance for each bank account as at the start of the period. These balances are used to compute the running balance in the cashbook.
+            </p>
+
+            {BANK_ACCOUNT_OPTIONS.map((opt) => {
+              const amtKey = `${opt.value}-amount`
+              const dateKey = `${opt.value}-date`
+              const existing = openingBalances[opt.value]
+              const currentAmt = existing?.amount ?? 0
+
+              return (
+                <div key={opt.value} className="space-y-2 rounded-lg border border-border p-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium">{opt.label}</Label>
+                    {currentAmt !== 0 && (
+                      <span className="text-xs text-muted-foreground">
+                        Current: {formatNum(currentAmt)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">Balance Amount</Label>
+                      <Input
+                        type="number"
+                        step="1"
+                        placeholder="0"
+                        value={openingForm[amtKey] || ''}
+                        onChange={(e) =>
+                          setOpeningForm((prev) => ({ ...prev, [amtKey]: e.target.value }))
+                        }
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">As at Date</Label>
+                      <Input
+                        type="date"
+                        value={openingForm[dateKey] || ''}
+                        onChange={(e) =>
+                          setOpeningForm((prev) => ({ ...prev, [dateKey]: e.target.value }))
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpeningDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={saveOpeningBalances} disabled={savingOpening}>
+              {savingOpening ? 'Saving...' : 'Save Opening Balances'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* ── Add / Edit Dialog ──────────────────────────────────────────── */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
@@ -507,7 +827,7 @@ export default function Cashbook({ reportId }: ModuleProps) {
             {/* Row: Receipt + Payment */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="cb-receipt" className="text-emerald-700">
+                <Label htmlFor="cb-receipt" className="text-emerald-700 dark:text-emerald-400">
                   Receipt Amount
                 </Label>
                 <Input
@@ -518,11 +838,10 @@ export default function Cashbook({ reportId }: ModuleProps) {
                   placeholder="0"
                   value={form.receipt}
                   onChange={(e) => updateField('receipt', e.target.value)}
-                  className="border-emerald-200 focus-visible:ring-emerald-500"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="cb-payment" className="text-red-700">
+                <Label htmlFor="cb-payment" className="text-red-700 dark:text-red-400">
                   Payment Amount
                 </Label>
                 <Input
@@ -533,7 +852,6 @@ export default function Cashbook({ reportId }: ModuleProps) {
                   placeholder="0"
                   value={form.payment}
                   onChange={(e) => updateField('payment', e.target.value)}
-                  className="border-red-200 focus-visible:ring-red-500"
                 />
               </div>
             </div>

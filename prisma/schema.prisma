@@ -294,6 +294,18 @@ model CashbookEntry {
   createdAt   DateTime @default(now())
 }
 
+model CashbookOpeningBalance {
+  id          String   @id @default(cuid())
+  reportId    String
+  bankAccount String   @default("main")
+  amount      Float   @default(0)
+  asOfDate    String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([reportId, bankAccount])
+}
+
 model BankReconciliation {
   id                  String   @id @default(cuid())
   reportId            String

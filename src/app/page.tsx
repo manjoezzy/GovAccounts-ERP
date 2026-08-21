@@ -459,8 +459,11 @@ export default function AccountingERPPage() {
           </motion.main>
         </div>
 
-        {/* ── Footer ────────────────────────────────────────── */}
-        <footer className="border-t border-border mt-auto">
+        {/* ── Footer — matches sidebar margin so nothing is overlaid ── */}
+        <footer
+          className="border-t border-border mt-auto transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+          style={{ marginLeft: isMobile ? 0 : (sidebarCollapsed ? 64 : 256) }}
+        >
           <div className="px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
             <span>GovAccounts ERP — Government Accounting System</span>
             <div className="flex items-center gap-3">
