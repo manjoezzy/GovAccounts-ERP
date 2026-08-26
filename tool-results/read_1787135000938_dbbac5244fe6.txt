@@ -1,0 +1,741 @@
+   375→
+   376→  return (
+   377→    <TooltipProvider>
+   378→      <motion.div
+   379→        variants={pageVariants}
+   380→        initial="initial"
+   381→        animate="animate"
+   382→        exit="exit"
+   383→        transition={{ duration: 0.3, ease: 'easeOut' }}
+   384→        className="space-y-6"
+   385→      >
+   386→        {/* --- HEADER --- */
+   387→        <div className="flex flex-col gap-1">
+   388→          <div className="flex items-center gap-3">
+   389→            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-md">
+   390→              <BookOpen className="h-5 w-5" />
+   391→            </div>
+   392→            <div>
+   393→              <h1 className="text-2xl font-bold tracking-tight text-foreground">
+   394→                General Ledger
+   395→              </h1>
+   396→              <p className="text-sm text-muted-foreground">
+   397→                Double-entry bookkeeping with account-level tracking. Record, classify, and
+   398→                review every journal entry before generating the trial balance.
+   399→              </p>
+   400→            </div>
+   401→          </div>
+   402→        </div>
+   403→
+   404→        {/* --- ACTION BAR --- */
+   405→        <div className="flex flex-wrap items-center gap-2">
+   406→          <Tooltip>
+   407→            <TooltipTrigger asChild>
+   408→              <Button
+   409→                onClick={() => setShowForm(true)}
+   410→                size="sm"
+   411→                className="gap-1.5"
+   412→              >
+   413→                <Plus className="h-4 w-4" /> Add Entry
+   414→              </Button>
+   415→            </TooltipTrigger>
+   416→            <TooltipContent>Add a new journal entry</TooltipContent>
+   417→          </Tooltip>
+   418→
+   419→          <Tooltip>
+   420→            <TooltipTrigger asChild>
+   421→              <Button
+   422→                variant="outline"
+   423→                size="sm"
+   424→                onClick={handleGenerateTB}
+   425→                disabled={generating || ledgerEntries.length === 0}
+   426→                className="gap-1.5"
+   427→              >
+   428→                {generating ? (
+   429→                  <Loader2 className="h-4 w-4 animate-spin" />
+   430→                ) : (
+   431→                  <Wand2 className="h-4 w-4" />
+   432→                )}
+   433→                Generate TB from Ledger
+   434→              </Button>
+   435→            </TooltipTrigger>
+   436→            <TooltipContent>Summarize ledger entries into trial balance</TooltipContent>
+   437→          </Tooltip>
+   438→
+   439→          <Tooltip>
+   440→            <TooltipTrigger asChild>
+   441→              <Button
+   442→                variant="outline"
+   443→                size="sm"
+   444→                onClick={handleSave}
+   445→                disabled={saving}
+   446→                className="gap-1.5"
+   447→              >
+   448→                {saving ? (
+   449→                  <Loader2 className="h-4 w-4 animate-spin" />
+   450→                ) : (
+   451→                  <Save className="h-4 w-4" />
+   452→                )}
+   453→                Save
+   454→              </Button>
+   455→            </TooltipTrigger>
+   456→            <TooltipContent>Save ledger entries</TooltipContent>
+   457→          </Tooltip>
+   458→
+   459→          <Tooltip>
+   460→            <TooltipTrigger asChild>
+   461→              <Button
+   462→                variant="destructive"
+   463→                size="sm"
+   464→                onClick={() =>
+   465→                  ledgerEntries.length > 0
+   466→                    ? setClearDialogOpen(true)
+   467→                    : toast.error('Nothing to clear')
+   468→                }
+   469→                className="gap-1.5"
+   470→              >
+   471→                <Trash2 className="h-4 w-4" /> Clear All
+   472→              </Button>
+   473→            </TooltipTrigger>
+   474→            <TooltipContent>Remove all ledger entries</TooltipContent>
+   475→          </Tooltip>
+   476→        </div>
+   477→
+   478→        {/* --- SUMMARY CARDS --- */
+   479→        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+   480→          <Card className="border-slate-200 dark:border-slate-700">
+   481→            <CardHeader className="pb-2 pt-4 px-4">
+   482→              <CardDescription className="text-[11px] uppercase tracking-wider">
+   483→                Account Code
+   484→              </CardDescription>
+   485→            </CardHeader>
+   486→            <CardContent className="px-4 pb-4">
+   487→              <p className="text-lg font-semibold truncate">
+   488→                {accountSummary.accountCode}
+   489→              </p>
+   490→            </CardContent>
+   491→          </Card>
+   492→
+   493→          <Card className="border-slate-200 dark:border-slate-700">
+   494→            <CardHeader className="pb-2 pt-4 px-4">
+   495→              <CardDescription className="text-[11px] uppercase tracking-wider">
+   496→                Account Name
+   497→              </CardDescription>
+   498→            </CardHeader>
+   499→            <CardContent className="px-4 pb-4">
+   500→              <p className="text-lg font-semibold truncate">
+   501→                {accountSummary.accountName}
+   502→              </p>
+   503→            </CardContent>
+   504→          </Card>
+   505→
+   506→          <Card className="border-slate-200 dark:border-slate-700">
+   507→            <CardHeader className="pb-2 pt-4 px-4">
+   508→              <CardDescription className="text-[11px] uppercase tracking-wider">
+   509→                Total Debits
+   510→              </CardDescription>
+   511→            </CardHeader>
+   512→            <CardContent className="px-4 pb-4">
+   513→              <p className="text-lg font-semibold text-blue-600 dark:text-blue-400">
+   514→                {entityConfig.currency} {formatNum(accountSummary.totalDebits)}
+   515→              </p>
+   516→            </CardContent>
+   517→          </Card>
+   518→
+   519→          <Card className="border-slate-200 dark:border-slate-700">
+   520→            <CardHeader className="pb-2 pt-4 px-4">
+   521→              <CardDescription className="text-[11px] uppercase tracking-wider">
+   522→                Total Credits
+   523→              </CardDescription>
+   524→            </CardHeader>
+   525→            <CardContent className="px-4 pb-4">
+   526→              <p className="text-lg font-semibold text-emerald-600 dark:text-emerald-400">
+   527→                {entityConfig.currency} {formatNum(accountSummary.totalCredits)}
+   528→              </p>
+   529→            </CardContent>
+   530→          </Card>
+   531→
+   532→          <Card className="border-slate-200 dark:border-slate-700">
+   533→            <CardHeader className="pb-2 pt-4 px-4">
+   534→              <CardDescription className="text-[11px] uppercase tracking-wider">
+   535→                Net Balance
+   536→              </CardDescription>
+   537→            </CardHeader>
+   538→            <CardContent className="px-4 pb-4">
+   539→              <p
+   540→                className={`text-lg font-semibold ${
+   541→                  accountSummary.netBalance < 0
+   542→                    ? 'text-red-600 dark:text-red-400'
+   543→                    : accountSummary.netBalance > 0
+   544→                      ? 'text-foreground'
+   545→                      : 'text-muted-foreground'
+   546→                }`
+   547→                }
+   548→              >
+   549→                {accountSummary.netBalance < 0 ? '(' : ''}
+   550→                {entityConfig.currency} {formatNum(accountSummary.netBalance)}
+   551→                {accountSummary.netBalance < 0 ? ')' : ''}
+   552→              </p>
+   553→            </CardContent>
+   554→          </Card>
+   555→
+   556→          <Card className="border-slate-200 dark:border-slate-700">
+   557→            <CardHeader className="pb-2 pt-4 px-4">
+   558→              <CardDescription className="text-[11px] uppercase tracking-wider">
+   559→                Entry Count
+   560→              </CardDescription>
+   561→            </CardHeader>
+   562→            <CardContent className="px-4 pb-4">
+   563→              <p className="text-lg font-semibold">{accountSummary.entryCount}</p>
+   564→            </CardContent>
+   565→          </Card>
+   566→        </div>
+   567→
+   568→        {/* --- FILTER BAR --- */
+   569→        <Card className="border-slate-200 dark:border-slate-700">
+   570→          <CardContent className="pt-4 pb-4 px-4">
+   571→            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
+   572→              {/* Search */}
+   573→              <div className="relative flex-1 min-w-[200px]">
+   574→                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+   575→                <Input
+   576→                  placeholder="Search description, reference, account..."
+   577→                  value={searchQuery}
+   578→                  onChange={(e) => setSearchQuery(e.target.value)}
+   579→                  className="pl-8 h-9"
+   580→                />
+   581→                {searchQuery && (
+   582→                  <button
+   583→                    onClick={() => setSearchQuery('')}
+   584→                    className="absolute right-2 top-2 text-muted-foreground hover:text-foreground"
+   585→                  >
+   586→                    <X className="h-4 w-4" />
+   587→                  </button>
+   588→                )}
+   589→              </div>
+   590→
+   591→              {/* Account selector */}
+   592→              <div className="flex items-center gap-2 min-w-[200px]">
+   593→                <Label className="text-xs font-medium whitespace-nowrap flex items-center gap-1">
+   594→                  <Table className="h-3.5 w-3.5" /> Account
+   595→                </Label>
+   596→                <Select
+   597→                  value={selectedAccount}
+   598→                  onValueChange={setSelectedAccount}
+   599→                >
+   600→                  <SelectTrigger className="h-9 w-full">
+   601→                    <SelectValue placeholder="All accounts" />
+   602→                  </SelectTrigger>
+   603→                  <SelectContent>
+   604→                    <SelectItem value="all">All Accounts</SelectItem>
+   605→                    {uniqueAccounts.map(([code, name]) => (
+   606→                      <SelectItem key={code} value={code}>
+   607→                        {code} — {name}
+   608→                      </SelectItem>
+   609→                    ))}
+   610→                  </SelectContent>
+   611→                </Select>
+   612→              </div>
+   613→
+   614→              {/* Journal type filter */}
+   615→              <div className="flex items-center gap-2 min-w-[160px]">
+   616→                <Label className="text-xs font-medium whitespace-nowrap flex items-center gap-1">
+   617→                  <Filter className="h-3.5 w-3.5" /> Journal
+   618→                </Label>
+   619→                <Select
+   620→                  value={journalFilter}
+   621→                  onValueChange={(v) => setJournalFilter(v as JournalTypeFilter)}
+   622→                >
+   623→                  <SelectTrigger className="h-9 w-full">
+   624→                    <SelectValue placeholder="All types" />
+   625→                  </SelectTrigger>
+   626→                  <SelectContent>
+   627→                    {JOURNAL_TYPE_FILTERS.map((jt) => (
+   628→                      <SelectItem key={jt} value={jt}>
+   629→                        {jt === 'all' ? 'All Types' : jt.charAt(0).toUpperCase() + jt.slice(1)}
+   630→                      </SelectItem>
+   631→                    ))}
+   632→                  </SelectContent>
+   633→                </Select>
+   634→              </div>
+   635→            </div>
+   636→          </CardContent>
+   637→        </Card>
+   638→
+   639→        {/* --- ADD ENTRY COLLAPSIBLE FORM --- */
+   640→        {showForm && (
+   641→          <motion.div
+   642→            initial={{ opacity: 0, height: 0 }}
+   643→            animate={{ opacity: 1, height: 'auto' }}
+   644→            exit={{ opacity: 0, height: 0 }}
+   645→          >
+   646→            <Card className="border-indigo-200 dark:border-indigo-800 bg-gradient-to-br from-slate-50 to-indigo-50/30 dark:from-slate-900 dark:to-indigo-950/20">
+   647→              <CardHeader className="pb-3 pt-4 px-5">
+   648→                <div className="flex items-center justify-between">
+   649→                  <div className="flex items-center gap-2">
+   650→                    <FileText className="h-5 w-5 text-indigo-500" />
+   651→                    <CardTitle className="text-base">New Journal Entry</CardTitle>
+   652→                  </div>
+   653→                  <Button
+   654→                    variant="ghost"
+   655→                    size="icon"
+   656→                    className="h-7 w-7"
+   657→                    onClick={resetForm}
+   658→                  >
+   659→                    <X className="h-4 w-4" />
+   660→                  </Button>
+   661→                </div>
+   662→                <CardDescription>
+   663→                  Enter debit or credit — not both. Classification is optional.
+   664→                </CardDescription>
+   665→              </CardHeader>
+   666→              <CardContent className="px-5 pb-5">
+   667→                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+   668→                  {/* Date */}
+   669→                  <div className="space-y-1.5">
+   670→                    <Label className="text-xs font-medium">Date *</Label>
+   671→                    <Input
+   672→                      type="date"
+   673→                      value={form.entryDate}
+   674→                      onChange={(e) => handleFormChange('entryDate', e.target.value)}
+   675→                      className="h-9"
+   676→                    />
+   677→                  </div>
+   678→
+   679→                  {/* Account Code */}
+   680→                  <div className="space-y-1.5">
+   681→                    <Label className="text-xs font-medium">Account Code *</Label>
+   682→                    <Input
+   683→                      placeholder="e.g. 1100"
+   684→                      value={form.accountCode}
+   685→                      onChange={(e) => handleFormChange('accountCode', e.target.value)}
+   686→                      className="h-9"
+   687→                    />
+   688→                  </div>
+   689→
+   690→                  {/* Account Name */}
+   691→                  <div className="space-y-1.5">
+   692→                    <Label className="text-xs font-medium">Account Name *</Label>
+   693→                    <Input
+   694→                      placeholder="e.g. Cash & Cash Equivalents"
+   695→                      value={form.accountName}
+   696→                      onChange={(e) => handleFormChange('accountName', e.target.value)}
+   697→                      className="h-9"
+   698→                    />
+   699→                  </div>
+   700→
+   701→                  {/* Classification */}
+   702→                  <div className="space-y-1.5">
+   703→                    <Label className="text-xs font-medium">Classification</Label>
+   704→                    <Select
+   705→                      value={form.classification}
+   706→                      onValueChange={(v) => handleFormChange('classification', v)}
+   707→                    >
+   708→                      <SelectTrigger className="h-9">
+   709→                        <SelectValue placeholder="Select classification" />
+   710→                      </SelectTrigger>
+   711→                      <SelectContent>
+   712→                        {CLASSIFICATION_OPTIONS.map((c) => (
+   713→                          <SelectItem key={c} value={c}>
+   714→                            {formatClassificationLabel(c)}
+   715→                          </SelectItem>
+   716→                        ))}
+   717→                      </SelectContent>
+   718→                    </Select>
+   719→                  </div>
+   720→
+   721→                  {/* Category */}
+   722→                  <div className="space-y-1.5">
+   723→                    <Label className="text-xs font-medium">Category</Label>
+   724→                    <Input
+   725→                      placeholder="e.g. Personnel Costs"
+   726→                      value={form.category}
+   727→                      onChange={(e) => handleFormChange('category', e.target.value)}
+   728→                      className="h-9"
+   729→                    />
+   730→                  </div>
+   731→
+   732→                  {/* Debit */}
+   733→                  <div className="space-y-1.5">
+   734→                    <Label className="text-xs font-medium text-blue-600 dark:text-blue-400">
+   735→                      Debit
+   736→                    </Label>
+   737→                    <Input
+   738→                      type="number"
+   739→                      placeholder="0"
+   740→                      min="0"
+   741→                      step="1"
+   742→                      value={form.debit}
+   743→                      onChange={(e) => handleFormChange('debit', e.target.value)}
+   744→                      className="h-9 border-blue-200 dark:border-blue-800 focus-visible:ring-blue-400"
+   745→                    />
+   746→                  </div>
+   747→
+   748→                  {/* Credit */}
+   749→                  <div className="space-y-1.5">
+   750→                    <Label className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+   751→                      Credit
+   752→                    </Label>
+   753→                    <Input
+   754→                      type="number"
+   755→                      placeholder="0"
+   756→                      min="0"
+   757→                      step="1"
+   758→                      value={form.credit}
+   759→                      onChange={(e) => handleFormChange('credit', e.target.value)}
+   760→                      className="h-9 border-emerald-200 dark:border-emerald-800 focus-visible:ring-emerald-400"
+   761→                    />
+   762→                  </div>
+   763→
+   764→                  {/* Reference */}
+   765→                  <div className="space-y-1.5">
+   766→                    <Label className="text-xs font-medium">Reference</Label>
+   767→                    <Input
+   768→                      placeholder="e.g. JV-001"
+   769→                      value={form.reference}
+   770→                      onChange={(e) => handleFormChange('reference', e.target.value)}
+   771→                      className="h-9"
+   772→                    />
+   773→                  </div>
+   774→
+   775→                  {/* Description */}
+   776→                  <div className="space-y-1.5 sm:col-span-2">
+   777→                    <Label className="text-xs font-medium">Description</Label>
+   778→                    <Input
+   779→                      placeholder="Narrative for this entry"
+   780→                      value={form.description}
+   781→                      onChange={(e) => handleFormChange('description', e.target.value)}
+   782→                      className="h-9"
+   783→                    />
+   784→                  </div>
+   785→
+   786→                  {/* Journal Type */}
+   787→                  <div className="space-y-1.5">
+   788→                    <Label className="text-xs font-medium">Journal Type</Label>
+   789→                    <Select
+   790→                      value={form.journalType}
+   791→                      onValueChange={(v) =>
+   792→                        handleFormChange(
+   793→                          'journalType',
+   794→                          v
+   795→                        )
+   796→                      }
+   797→                    >
+   798→                      <SelectTrigger className="h-9">
+   799→                        <SelectValue />
+   800→                      </SelectTrigger>
+   801→                      <SelectContent>
+   802→                        {JOURNAL_TYPE_OPTIONS.map((j) => (
+   803→                          <SelectItem key={j.value} value={j.value}>
+   804→                            {j.label}
+   805→                          </SelectItem>
+   806→                        ))}
+   807→                      </SelectContent>
+   808→                    </Select>
+   809→                  </div>
+   810→                </div>
+   811→
+   812→                {/* Form actions */}
+   813→                <div className="mt-4 flex items-center gap-2 border-t pt-4">
+   814→                  <Button
+   815→                    onClick={handleSubmit}
+   816→                    disabled={isLoading}
+   817→                    className="gap-1.5"
+   818→                    size="sm"
+   819→                  >
+   820→                    <Plus className="h-4 w-4" /> Add Entry
+   821→                  </Button>
+   822→                  <Button
+   823→                    variant="ghost"
+   824→                    size="sm"
+   825→                    onClick={resetForm}
+   826→                  >
+   827→                    Cancel
+   828→                  </Button>
+   829→                </div>
+   830→              </CardContent>
+   831→            </Card>
+   832→          </motion.div>
+   833→        )}
+   834→
+   835→        {/* --- DATA TABLE --- */
+   836→        <Card className="border-slate-200 dark:border-slate-700 overflow-hidden">
+   837→          <CardHeader className="pb-2 pt-4 px-5">
+   838→            <div className="flex items-center justify-between">
+   839→              <div>
+   840→                <CardTitle className="text-base flex items-center gap-2">
+   841→                  <Table className="h-4 w-4 text-muted-foreground" />
+   842→                  Ledger Entries
+   843→                  <Badge variant="secondary" className="font-normal">
+   844→                    {entriesWithBalance.length}
+   845→                  </Badge>
+   846→                </CardTitle>
+   847→                <CardDescription className="mt-0.5">
+   848→                  Running balance recalculated per filtered view (prev + debit − credit)
+   849→                </CardDescription>
+   850→              </div>
+   851→            </div>
+   852→          </CardHeader>
+   853→          <CardContent className="px-0 pb-0">
+   854→            {entriesWithBalance.length === 0 ? (
+   855→              /* --- EMPTY STATE --- */
+   856→              <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+   857→                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
+   858→                  <BookOpen className="h-8 w-8 text-muted-foreground" />
+   859→                </div>
+   860→                <h3 className="text-lg font-semibold text-foreground">No ledger entries</h3>
+   861→                <p className="mt-1 text-sm text-muted-foreground max-w-md">
+   862→                  {ledgerEntries.length === 0
+   863→                    ? 'Start by adding journal entries manually or posting transactions from the Revenue & Expenditure step.'
+   864→                    : 'No entries match the current filters. Try adjusting your search or account selection.'}
+   865→                </p>
+   866→                {ledgerEntries.length === 0 && (
+   867→                  <Button
+   868→                    onClick={() => setShowForm(true)}
+   869→                    size="sm"
+   870→                    className="mt-4 gap-1.5"
+   871→                  >
+   872→                    <Plus className="h-4 w-4" /> Add First Entry
+   873→                  </Button>
+   874→                )}
+   875→              </div>
+   876→            ) : (
+   877→              /* --- TABLE --- */
+   878→              <div className="overflow-x-auto">
+   879→                <table className="w-full text-sm">
+   880→                  <thead>
+   881→                    <tr className="border-b bg-muted/50 text-left">
+   882→                      <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+   883→                        Date
+   884→                      </th>
+   885→                      <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+   886→                        Account Code
+   887→                      </th>
+   888→                      <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+   889→                        Account Name
+   890→                      </th>
+   891→                      <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">
+   892→                        Debit
+   893→                      </th>
+   894→                      <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">
+   895→                        Credit
+   896→                      </th>
+   897→                      <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">
+   898→                        Running Bal.
+   899→                      </th>
+   900→                      <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+   901→                        Reference
+   902→                      </th>
+   903→                      <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+   904→                        Description
+   905→                      </th>
+   906→                      <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+   907→                        Journal Type
+   908→                      </th>
+   909→                      <th className="whitespace-nowrap px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground text-center">
+   910→                        Actions
+   911→                      </th>
+   912→                    </tr>
+   913→                  </thead>
+   914→                  <tbody>
+   915→                    {entriesWithBalance.map((entry, idx) => {
+   916→                      const badge = getJournalBadge(entry.journalType)
+   917→                      const isZebra = idx % 2 === 1
+   918→                      const balance = entry.computedBalance ?? 0
+   919→
+   920→                      return (
+   921→                        <tr
+   922→                          key={entry._id ?? idx}
+   923→                          className={`
+   924→                            border-b transition-colors hover:bg-muted/30
+   925→                            ${isZebra ? 'bg-muted/20' : 'bg-transparent'}
+   926→                          `
+   927→                        >
+   928→                          {/* Date */}
+   929→                          <td className="whitespace-nowrap px-4 py-2.5 text-muted-foreground">
+   930→                            {entry.entryDate || '—'}
+   931→                          </td>
+   932→
+   933→                          {/* Account Code */}
+   934→                          <td className="whitespace-nowrap px-4 py-2.5 font-mono text-xs font-medium">
+   935→                            {entry.accountCode || '—'}
+   936→                          </td>
+   937→
+   938→                          {/* Account Name */}
+   939→                          <td className="whitespace-nowrap px-4 py-2.5 font-medium">
+   940→                            {entry.accountName || '—'}
+   941→                          </td>
+   942→
+   943→                          {/* Debit */}
+   944→                          <td className="whitespace-nowrap px-4 py-2.5 text-right font-mono">
+   945→                            {entry.debit > 0 ? (
+   946→                              <span className="text-blue-600 dark:text-blue-400 font-medium">
+   947→                                {entityConfig.currency} {formatNum(entry.debit)}
+   948→                              </span>
+   949→                            ) : (
+   950→                              <span className="text-muted-foreground/40">—</span>
+   951→                            )}
+   952→                          </td>
+   953→
+   954→                          {/* Credit */}
+   955→                          <td className="whitespace-nowrap px-4 py-2.5 text-right font-mono">
+   956→                            {entry.credit > 0 ? (
+   957→                              <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+   958→                                {entityConfig.currency} {formatNum(entry.credit)}
+   959→                              </span>
+   960→                            ) : (
+   961→                              <span className="text-muted-foreground/40">—</span>
+   962→                            )}
+   963→                          </td>
+   964→
+   965→                          {/* Running Balance */}
+   966→                          <td className="whitespace-nowrap px-4 py-2.5 text-right font-mono">
+   967→                            <span
+   968→                              className={`
+   969→                                font-semibold
+   970→                                ${
+   971→                                  balance < 0
+   972→                                    ? 'text-red-600 dark:text-red-400'
+   973→                                    : balance > 0
+   974→                                      ? 'text-foreground'
+   975→                                      : 'text-muted-foreground'
+   976→                                }
+   977→                              `
+   978→                            >
+   979→                              {balance < 0 ? '(' : ''}
+   980→                              {entityConfig.currency} {formatNum(balance)}
+   981→                              {balance < 0 ? ')' : ''}
+   982→                            </span>
+   983→                          </td>
+   984→
+   985→                          {/* Reference */}
+   986→                          <td className="whitespace-nowrap px-4 py-2.5 text-muted-foreground">
+   987→                            {entry.reference || '—'}
+   988→                          </td>
+   989→
+   990→                          {/* Description */}
+   991→                          <td className="max-w-[200px] truncate px-4 py-2.5">
+   992→                            {entry.description || '—'}
+   993→                          </td>
+   994→
+   995→                          {/* Journal Type Badge */}
+   996→                          <td className="whitespace-nowrap px-4 py-2.5">
+   997→                            <Badge
+   998→                              variant="secondary"
+   999→                              className={`text-[11px] font-medium px-2 py-0 ${badge.color}`}
+  1000→                            >
+  1001→                              {badge.label}
+  1002→                            </Badge>
+  1003→                          </td>
+  1004→
+  1005→                          {/* Actions */}
+  1006→                          <td className="whitespace-nowrap px-4 py-2.5 text-center">
+  1007→                            <Tooltip>
+  1008→                              <TooltipTrigger asChild>
+  1009→                                <Button
+  1010→                                  variant="ghost"
+  1011→                                  size="icon"
+  1012→                                  className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+  1013→                                  onClick={() => handleDelete(idx)}
+  1014→                                >
+  1015→                                  <Trash2 className="h-3.5 w-3.5" />
+  1016→                                </Button>
+  1017→                              </TooltipTrigger>
+  1018→                              <TooltipContent>Delete this entry</TooltipContent>
+  1019→                            </Tooltip>
+  1020→                          </td>
+  1021→                        </tr>
+  1022→                      )
+  1023→                    })}
+  1024→                  </tbody>
+  1025→
+  1026→                  {/* --- TABLE FOOTER TOTALS --- */
+  1027→                  <tfoot>
+  1028→                    <tr className="border-t-2 border-foreground/10 bg-muted/50 font-semibold">
+  1029→                      <td colSpan={3} className="px-4 py-2.5 text-right uppercase text-xs tracking-wider">
+  1030→                        Totals
+  1031→                      </td>
+  1032→                      <td className="whitespace-nowrap px-4 py-2.5 text-right font-mono text-blue-600 dark:text-blue-400">
+  1033→                        {entityConfig.currency}{' '}
+  1034→                        {formatNum(
+  1035→                          entriesWithBalance.reduce((s, e) => s + e.debit, 0)
+  1036→                        )}
+  1037→                      </td>
+  1038→                      <td className="whitespace-nowrap px-4 py-2.5 text-right font-mono text-emerald-600 dark:text-emerald-400">
+  1039→                        {entityConfig.currency}{' '}
+  1040→                        {formatNum(
+  1041→                          entriesWithBalance.reduce((s, e) => s + e.credit, 0)
+  1042→                        )}
+  1043→                      </td>
+  1044→                      <td className="whitespace-nowrap px-4 py-2.5 text-right font-mono">
+  1045→                        <span
+  1046→                          className={
+  1047→                            entriesWithBalance.length > 0 &&
+  1048→                            (entriesWithBalance[entriesWithBalance.length - 1]
+  1049→                              .computedBalance ?? 0) < 0
+  1050→                              ? 'text-red-600 dark:text-red-400'
+  1051→                              : ''
+  1052→                          }
+  1053→                        >
+  1054→                          {entityConfig.currency}{' '}
+  1055→                          {formatNum(
+  1056→                            entriesWithBalance.length > 0
+  1057→                              ? entriesWithBalance[entriesWithBalance.length - 1]
+  1058→                                  .computedBalance ?? 0
+  1059→                              : 0
+  1060→                          )}
+  1061→                        </span>
+  1062→                      </td>
+  1063→                      <td colSpan={3} />
+  1064→                    </tr>
+  1065→                  </tfoot>
+  1066→                </table>
+  1067→              </div>
+  1068→            )}
+  1069→          </CardContent>
+  1070→        </Card>
+  1071→
+  1072→        {/* --- NAVIGATION --- */
+  1073→        <div className="flex items-center justify-between pt-2">
+  1074→          <Button
+  1075→            variant="outline"
+  1076→            onClick={() => setWizardStep(3)}
+  1077→            className="gap-2"
+  1078→          >
+  1079→            <ArrowLeft className="h-4 w-4" /> Back to Cashbook
+  1080→          </Button>
+  1081→          <Button
+  1082→            onClick={() => setWizardStep(5)}
+  1083→            className="gap-2"
+  1084→          >
+  1085→            Continue to Trial Balance <ArrowRight className="h-4 w-4" />
+  1086→          </Button>
+  1087→        </div>
+  1088→
+  1089→        {/* --- CLEAR ALL DIALOG --- */
+  1090→        <Dialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
+  1091→          <DialogContent>
+  1092→            <DialogHeader>
+  1093→              <DialogTitle>Clear All Ledger Entries?</DialogTitle>
+  1094→              <DialogDescription>
+  1095→                This will permanently remove all {ledgerEntries.length} ledger entry
+  1096→                {ledgerEntries.length !== 1 ? 'ies' : 'y'}. This action cannot be undone.
+  1097→              </DialogDescription>
+  1098→            </DialogHeader>
+  1099→            <DialogFooter className="gap-2">
+  1100→              <Button
+  1101→                variant="outline"
+  1102→                onClick={() => setClearDialogOpen(false)}
+  1103→              >
+  1104→                Cancel
+  1105→              </Button>
+  1106→              <Button variant="destructive" onClick={handleClearAll}>
+  1107→                <Trash2 className="mr-1.5 h-4 w-4" /> Clear All
+  1108→              </Button>
+  1109→            </DialogFooter>
+  1110→          </DialogContent>
+  1111→        </Dialog>
+  1112→      </motion.div>
+  1113→    </TooltipProvider>
+  1114→  )
+  1115→}

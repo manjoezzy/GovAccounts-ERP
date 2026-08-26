@@ -1,0 +1,1125 @@
+   196→export interface VotebookEntryUI {
+   197→  _id?: string
+   198→  _dbId?: string
+   199→  voteCode: string
+   200→  voteDescription: string
+   201→  annualAppropriation: number
+   202→  supplementaryAppropriation: number
+   203→  totalAppropriation: number
+   204→  commitments: number
+   205→  expenditures: number
+   206→  unspentBalance: number
+   207→  encumbrances: number
+   208→  availableBalance: number
+   209→  quarter: string
+   210→  status: 'active' | 'exhausted' | 'suspended' | 'lapsed'
+   211→  notes: string
+   212→}
+   213→
+   214→export interface AbstractEntryUI {
+   215→  _id?: string
+   216→  _dbId?: string
+   217→  itemCode: string
+   218→  itemDescription: string
+   219→  type: 'revenue' | 'expenditure' | 'adjustment'
+   220→  budgetEstimate: number
+   221→  actualAmount: number
+   222→  variance: number
+   223→  variancePercent: number
+   224→  priorYearActual: number
+   225→}
+   226→
+   227→// ═══════════════════════════════════════════════════════════════════
+   228→// WIZARD & TAB TYPES
+   229→// ═══════════════════════════════════════════════════════════════════
+   230→
+   231→export type WizardStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11
+   232→
+   233→export type TabType = 'dashboard' | 'trial-balance' | 'statements' | 'export'
+   234→
+   235→export type StatementSubTab =
+   236→  | 'sfp'
+   237→  | 'balance-sheet'
+   238→  | 'changes-na'
+   239→  | 'cash-flow'
+   240→  | 'revenue-recon'
+   241→  | 'cash-recon'
+   242→  | 'budget-variance'
+   243→
+   244→// ═══════════════════════════════════════════════════════════════════
+   245→// STORE INTERFACE
+   246→// ═══════════════════════════════════════════════════════════════════
+   247→
+   248→interface FinancialStore {
+   249→  // Core
+   250→  reports: Report[]
+   251→  activeReportId: string | null
+   252→  entries: TBEntryUI[]
+   253→  entityConfig: EntityConfig
+   254→  generatedStatements: GeneratedStatements | null
+   255→  activeTab: TabType
+   256→  statementSubTab: StatementSubTab
+   257→  isLoading: boolean
+   258→  wizardStep: WizardStep
+   259→  supplementaryData: SupplementaryData | null
+   260→  auditLog: AuditLogEntry[]
+   261→  complianceData: ComplianceData | null
+   262→  analyticsData: AnalyticsData | null
+   263→  approvalWorkflow: ApprovalWorkflow | null
+   264→  versions: VersionEntry[]
+   265→  showAnalytics: boolean
+   266→  budgets: BudgetEntry[]
+   267→
+   268→  // New module data
+   269→  transactions: TransactionEntry[]
+   270→  cashbookEntries: CashbookEntryUI[]
+   271→  ledgerEntries: LedgerEntryUI[]
+   272→  votebookEntries: VotebookEntryUI[]
+   273→  abstractEntries: AbstractEntryUI[]
+   274→
+   275→  // Core actions
+   276→  setActiveTab: (tab: TabType) => void
+   277→  setStatementSubTab: (tab: StatementSubTab) => void
+   278→  setEntityConfig: (config: Partial<EntityConfig>) => void
+   279→  setEntries: (entries: TBEntryUI[]) => void
+   280→  updateEntry: (index: number, updates: Partial<TBEntryUI>) => void
+   281→  deleteEntry: (index: number) => void
+   282→  addEntry: () => void
+   283→  loadTemplate: () => void
+   284→  setWizardStep: (step: WizardStep) => void
+   285→  setShowAnalytics: (show: boolean) => void
+   286→  setSupplementaryData: (data: SupplementaryData | null) => void
+   287→
+   288→  fetchReports: () => Promise<void>
+   289→  createReport: () => Promise<void>
+   290→  loadReport: (id: string) => Promise<void>
+   291→  deleteReport: (id: string) => Promise<void>
+   292→  saveTrialBalance: () => Promise<void>
+   293→  generateStatements: () => Promise<void>
+   294→  fetchSupplementary: () => Promise<void>
+   295→  saveSupplementary: (data: Record<string, unknown>) => Promise<void>
+   296→  fetchAuditLog: () => Promise<void>
+   297→  fetchCompliance: () => Promise<void>
+   298→  fetchAnalytics: () => Promise<void>
+   299→  fetchApprovalWorkflow: () => Promise<void>
+   300→  advanceApproval: (userName: string) => Promise<void>
+   301→  createVersion: (label: string) => Promise<void>
+   302→  fetchVersions: () => Promise<void>
+   303→  autoBalance: () => Promise<void>
+   304→  clearTrialBalance: () => void
+   305→  uploadExcelFile: (file: File) => Promise<void>
+   306→  fetchBudgets: () => Promise<void>
+   307→  saveBudgets: (budgets: BudgetEntry[]) => Promise<void>
+   308→  importBudgetFromTB: () => void
+   309→  clearBudgets: () => void
+   310→
+   311→  // New module actions
+   312→  addTransaction: (entry: TransactionEntry) => void
+   313→  updateTransaction: (index: number, updates: Partial<TransactionEntry>) => void
+   314→  deleteTransaction: (index: number) => void
+   315→  postTransactionsToLedger: () => Promise<void>
+   316→  postTransactionsToCashbook: () => Promise<void>
+   317→  fetchTransactions: () => Promise<void>
+   318→  saveTransactions: () => Promise<void>
+   319→  clearTransactions: () => void
+   320→
+   321→  addCashbookEntry: (entry: CashbookEntryUI) => void
+   322→  updateCashbookEntry: (index: number, updates: Partial<CashbookEntryUI>) => void
+   323→  deleteCashbookEntry: (index: number) => void
+   324→  fetchCashbookEntries: () => Promise<void>
+   325→  saveCashbookEntries: () => Promise<void>
+   326→  clearCashbookEntries: () => void
+   327→
+   328→  addLedgerEntry: (entry: LedgerEntryUI) => void
+   329→  updateLedgerEntry: (index: number, updates: Partial<LedgerEntryUI>) => void
+   330→  deleteLedgerEntry: (index: number) => void
+   331→  fetchLedgerEntries: () => Promise<void>
+   332→  saveLedgerEntries: () => Promise<void>
+   333→  clearLedgerEntries: () => void
+   334→  generateTBFromLedger: () => void
+   335→
+   336→  addVotebookEntry: (entry: VotebookEntryUI) => void
+   337→  updateVotebookEntry: (index: number, updates: Partial<VotebookEntryUI>) => void
+   338→  deleteVotebookEntry: (index: number) => void
+   339→  fetchVotebookEntries: () => Promise<void>
+   340→  saveVotebookEntries: () => Promise<void>
+   341→  clearVotebookEntries: () => void
+   342→  recalculateVotebook: () => void
+   343→  importVotesFromBudget: () => void
+   344→
+   345→  addAbstractEntry: (entry: AbstractEntryUI) => void
+   346→  updateAbstractEntry: (index: number, updates: Partial<AbstractEntryUI>) => void
+   347→  deleteAbstractEntry: (index: number) => void
+   348→  fetchAbstractEntries: () => Promise<void>
+   349→  saveAbstractEntries: () => Promise<void>
+   350→  clearAbstractEntries: () => void
+   351→  generateAbstract: () => void
+   352→
+   353→  // Quick add transaction
+   354→  quickAddTransaction: (type: 'revenue' | 'expenditure', data: Partial<TransactionEntry>) => Promise<void>
+   355→}
+   356→
+   357→export interface BudgetEntry {
+   358→  id?: string
+   359→  _dbId?: string
+   360→  category: string
+   361→  categoryLabel: string
+   362→  lineItem: string
+   363→  initialBudget: number
+   364→  revisedBudget: number
+   365→  virementFrom: number
+   366→  virementTo: number
+   367→  actualAmount: number
+   368→  variance: number
+   369→  variancePercent: number
+   370→  sortOrder: number
+   371→}
+   372→
+   373→const DEFAULT_SUPPLEMENTARY: SupplementaryData = {
+   374→  advancesRecovered: 0, advancesRecoveredPrior: 0,
+   375→  depositsReceived: 0, depositsReceivedPrior: 0,
+   376→  transfersToTreasury: 0, transfersToTreasuryPrior: 0,
+   377→  revenueInKindTaxWaivers: 0, revenueInKindTaxWaiversPrior: 0,
+   378→  ppeOpeningCurrent: 0, ppeAdditionsCurrent: 0, ppeDisposalsCurrent: 0,
+   379→  ppeOpeningPrior: 0, ppeAdditionsPrior: 0, ppeDisposalsPrior: 0,
+   380→  depreciationRate: 0, depreciationMethod: 'straight-line',
+   381→  employeeCount: 0, salariesWages: 0, pensionContributions: 0,
+   382→  payrollTaxes: 0, otherEmployeeBenefits: 0,
+   383→  priorYearAdjustments: 0, revaluationReserves: 0, transfersToUCF: 0,
+   384→  accountingOfficer: '', chiefFinanceOfficer: '', internalAuditHead: '',
+   385→  signatoryDate: '', ipsasBasis: 'IPSAS Accrual Basis', accountingPolicies: '',
+   386→  exchangeRateUSD: 1, exchangeRateEUR: 1,
+   387→}
+   388→
+   389→export const useFinancialStore = create<FinancialStore>((set, get) => ({
+   390→  // ═══════════════════════════════════════════════════════════════════
+   391→  // INITIAL STATE
+   392→  // ═══════════════════════════════════════════════════════════════════
+   393→  reports: [],
+   394→  activeReportId: null,
+   395→  entries: [],
+   396→  entityConfig: {
+   397→    name: 'Government Entity',
+   398→    periodEnd: '2025-06-30',
+   399→    periodLabel: '30 June 2025',
+   400→    currency: 'Shs',
+   401→  },
+   402→  generatedStatements: null,
+   403→  activeTab: 'dashboard',
+   404→  statementSubTab: 'sfp',
+   405→  isLoading: false,
+   406→  wizardStep: 1,
+   407→  supplementaryData: null,
+   408→  auditLog: [],
+   409→  complianceData: null,
+   410→  analyticsData: null,
+   411→  approvalWorkflow: null,
+   412→  versions: [],
+   413→  showAnalytics: false,
+   414→  budgets: [],
+   415→  transactions: [],
+   416→  cashbookEntries: [],
+   417→  ledgerEntries: [],
+   418→  votebookEntries: [],
+   419→  abstractEntries: [],
+   420→
+   421→  // ═══════════════════════════════════════════════════════════════════
+   422→  // CORE SETTERS
+   423→  // ═══════════════════════════════════════════════════════════════════
+   424→  setActiveTab: (tab) => set({ activeTab: tab }),
+   425→  setStatementSubTab: (tab) => set({ statementSubTab: tab }),
+   426→  setEntityConfig: (config) =>
+   427→    set((state) => ({ entityConfig: { ...state.entityConfig, ...config } })),
+   428→  setEntries: (entries) => set({ entries }),
+   429→  setWizardStep: (step) => set({ wizardStep: step }),
+   430→  setShowAnalytics: (show) => set({ showAnalytics: show }),
+   431→  setSupplementaryData: (data) => set({ supplementaryData: data }),
+   432→
+   433→  updateEntry: (index, updates) =>
+   434→    set((state) => {
+   435→      const newEntries = [...state.entries]
+   436→      newEntries[index] = { ...newEntries[index], ...updates }
+   437→      return { entries: newEntries }
+   438→    }),
+   439→
+   440→  deleteEntry: (index) =>
+   441→    set((state) => ({
+   442→      entries: state.entries.filter((_, i) => i !== index),
+   443→    })),
+   444→
+   445→  addEntry: () =>
+   446→    set((state) => ({
+   447→      entries: [
+   448→        ...state.entries,
+   449→        {
+   450→          accountCode: '', accountName: '', classification: 'revenue-non-exchange',
+   451→          category: '', noteRef: '', debitCurrent: 0, creditCurrent: 0,
+   452→          debitPrior: 0, creditPrior: 0, budgetInitial: 0, budgetAdjusted: 0,
+   453→        },
+   454→      ],
+   455→    })),
+   456→
+   457→  loadTemplate: () => {
+   458→    const template = DEFAULT_TB_TEMPLATE.map((item) => ({
+   459→      ...item, noteRef: NOTE_REFS[item.category] || '',
+   460→      _id: Math.random().toString(36).substring(2, 9),
+   461→    }))
+   462→    set((state) => ({
+   463→      entries: state.entries.length > 0 ? [...state.entries, ...template] : template,
+   464→    }))
+   465→  },
+   466→
+   467→  // ═══════════════════════════════════════════════════════════════════
+   468→  // REPORTS
+   469→  // ═══════════════════════════════════════════════════════════════════
+   470→  fetchReports: async () => {
+   471→    try {
+   472→      const res = await fetch('/api/reports')
+   473→      if (!res.ok) throw new Error('Failed to fetch reports')
+   474→      const data = await res.json()
+   475→      set({ reports: data })
+   476→    } catch { /* silent */ }
+   477→  },
+   478→
+   479→  createReport: async () => {
+   480→    const { entityConfig } = get()
+   481→    set({ isLoading: true })
+   482→    try {
+   483→      const res = await fetch('/api/reports', {
+   484→        method: 'POST', headers: { 'Content-Type': 'application/json' },
+   485→        body: JSON.stringify({
+   486→          entityName: entityConfig.name, periodEnd: entityConfig.periodEnd,
+   487→          periodLabel: entityConfig.periodLabel, currency: entityConfig.currency,
+   488→        }),
+   489→      })
+   490→      if (!res.ok) throw new Error('Failed to create report')
+   491→      const report = await res.json()
+   492→      set((state) => ({
+   493→        reports: [report, ...state.reports], activeReportId: report.id,
+   494→        wizardStep: 1, entries: [], generatedStatements: null,
+   495→        supplementaryData: null, complianceData: null, analyticsData: null,
+   496→        approvalWorkflow: null, auditLog: [], versions: [],
+   497→        transactions: [], cashbookEntries: [], ledgerEntries: [],
+   498→        votebookEntries: [], abstractEntries: [],
+   499→        isLoading: false,
+   500→      }))
+   501→    } catch {
+   502→      set({ isLoading: false })
+   503→      throw new Error('Failed to create report')
+   504→    }
+   505→  },
+   506→
+   507→  loadReport: async (id) => {
+   508→    set({ isLoading: true })
+   509→    try {
+   510→      const res = await fetch(`/api/reports/${id}`)
+   511→      if (!res.ok) throw new Error('Report not found')
+   512→      const report = await res.json()
+   513→      const entries: TBEntryUI[] = report.entries.map((e: Record<string, unknown>) => ({
+   514→        accountCode: e.accountCode, accountName: e.accountName,
+   515→        classification: e.classification, category: e.category, noteRef: e.noteRef,
+   516→        debitCurrent: e.debitCurrent, creditCurrent: e.creditCurrent,
+   517→        debitPrior: e.debitPrior, creditPrior: e.creditPrior,
+   518→        budgetInitial: e.budgetInitial, budgetAdjusted: e.budgetAdjusted, _dbId: e.id,
+   519→      }))
+   520→      set({
+   521→        activeReportId: id, entries,
+   522→        entityConfig: {
+   523→          name: report.entityName, periodEnd: report.periodEnd,
+   524→          periodLabel: report.periodLabel, currency: report.currency,
+   525→        },
+   526→        wizardStep: entries.length > 0 ? 7 : 1,
+   527→        generatedStatements: null, supplementaryData: null,
+   528→        complianceData: null, analyticsData: null, approvalWorkflow: null,
+   529→        auditLog: [], versions: [],
+   530→        transactions: [], cashbookEntries: [], ledgerEntries: [],
+   531→        votebookEntries: [], abstractEntries: [],
+   532→        isLoading: false,
+   533→      })
+   534→    } catch {
+   535→      set({ isLoading: false })
+   536→      throw new Error('Failed to load report')
+   537→    }
+   538→  },
+   539→
+   540→  deleteReport: async (id) => {
+   541→    try {
+   542→      const res = await fetch(`/api/reports/${id}`, { method: 'DELETE' })
+   543→      if (!res.ok) throw new Error('Failed to delete')
+   544→      set((state) => ({
+   545→        reports: state.reports.filter((r) => r.id !== id),
+   546→        activeReportId: state.activeReportId === id ? null : state.activeReportId,
+   547→        entries: state.activeReportId === id ? [] : state.entries,
+   548→        generatedStatements: state.activeReportId === id ? null : state.generatedStatements,
+   549→        wizardStep: state.activeReportId === id ? 1 : state.wizardStep,
+   550→        supplementaryData: state.activeReportId === id ? null : state.supplementaryData,
+   551→      }))
+   552→    } catch { throw new Error('Failed to delete report') }
+   553→  },
+   554→
+   555→  saveTrialBalance: async () => {
+   556→    const { activeReportId, entries, entityConfig } = get()
+   557→    if (!activeReportId) throw new Error('No active report')
+   558→    set({ isLoading: true })
+   559→    try {
+   560→      await fetch(`/api/reports/${activeReportId}`, {
+   561→        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+   562→        body: JSON.stringify({
+   563→          entityName: entityConfig.name, periodEnd: entityConfig.periodEnd,
+   564→          periodLabel: entityConfig.periodLabel, currency: entityConfig.currency,
+   565→        }),
+   566→      })
+   567→      const cleanEntries = entries.map(({ _id, _dbId, ...rest }) => rest)
+   568→      const res = await fetch(`/api/reports/${activeReportId}/trial-balance`, {
+   569→        method: 'POST', headers: { 'Content-Type': 'application/json' },
+   570→        body: JSON.stringify({ entries: cleanEntries }),
+   571→      })
+   572→      if (!res.ok) throw new Error('Failed to save')
+   573→      await get().fetchReports()
+   574→      set({ isLoading: false })
+   575→    } catch {
+   576→      set({ isLoading: false })
+   577→      throw new Error('Failed to save trial balance')
+   578→    }
+   579→  },
+   580→
+   581→  generateStatements: async () => {
+   582→    const { activeReportId } = get()
+   583→    if (!activeReportId) throw new Error('No active report')
+   584→    set({ isLoading: true })
+   585→    try {
+   586→      const res = await fetch(`/api/reports/${activeReportId}/generate`)
+   587→      if (!res.ok) throw new Error('Failed to generate')
+   588→      const data = await res.json()
+   589→      set({ generatedStatements: data.statements, statementSubTab: 'sfp', isLoading: false })
+   590→      await get().fetchReports()
+   591→    } catch {
+   592→      set({ isLoading: false })
+   593→      throw new Error('Failed to generate statements')
+   594→    }
+   595→  },
+   596→
+   597→  // ═══════════════════════════════════════════════════════════════════
+   598→  // SUPPLEMENTARY / AUDIT / COMPLIANCE / APPROVAL / VERSIONS
+   599→  // ═══════════════════════════════════════════════════════════════════
+   600→  fetchSupplementary: async () => {
+   601→    const { activeReportId } = get()
+   602→    if (!activeReportId) return
+   603→    try {
+   604→      const res = await fetch(`/api/reports/${activeReportId}/supplementary`)
+   605→      if (!res.ok) return
+   606→      const data = await res.json()
+   607→      set({ supplementaryData: { ...DEFAULT_SUPPLEMENTARY, ...data } as SupplementaryData })
+   608→    } catch { /* silent */ }
+   609→  },
+   610→
+   611→  saveSupplementary: async (data) => {
+   612→    const { activeReportId } = get()
+   613→    if (!activeReportId) throw new Error('No active report')
+   614→    set({ isLoading: true })
+   615→    try {
+   616→      const res = await fetch(`/api/reports/${activeReportId}/supplementary`, {
+   617→        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+   618→        body: JSON.stringify(data),
+   619→      })
+   620→      if (!res.ok) throw new Error('Failed to save')
+   621→      const result = await res.json()
+   622→      set({ supplementaryData: { ...DEFAULT_SUPPLEMENTARY, ...result.supplementary } as SupplementaryData, isLoading: false })
+   623→    } catch {
+   624→      set({ isLoading: false })
+   625→      throw new Error('Failed to save supplementary data')
+   626→    }
+   627→  },
+   628→
+   629→  fetchAuditLog: async () => {
+   630→    const { activeReportId } = get()
+   631→    if (!activeReportId) return
+   632→    try {
+   633→      const res = await fetch(`/api/reports/${activeReportId}/audit`)
+   634→      if (!res.ok) return
+   635→      const data = await res.json()
+   636→      set({ auditLog: data })
+   637→    } catch { /* silent */ }
+   638→  },
+   639→
+   640→  fetchCompliance: async () => {
+   641→    const { activeReportId } = get()
+   642→    if (!activeReportId) return
+   643→    set({ isLoading: true })
+   644→    try {
+   645→      const res = await fetch(`/api/reports/${activeReportId}/compliance`)
+   646→      if (!res.ok) throw new Error('Failed to fetch compliance')
+   647→      const data = await res.json()
+   648→      set({ complianceData: data, isLoading: false })
+   649→    } catch { set({ isLoading: false }) }
+   650→  },
+   651→
+   652→  fetchAnalytics: async () => {
+   653→    const { activeReportId } = get()
+   654→    if (!activeReportId) return
+   655→    set({ isLoading: true })
+   656→    try {
+   657→      const res = await fetch(`/api/reports/${activeReportId}/analytics`)
+   658→      if (!res.ok) throw new Error('Failed to fetch analytics')
+   659→      const data = await res.json()
+   660→      set({ analyticsData: data, isLoading: false })
+   661→    } catch { set({ isLoading: false }) }
+   662→  },
+   663→
+   664→  fetchApprovalWorkflow: async () => {
+   665→    const { activeReportId } = get()
+   666→    if (!activeReportId) return
+   667→    try {
+   668→      const res = await fetch(`/api/reports/${activeReportId}/approval`)
+   669→      if (!res.ok) return
+   670→      const data = await res.json()
+   671→      set({ approvalWorkflow: data })
+   672→    } catch { /* silent */ }
+   673→  },
+   674→
+   675→  advanceApproval: async (userName) => {
+   676→    const { activeReportId } = get()
+   677→    if (!activeReportId) throw new Error('No active report')
+   678→    set({ isLoading: true })
+   679→    try {
+   680→      const res = await fetch(`/api/reports/${activeReportId}/approval`, {
+   681→        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+   682→        body: JSON.stringify({ userName }),
+   683→      })
+   684→      if (!res.ok) throw new Error('Failed to advance approval')
+   685→      const data = await res.json()
+   686→      set({ approvalWorkflow: data.workflow, isLoading: false })
+   687→      await get().fetchReports()
+   688→    } catch {
+   689→      set({ isLoading: false })
+   690→      throw new Error('Failed to advance approval')
+   691→    }
+   692→  },
+   693→
+   694→  createVersion: async (label) => {
+   695→    const { activeReportId } = get()
+   696→    if (!activeReportId) throw new Error('No active report')
+   697→    set({ isLoading: true })
+   698→    try {
+   699→      const res = await fetch(`/api/reports/${activeReportId}/versions`, {
+   700→        method: 'POST', headers: { 'Content-Type': 'application/json' },
+   701→        body: JSON.stringify({ versionLabel: label }),
+   702→      })
+   703→      if (!res.ok) throw new Error('Failed to create version')
+   704→      set({ isLoading: false })
+   705→      await get().fetchVersions()
+   706→    } catch {
+   707→      set({ isLoading: false })
+   708→      throw new Error('Failed to create version')
+   709→    }
+   710→  },
+   711→
+   712→  fetchVersions: async () => {
+   713→    const { activeReportId } = get()
+   714→    if (!activeReportId) return
+   715→    try {
+   716→      const res = await fetch(`/api/reports/${activeReportId}/versions`)
+   717→      if (!res.ok) return
+   718→      const data = await res.json()
+   719→      set({ versions: data })
+   720→    } catch { /* silent */ }
+   721→  },
+   722→
+   723→  autoBalance: async () => {
+   724→    const { activeReportId } = get()
+   725→    if (!activeReportId) throw new Error('No active report')
+   726→    set({ isLoading: true })
+   727→    try {
+   728→      const res = await fetch(`/api/reports/${activeReportId}/auto-balance`, { method: 'POST' })
+   729→      if (!res.ok) throw new Error('Failed to auto-balance')
+   730→      const data = await res.json()
+   731→      await get().loadReport(activeReportId)
+   732→      return data
+   733→    } catch {
+   734→      set({ isLoading: false })
+   735→      throw new Error('Failed to auto-balance')
+   736→    }
+   737→  },
+   738→
+   739→  clearTrialBalance: () => {
+   740→    set({ entries: [], generatedStatements: null })
+   741→    toast.success('Trial balance cleared')
+   742→  },
+   743→
+   744→  uploadExcelFile: async (file: File) => {
+   745→    set({ isLoading: true })
+   746→    try {
+   747→      const XLSX = await import('xlsx')
+   748→      const buffer = await file.arrayBuffer()
+   749→      const workbook = XLSX.read(buffer, { type: 'array' })
+   750→      const sheetName = workbook.SheetNames[0]
+   751→      if (!sheetName) throw new Error('No sheets found in file')
+   752→      const sheet = workbook.Sheets[sheetName]
+   753→      const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: '' })
+   754→      const parsedEntries: TBEntryUI[] = []
+   755→      for (let i = 0; i < rows.length; i++) {
+   756→        const row = rows[i]
+   757→        const values = Object.values(row)
+   758→        if (values.every(v => v === '' || v === 0 || v === undefined || v === null)) continue
+   759→        const code = String(row['Account Code'] ?? row['Code'] ?? row['Acct Code'] ?? values[0] ?? '').trim()
+   760→        const name = String(row['Account Name'] ?? row['Description'] ?? row['Account'] ?? values[1] ?? '').trim()
+   761→        if (!code && !name) continue
+   762→        const classification = String(row['Classification'] ?? row['Type'] ?? values[2] ?? 'revenue-non-exchange').trim()
+   763→        const category = String(row['Category'] ?? row['Line Item'] ?? values[3] ?? '').trim()
+   764→        const noteRef = String(row['Note Ref'] ?? row['Note'] ?? values[4] ?? '').trim()
+   765→        const parseNum = (v: unknown): number => {
+   766→          if (typeof v === 'number') return v
+   767→          if (typeof v === 'string') { const c = v.replace(/[^\d.-]/g, ''); const n = parseFloat(c); return isNaN(n) ? 0 : n }
+   768→          return 0
+   769→        }
+   770→        parsedEntries.push({
+   771→          accountCode: code, accountName: name, classification, category, noteRef,
+   772→          debitCurrent: parseNum(row['Dr Current'] ?? row['Debit Current'] ?? row['Debit'] ?? values[5]),
+   773→          creditCurrent: parseNum(row['Cr Current'] ?? row['Credit Current'] ?? row['Credit'] ?? values[6]),
+   774→          debitPrior: parseNum(row['Dr Prior'] ?? row['Debit Prior'] ?? values[7]),
+   775→          creditPrior: parseNum(row['Cr Prior'] ?? row['Credit Prior'] ?? values[8]),
+   776→          budgetInitial: parseNum(row['Budget Initial'] ?? row['Initial Budget'] ?? values[9]),
+   777→          budgetAdjusted: parseNum(row['Budget Adj'] ?? row['Adjusted Budget'] ?? values[10]),
+   778→          _id: Math.random().toString(36).substring(2, 9),
+   779→        })
+   780→      }
+   781→      if (parsedEntries.length === 0) throw new Error('No valid entries found in Excel file')
+   782→      set({ entries: parsedEntries, isLoading: false })
+   783→      toast.success(`Imported ${parsedEntries.length} entries from Excel`)
+   784→    } catch (err) {
+   785→      set({ isLoading: false })
+   786→      const msg = err instanceof Error ? err.message : 'Failed to parse Excel file'
+   787→      toast.error(msg)
+   788→      throw new Error(msg)
+   789→    }
+   790→  },
+   791→
+   792→  // ═══════════════════════════════════════════════════════════════════
+   793→  // BUDGETS
+   794→  // ═══════════════════════════════════════════════════════════════════
+   795→  fetchBudgets: async () => {
+   796→    const { activeReportId } = get()
+   797→    if (!activeReportId) return
+   798→    try {
+   799→      const res = await fetch(`/api/reports/${activeReportId}/budgets`)
+   800→      if (!res.ok) return
+   801→      const data = await res.json()
+   802→      set({ budgets: data.map((b: Record<string, unknown>) => ({ ...b, _dbId: b.id })) })
+   803→    } catch { /* silent */ }
+   804→  },
+   805→
+   806→  saveBudgets: async (budgets) => {
+   807→    const { activeReportId } = get()
+   808→    if (!activeReportId) throw new Error('No active report')
+   809→    set({ isLoading: true })
+   810→    try {
+   811→      const cleanBudgets = budgets.map(({ id, _dbId, ...rest }) => ({ ...rest, id: _dbId || undefined }))
+   812→      const res = await fetch(`/api/reports/${activeReportId}/budgets`, {
+   813→        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+   814→        body: JSON.stringify({ budgets: cleanBudgets }),
+   815→      })
+   816→      if (!res.ok) throw new Error('Failed to save budgets')
+   817→      const data = await res.json()
+   818→      set({ budgets: data.map((b: Record<string, unknown>) => ({ ...b, _dbId: b.id })), isLoading: false })
+   819→      toast.success('Budgets saved successfully')
+   820→    } catch {
+   821→      set({ isLoading: false })
+   822→      throw new Error('Failed to save budgets')
+   823→    }
+   824→  },
+   825→
+   826→  importBudgetFromTB: () => {
+   827→    const { entries } = get()
+   828→    const allCats = [...REVENUE_CATEGORIES, ...EXPENSE_CATEGORIES]
+   829→    const budgetEntries: BudgetEntry[] = []
+   830→    let order = 0
+   831→    for (const cat of allCats) {
+   832→      const catEntries = entries.filter(e => e.category === cat.key)
+   833→      if (catEntries.length === 0) continue
+   834→      const initial = catEntries.reduce((s, e) => s + (e.budgetInitial || 0), 0)
+   835→      const adjusted = catEntries.reduce((s, e) => s + (e.budgetAdjusted || 0), 0)
+   836→      const revised = initial + adjusted
+   837→      const actual = catEntries.reduce((s, e) => {
+   838→        const cls = e.classification
+   839→        return s + (cls === 'revenue-non-exchange' || cls === 'revenue-exchange' ? e.creditCurrent : e.debitCurrent)
+   840→      }, 0)
+   841→      const variance = revised - actual
+   842→      const variancePercent = revised !== 0 ? (variance / revised) * 100 : 0
+   843→      budgetEntries.push({
+   844→        category: cat.key, categoryLabel: cat.label, lineItem: '',
+   845→        initialBudget: initial, revisedBudget: revised, virementFrom: 0, virementTo: adjusted,
+   846→        actualAmount: actual, variance, variancePercent, sortOrder: order++,
+   847→      })
+   848→    }
+   849→    set({ budgets: budgetEntries })
+   850→    toast.success(`Imported ${budgetEntries.length} budget items from trial balance`)
+   851→  },
+   852→
+   853→  clearBudgets: () => {
+   854→    set({ budgets: [] })
+   855→    toast.success('Budget data cleared')
+   856→  },
+   857→
+   858→  // ═══════════════════════════════════════════════════════════════════
+   859→  // TRANSACTIONS (Revenue & Expenditure Capture)
+   860→  // ═══════════════════════════════════════════════════════════════════
+   861→  addTransaction: (entry) => set((state) => ({
+   862→    transactions: [...state.transactions, { ...entry, _id: Math.random().toString(36).substring(2, 9) }],
+   863→  })),
+   864→  updateTransaction: (index, updates) => set((state) => {
+   865→    const t = [...state.transactions]; t[index] = { ...t[index], ...updates }; return { transactions: t }
+   866→  }),
+   867→  deleteTransaction: (index) => set((state) => ({
+   868→    transactions: state.transactions.filter((_, i) => i !== index),
+   869→  })),
+   870→  clearTransactions: () => set({ transactions: [] }),
+   871→
+   872→  fetchTransactions: async () => {
+   873→    const { activeReportId } = get()
+   874→    if (!activeReportId) return
+   875→    try {
+   876→      const res = await fetch(`/api/reports/${activeReportId}/transactions`)
+   877→      if (!res.ok) return
+   878→      const data = await res.json()
+   879→      set({ transactions: data.map((t: Record<string, unknown>) => ({ ...t, _dbId: t.id })) })
+   880→    } catch { /* silent */ }
+   881→  },
+   882→
+   883→  saveTransactions: async () => {
+   884→    const { activeReportId, transactions } = get()
+   885→    if (!activeReportId) throw new Error('No active report')
+   886→    set({ isLoading: true })
+   887→    try {
+   888→      const clean = transactions.map(({ _id, _dbId, ...rest }) => ({ ...rest, id: _dbId || undefined }))
+   889→      const res = await fetch(`/api/reports/${activeReportId}/transactions`, {
+   890→        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+   891→        body: JSON.stringify({ transactions: clean }),
+   892→      })
+   893→      if (!res.ok) throw new Error('Failed to save')
+   894→      const data = await res.json()
+   895→      set({ transactions: data.map((t: Record<string, unknown>) => ({ ...t, _dbId: t.id })), isLoading: false })
+   896→      toast.success('Transactions saved')
+   897→    } catch {
+   898→      set({ isLoading: false })
+   899→      throw new Error('Failed to save transactions')
+   900→    }
+   901→  },
+   902→
+   903→  postTransactionsToLedger: async () => {
+   904→    const { activeReportId, transactions } = get()
+   905→    if (!activeReportId) return
+   906→    set({ isLoading: true })
+   907→    try {
+   908→      const unposted = transactions.filter(t => !t.postedToLedger)
+   909→      if (unposted.length === 0) { toast.info('All transactions already posted'); set({ isLoading: false }); return }
+   910→      const ledgerEntries: LedgerEntryUI[] = unposted.map(t => {
+   911→        const isRevenue = t.type === 'revenue'
+   912→        return {
+   913→          entryDate: t.transactionDate,
+   914→          accountCode: t.accountCode,
+   915→          accountName: t.accountName,
+   916→          classification: t.classification,
+   917→          category: t.category,
+   918→          debit: isRevenue ? 0 : t.netAmount,
+   919→          credit: isRevenue ? t.netAmount : 0,
+   920→          runningBalance: 0,
+   921→          reference: t.reference || t.voucherNo || t.receiptNo,
+   922→          description: t.description,
+   923→          journalType: 'general' as const,
+   924→          transactionId: t._id,
+   925→          _id: Math.random().toString(36).substring(2, 9),
+   926→        }
+   927→      })
+   928→      // Also create double-entry counterpart (cash/bank or receivable/payable)
+   929→      const counterpartEntries: LedgerEntryUI[] = unposted.map(t => {
+   930→        const isRevenue = t.type === 'revenue'
+   931→        return {
+   932→          entryDate: t.transactionDate,
+   933→          accountCode: isRevenue ? '1001' : '2001',
+   934→          accountName: isRevenue ? 'Cash / Bank' : 'Accounts Payable',
+   935→          classification: isRevenue ? 'asset-current' : 'liability-current',
+   936→          category: isRevenue ? 'cash' : 'trade-payables',
+   937→          debit: isRevenue ? t.netAmount : 0,
+   938→          credit: isRevenue ? 0 : t.netAmount,
+   939→          runningBalance: 0,
+   940→          reference: t.reference || t.voucherNo || t.receiptNo,
+   941→          description: `Contra: ${t.description}`,
+   942→          journalType: 'general' as const,
+   943→          _id: Math.random().toString(36).substring(2, 9),
+   944→        }
+   945→      })
+   946→      const allNew = [...ledgerEntries, ...counterpartEntries]
+   947→      set((state) => {
+   948→        const updatedTx = state.transactions.map(t =>
+   949→          t.postedToLedger ? t : { ...t, postedToLedger: true }
+   950→        )
+   951→        return { ledgerEntries: [...state.ledgerEntries, ...allNew], transactions: updatedTx, isLoading: false }
+   952→      })
+   953→      toast.success(`Posted ${unposted.length} transactions to ledger (${allNew.length} entries)`) 
+   954→    } catch {
+   955→      set({ isLoading: false })
+   956→      toast.error('Failed to post transactions')
+   957→    }
+   958→  },
+   959→
+   960→  postTransactionsToCashbook: async () => {
+   961→    const { activeReportId, transactions } = get()
+   962→    if (!activeReportId) return
+   963→    set({ isLoading: true })
+   964→    try {
+   965→      const unposted = transactions.filter(t => !t.postedToCashbook)
+   966→      if (unposted.length === 0) { toast.info('All transactions already posted to cashbook'); set({ isLoading: false }); return }
+   967→      const newEntries: CashbookEntryUI[] = unposted.map(t => {
+   968→        const isRevenue = t.type === 'revenue'
+   969→        return {
+   970→          entryDate: t.transactionDate,
+   971→          type: isRevenue ? 'receipt' as const : 'payment' as const,
+   972→          reference: t.reference || t.voucherNo || t.receiptNo,
+   973→          description: t.description,
+   974→          accountCode: t.accountCode,
+   975→          accountName: t.accountName,
+   976→          debitAmount: isRevenue ? t.netAmount : 0,
+   977→          creditAmount: isRevenue ? 0 : t.netAmount,
+   978→          balance: 0,
+   979→          bankAccount: '',
+   980→          chequeNo: '',
+   981→          payeePayer: t.payeePayer,
+   982→          transactionId: t._id,
+   983→          _id: Math.random().toString(36).substring(2, 9),
+   984→        }
+   985→      })
+   986→      set((state) => {
+   987→        const updatedTx = state.transactions.map(t =>
+   988→          t.postedToCashbook ? t : { ...t, postedToCashbook: true }
+   989→        )
+   990→        return { cashbookEntries: [...state.cashbookEntries, ...newEntries], transactions: updatedTx, isLoading: false }
+   991→      })
+   992→      toast.success(`Posted ${unposted.length} transactions to cashbook`)
+   993→    } catch {
+   994→      set({ isLoading: false })
+   995→      toast.error('Failed to post to cashbook')
+   996→    }
+   997→  },
+   998→
+   999→  quickAddTransaction: async (type, data) => {
+  1000→    const { entityConfig } = get()
+  1001→    const today = new Date().toISOString().split('T')[0]
+  1002→    const entry: TransactionEntry = {
+  1003→      _id: Math.random().toString(36).substring(2, 9),
+  1004→      transactionDate: data.transactionDate || today,
+  1005→      type,
+  1006→      reference: data.reference || '',
+  1007→      description: data.description || '',
+  1008→      accountCode: data.accountCode || '',
+  1009→      accountName: data.accountName || '',
+  1010→      classification: data.classification || (type === 'revenue' ? 'revenue-non-exchange' : 'expense'),
+  1011→      category: data.category || '',
+  1012→      amount: data.amount || 0,
+  1013→      taxAmount: data.taxAmount || 0,
+  1014→      netAmount: (data.amount || 0) - (data.taxAmount || 0),
+  1015→      payeePayer: data.payeePayer || '',
+  1016→      voucherNo: data.voucherNo || '',
+  1017→      invoiceNo: data.invoiceNo || '',
+  1018→      receiptNo: data.receiptNo || '',
+  1019→      fundSource: data.fundSource || '',
+  1020→      postedToLedger: false,
+  1021→      postedToCashbook: false,
+  1022→    }
+  1023→    set((state) => ({ transactions: [...state.transactions, entry] }))
+  1024→    toast.success(`${type === 'revenue' ? 'Revenue' : 'Expenditure'} recorded`) 
+  1025→    return entry
+  1026→  },
+  1027→
+  1028→  // ═══════════════════════════════════════════════════════════════════
+  1029→  // CASHBOOK
+  1030→  // ═══════════════════════════════════════════════════════════════════
+  1031→  addCashbookEntry: (entry) => set((state) => ({
+  1032→    cashbookEntries: [...state.cashbookEntries, { ...entry, _id: Math.random().toString(36).substring(2, 9) }],
+  1033→  })),
+  1034→  updateCashbookEntry: (index, updates) => set((state) => {
+  1035→    const e = [...state.cashbookEntries]; e[index] = { ...e[index], ...updates }; return { cashbookEntries: e }
+  1036→  }),
+  1037→  deleteCashbookEntry: (index) => set((state) => ({
+  1038→    cashbookEntries: state.cashbookEntries.filter((_, i) => i !== index),
+  1039→  })),
+  1040→  clearCashbookEntries: () => set({ cashbookEntries: [] }),
+  1041→
+  1042→  fetchCashbookEntries: async () => {
+  1043→    const { activeReportId } = get()
+  1044→    if (!activeReportId) return
+  1045→    try {
+  1046→      const res = await fetch(`/api/reports/${activeReportId}/cashbook`)
+  1047→      if (!res.ok) return
+  1048→      const data = await res.json()
+  1049→      set({ cashbookEntries: data.map((e: Record<string, unknown>) => ({ ...e, _dbId: e.id })) })
+  1050→    } catch { /* silent */ }
+  1051→  },
+  1052→
+  1053→  saveCashbookEntries: async () => {
+  1054→    const { activeReportId, cashbookEntries } = get()
+  1055→    if (!activeReportId) throw new Error('No active report')
+  1056→    set({ isLoading: true })
+  1057→    try {
+  1058→      const clean = cashbookEntries.map(({ _id, _dbId, ...rest }) => ({ ...rest, id: _dbId || undefined }))
+  1059→      const res = await fetch(`/api/reports/${activeReportId}/cashbook`, {
+  1060→        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+  1061→        body: JSON.stringify({ entries: clean }),
+  1062→      })
+  1063→      if (!res.ok) throw new Error('Failed to save')
+  1064→      const data = await res.json()
+  1065→      set({ cashbookEntries: data.map((e: Record<string, unknown>) => ({ ...e, _dbId: e.id })), isLoading: false })
+  1066→      toast.success('Cashbook entries saved')
+  1067→    } catch {
+  1068→      set({ isLoading: false })
+  1069→      throw new Error('Failed to save cashbook entries')
+  1070→    }
+  1071→  },
+  1072→
+  1073→  // ═══════════════════════════════════════════════════════════════════
+  1074→  // LEDGER
+  1075→  // ═══════════════════════════════════════════════════════════════════
+  1076→  addLedgerEntry: (entry) => set((state) => ({
+  1077→    ledgerEntries: [...state.ledgerEntries, { ...entry, _id: Math.random().toString(36).substring(2, 9) }],
+  1078→  })),
+  1079→  updateLedgerEntry: (index, updates) => set((state) => {
+  1080→    const e = [...state.ledgerEntries]; e[index] = { ...e[index], ...updates }; return { ledgerEntries: e }
+  1081→  }),
+  1082→  deleteLedgerEntry: (index) => set((state) => ({
+  1083→    ledgerEntries: state.ledgerEntries.filter((_, i) => i !== index),
+  1084→  })),
+  1085→  clearLedgerEntries: () => set({ ledgerEntries: [] }),
+  1086→
+  1087→  fetchLedgerEntries: async () => {
+  1088→    const { activeReportId } = get()
+  1089→    if (!activeReportId) return
+  1090→    try {
+  1091→      const res = await fetch(`/api/reports/${activeReportId}/ledger`)
+  1092→      if (!res.ok) return
+  1093→      const data = await res.json()
+  1094→      set({ ledgerEntries: data.map((e: Record<string, unknown>) => ({ ...e, _dbId: e.id })) })
+  1095→    } catch { /* silent */ }
+  1096→  },
+  1097→
+  1098→  saveLedgerEntries: async () => {
+  1099→    const { activeReportId, ledgerEntries } = get()
+  1100→    if (!activeReportId) throw new Error('No active report')
+  1101→    set({ isLoading: true })
+  1102→    try {
+  1103→      const clean = ledgerEntries.map(({ _id, _dbId, ...rest }) => ({ ...rest, id: _dbId || undefined }))
+  1104→      const res = await fetch(`/api/reports/${activeReportId}/ledger`, {
+  1105→        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+  1106→        body: JSON.stringify({ entries: clean }),
+  1107→      })
+  1108→      if (!res.ok) throw new Error('Failed to save')
+  1109→      const data = await res.json()
+  1110→      set({ ledgerEntries: data.map((e: Record<string, unknown>) => ({ ...e, _dbId: e.id })), isLoading: false })
+  1111→      toast.success('Ledger entries saved')
+  1112→    } catch {
+  1113→      set({ isLoading: false })
+  1114→      throw new Error('Failed to save ledger entries')
+  1115→    }
+  1116→  },
+  1117→
+  1118→  generateTBFromLedger: () => {
+  1119→    const { ledgerEntries } = get()
+  1120→    const accountMap = new Map<string, { name: string; classification: string; category: string; debitCurrent: number; creditCurrent: number }>()
+  1121→    for (const e of ledgerEntries) {
+  1122→      if (!e.accountCode) continue
+  1123→      const existing = accountMap.get(e.accountCode) || { name: e.accountName, classification: e.classification, category: e.category, debitCurrent: 0, creditCurrent: 0 }
+  1124→      existing.debitCurrent += e.debit || 0
+  1125→      existing.creditCurrent += e.credit || 0
+  1126→      accountMap.set(e.accountCode, existing)
+  1127→    }
+  1128→    const entries: TBEntryUI[] = Array.from(accountMap.entries()).map(([code, data]) => ({
+  1129→      accountCode: code, accountName: data.name, classification: data.classification,
+  1130→      category: data.category, noteRef: '', debitCurrent: data.debitCurrent,
+  1131→      creditCurrent: data.creditCurrent, debitPrior: 0, creditPrior: 0,
+  1132→      budgetInitial: 0, budgetAdjusted: 0, _id: Math.random().toString(36).substring(2, 9),
+  1133→    }))
+  1134→    set({ entries })
+  1135→    toast.success(`Generated ${entries.length} TB entries from ${ledgerEntries.length} ledger entries`)
+  1136→  },
+  1137→
+  1138→  // ═══════════════════════════════════════════════════════════════════
+  1139→  // VOTEBOOK
+  1140→  // ═══════════════════════════════════════════════════════════════════
+  1141→  addVotebookEntry: (entry) => set((state) => ({
+  1142→    votebookEntries: [...state.votebookEntries, { ...entry, _id: Math.random().toString(36).substring(2, 9) }],
+  1143→  })),
+  1144→  updateVotebookEntry: (index, updates) => set((state) => {
+  1145→    const e = [...state.votebookEntries]; e[index] = { ...e[index], ...updates }; return { votebookEntries: e }
+  1146→  }),
+  1147→  deleteVotebookEntry: (index) => set((state) => ({
+  1148→    votebookEntries: state.votebookEntries.filter((_, i) => i !== index),
+  1149→  })),
+  1150→  clearVotebookEntries: () => set({ votebookEntries: [] }),
+  1151→
+  1152→  fetchVotebookEntries: async () => {
+  1153→    const { activeReportId } = get()
+  1154→    if (!activeReportId) return
+  1155→    try {
+  1156→      const res = await fetch(`/api/reports/${activeReportId}/votebook`)
+  1157→      if (!res.ok) return
+  1158→      const data = await res.json()
+  1159→      set({ votebookEntries: data.map((e: Record<string, unknown>) => ({ ...e, _dbId: e.id })) })
+  1160→    } catch { /* silent */ }
+  1161→  },
+  1162→
+  1163→  saveVotebookEntries: async () => {
+  1164→    const { activeReportId, votebookEntries } = get()
+  1165→    if (!activeReportId) throw new Error('No active report')
+  1166→    set({ isLoading: true })
+  1167→    try {
+  1168→      const clean = votebookEntries.map(({ _id, _dbId, ...rest }) => ({ ...rest, id: _dbId || undefined }))
+  1169→      const res = await fetch(`/api/reports/${activeReportId}/votebook`, {
+  1170→        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+  1171→        body: JSON.stringify({ entries: clean }),
+  1172→      })
+  1173→      if (!res.ok) throw new Error('Failed to save')
+  1174→      const data = await res.json()
+  1175→      set({ votebookEntries: data.map((e: Record<string, unknown>) => ({ ...e, _dbId: e.id })), isLoading: false })
+  1176→      toast.success('Votebook entries saved')
+  1177→    } catch {
+  1178→      set({ isLoading: false })
+  1179→      throw new Error('Failed to save votebook entries')
+  1180→    }
+  1181→  },
+  1182→
+  1183→  recalculateVotebook: () => set((state) => ({
+  1184→    votebookEntries: state.votebookEntries.map(v => {
+  1185→      const total = (v.annualAppropriation || 0) + (v.supplementaryAppropriation || 0)
+  1186→      const unspent = total - (v.expenditures || 0) - (v.commitments || 0) - (v.encumbrances || 0)
+  1187→      const available = total - (v.commitments || 0) - (v.encumbrances || 0)
+  1188→      return {
+  1189→        ...v, totalAppropriation: total,
+  1190→        unspentBalance: Math.max(0, unspent),
+  1191→        availableBalance: Math.max(0, available),
+  1192→        status: unspent <= 0 ? 'exhausted' as const : v.status,
+  1193→      }
+  1194→    }),
+  1195→  })),
+  1196→
+  1197→  importVotesFromBudget: () => {
+  1198→    const { budgets } = get()
+  1199→    const entries: VotebookEntryUI[] = budgets.map((b, i) => ({
+  1200→      _id: Math.random().toString(36).substring(2, 9),
+  1201→      voteCode: b.category,
+  1202→      voteDescription: b.categoryLabel,
+  1203→      annualAppropriation: b.initialBudget,
+  1204→      supplementaryAppropriation: b.virementTo,
+  1205→      totalAppropriation: b.revisedBudget,
+  1206→      commitments: 0,
+  1207→      expenditures: b.actualAmount,
+  1208→      unspentBalance: b.variance,
+  1209→      encumbrances: 0,
+  1210→      availableBalance: b.revisedBudget - b.actualAmount,
+  1211→      quarter: '',
+  1212→      status: b.variance <= 0 ? 'exhausted' as const : 'active' as const,
+  1213→      notes: '',
+  1214→    }))
+  1215→    set({ votebookEntries: entries })
+  1216→    toast.success(`Imported ${entries.length} vote items from budget`)
+  1217→  },
+  1218→
+  1219→  // ═══════════════════════════════════════════════════════════════════
+  1220→  // ABSTRACT
+  1221→  // ═══════════════════════════════════════════════════════════════════
+  1222→  addAbstractEntry: (entry) => set((state) => ({
+  1223→    abstractEntries: [...state.abstractEntries, { ...entry, _id: Math.random().toString(36).substring(2, 9) }],
+  1224→  })),
+  1225→  updateAbstractEntry: (index, updates) => set((state) => {
+  1226→    const e = [...state.abstractEntries]; e[index] = { ...e[index], ...updates }; return { abstractEntries: e }
+  1227→  }),
+  1228→  deleteAbstractEntry: (index) => set((state) => ({
+  1229→    abstractEntries: state.abstractEntries.filter((_, i) => i !== index),
+  1230→  })),
+  1231→  clearAbstractEntries: () => set({ abstractEntries: [] }),
+  1232→
+  1233→  fetchAbstractEntries: async () => {
+  1234→    const { activeReportId } = get()
+  1235→    if (!activeReportId) return
+  1236→    try {
+  1237→      const res = await fetch(`/api/reports/${activeReportId}/abstract`)
+  1238→      if (!res.ok) return
+  1239→      const data = await res.json()
+  1240→      set({ abstractEntries: data.map((e: Record<string, unknown>) => ({ ...e, _dbId: e.id })) })
+  1241→    } catch { /* silent */ }
+  1242→  },
+  1243→
+  1244→  saveAbstractEntries: async () => {
+  1245→    const { activeReportId, abstractEntries } = get()
+  1246→    if (!activeReportId) throw new Error('No active report')
+  1247→    set({ isLoading: true })
+  1248→    try {
+  1249→      const clean = abstractEntries.map(({ _id, _dbId, ...rest }) => ({ ...rest, id: _dbId || undefined }))
+  1250→      const res = await fetch(`/api/reports/${activeReportId}/abstract`, {
+  1251→        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+  1252→        body: JSON.stringify({ entries: clean }),
+  1253→      })
+  1254→      if (!res.ok) throw new Error('Failed to save')
+  1255→      const data = await res.json()
+  1256→      set({ abstractEntries: data.map((e: Record<string, unknown>) => ({ ...e, _dbId: e.id })), isLoading: false })
+  1257→      toast.success('Abstract entries saved')
+  1258→    } catch {
+  1259→      set({ isLoading: false })
+  1260→      throw new Error('Failed to save abstract entries')
+  1261→    }
+  1262→  },
+  1263→
+  1264→  generateAbstract: () => {
+  1265→    const { transactions, budgets, cashbookEntries } = get()
+  1266→    const entries: AbstractEntryUI[] = []
+  1267→
+  1268→    // Generate from transactions grouped by category
+  1269→    const revenueMap = new Map<string, { total: number; budget: number; prior: number }>()
+  1270→    const expenditureMap = new Map<string, { total: number; budget: number; prior: number }>()
+  1271→
+  1272→    for (const t of transactions) {
+  1273→      if (t.type === 'revenue') {
+  1274→        const key = t.category || t.accountCode || 'other-revenue'
+  1275→        const existing = revenueMap.get(key) || { total: 0, budget: 0, prior: 0 }
+  1276→        existing.total += t.netAmount
+  1277→        revenueMap.set(key, existing)
+  1278→      } else {
+  1279→        const key = t.category || t.accountCode || 'other-expense'
+  1280→        const existing = expenditureMap.get(key) || { total: 0, budget: 0, prior: 0 }
+  1281→        existing.total += t.netAmount
+  1282→        expenditureMap.set(key, existing)
+  1283→      }
+  1284→    }
+  1285→
+  1286→    // Match budgets
+  1287→    for (const b of budgets) {
+  1288→      const rev = revenueMap.get(b.category)
+  1289→      const exp = expenditureMap.get(b.category)
+  1290→      if (rev) rev.budget = b.revisedBudget
+  1291→      if (exp) exp.budget = b.revisedBudget
+  1292→    }
+  1293→
+  1294→    let order = 0
+  1295→    for (const [key, data] of revenueMap) {
+  1296→      const variance = data.budget - data.total
+  1297→      entries.push({
+  1298→        _id: Math.random().toString(36).substring(2, 9),
+  1299→        itemCode: key, itemDescription: key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+  1300→        type: 'revenue', budgetEstimate: data.budget, actualAmount: data.total,
+  1301→        variance, variancePercent: data.budget ? (variance / data.budget) * 100 : 0,
+  1302→        priorYearActual: data.prior,
+  1303→      })
+  1304→    }
+  1305→    for (const [key, data] of expenditureMap) {
+  1306→      const variance = data.budget - data.total
+  1307→      entries.push({
+  1308→        _id: Math.random().toString(36).substring(2, 9),
+  1309→        itemCode: key, itemDescription: key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+  1310→        type: 'expenditure', budgetEstimate: data.budget, actualAmount: data.total,
+  1311→        variance, variancePercent: data.budget ? (variance / data.budget) * 100 : 0,
+  1312→        priorYearActual: data.prior,
+  1313→      })
+  1314→    }
+  1315→
+  1316→    set({ abstractEntries: entries })
+  1317→    toast.success(`Generated abstract with ${entries.length} line items`)
+  1318→  },
+  1319→}))
+  1320→

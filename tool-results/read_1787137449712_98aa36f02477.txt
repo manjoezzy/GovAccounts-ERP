@@ -1,0 +1,1871 @@
+     1→'use client'
+     2→
+     3→import React, { useEffect, useCallback, useState } from 'react'
+     4→import { useTheme } from 'next-themes'
+     5→import { toast } from 'sonner'
+     6→import { motion, AnimatePresence } from 'framer-motion'
+     7→import {
+     8→  Scale, Plus, LayoutDashboard, Table, FileText, Download, Trash2,
+     9→  FileSpreadsheet, CheckCircle2, AlertTriangle, ArrowRight, FolderOpen,
+    10→  Loader2, Calendar, Banknote, Sun, Moon, X, BarChart3, TrendingUp,
+    11→  TrendingDown, Shield, Clock, ClipboardCheck, User, ChevronRight,
+    12→  Info, Sparkles, Copy, Eye, GitBranch, Play, AlertCircle, ArrowLeft,
+    13→  CircleDot, Save, Wand2, History, RefreshCw, Upload, Pencil,
+    14→  BookOpen, Receipt, PenLine, Vote, FileBarChart, Wallet,
+    15→} from 'lucide-react'
+    16→import { Button } from '@/components/ui/button'
+    17→import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+    18→import { Input } from '@/components/ui/input'
+    19→import { Label } from '@/components/ui/label'
+    20→import { Badge } from '@/components/ui/badge'
+    21→import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+    22→import { Separator } from '@/components/ui/separator'
+    23→import { ScrollArea } from '@/components/ui/scroll-area'
+    24→import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+    25→import {
+    26→  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+    27→} from '@/components/ui/select'
+    28→import {
+    29→  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
+    30→} from '@/components/ui/tooltip'
+    31→import {
+    32→  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+    33→} from '@/components/ui/dialog'
+    34→import { Textarea } from '@/components/ui/textarea'
+    35→import {
+    36→  useFinancialStore,
+    37→  type WizardStep, type StatementSubTab,
+    38→  type Report, type AuditLogEntry, type ComplianceItem,
+    39→  type ApprovalWorkflow, type VersionEntry, type BudgetEntry,
+    40→} from '@/components/financials/store'
+    41→import { TBEntryRow } from '@/components/financials/tb-entry-row'
+    42→import { StatementTable, type StatementRow } from '@/components/financials/statement-table'
+    43→import Step3Budget from '@/components/financials/budget-step'
+    44→import RevExpCaptureStep from '@/components/financials/rev-exp-capture-step'
+    45→import CashbookStep from '@/components/financials/cashbook-step'
+    46→import LedgerStep from '@/components/financials/ledger-step'
+    47→import VotebookStep from '@/components/financials/votebook-step'
+    48→import AbstractStep from '@/components/financials/abstract-step'
+    49→import type {
+    50→  GeneratedStatements, SFPLine, BSLine, CashFlowData,
+    51→  RevenueReconciliationData, CashReconciliationData, BudgetVarianceData,
+    52→} from '@/lib/financial-engine'
+    53→import {
+    54→  BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
+    55→} from 'recharts'
+    56→
+    57→// ═══════════════════════════════════════════════════════════════════
+    58→// UTILITIES
+    59→// ═══════════════════════════════════════════════════════════════════
+    60→
+    61→function formatNum(n: number): string {
+    62→  return Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+    63→}
+    64→
+    65→function statusColor(status: string) {
+    66→  switch (status) {
+    67→    case 'draft': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+    68→    case 'complete': return 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-400'
+    69→    case 'generated': return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400'
+    70→    case 'in_review': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+    71→    case 'pending_approval': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
+    72→    case 'approved': return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400'
+    73→    default: return 'bg-muted text-muted-foreground'
+    74→  }
+    75→}
+    76→
+    77→const WIZARD_STEPS = [
+    78→  { step: 1, label: 'Entity Setup', icon: <User className="h-4 w-4" /> },
+    79→  { step: 2, label: 'Rev/Exp Capture', icon: <Receipt className="h-4 w-4" /> },
+    80→  { step: 3, label: 'Cashbook', icon: <Wallet className="h-4 w-4" /> },
+    81→  { step: 4, label: 'Ledger', icon: <BookOpen className="h-4 w-4" /> },
+    82→  { step: 5, label: 'Trial Balance', icon: <Table className="h-4 w-4" /> },
+    83→  { step: 6, label: 'Votebook', icon: <Vote className="h-4 w-4" /> },
+    84→  { step: 7, label: 'Abstract', icon: <FileBarChart className="h-4 w-4" /> },
+    85→  { step: 8, label: 'Budget', icon: <Banknote className="h-4 w-4" /> },
+    86→  { step: 9, label: 'Supplementary', icon: <ClipboardCheck className="h-4 w-4" /> },
+    87→  { step: 10, label: 'Review', icon: <Shield className="h-4 w-4" /> },
+    88→  { step: 11, label: 'Generate', icon: <FileText className="h-4 w-4" /> },
+    89→]
+    90→
+    91→const pageVariants = {
+    92→  initial: { opacity: 0, y: 12 },
+    93→  animate: { opacity: 1, y: 0 },
+    94→  exit: { opacity: 0, y: -12 },
+    95→}
+    96→
+    97→// ═══════════════════════════════════════════════════════════════════
+    98→// HEADER
+    99→// ═══════════════════════════════════════════════════════════════════
+   100→
+   101→function Header() {
+   102→  const { theme, setTheme } = useTheme()
+   103→  const { entityConfig, activeReportId, isLoading, createReport, showAnalytics, setShowAnalytics } = useFinancialStore()
+   104→  const [mounted, setMounted] = React.useState(false)
+   105→  React.useEffect(() => setMounted(true), [])
+   106→
+   107→  const handleNew = async () => {
+   108→    try {
+   109→      await createReport()
+   110→      toast.success('Report created successfully')
+   111→    } catch {
+   112→      toast.error('Failed to create report')
+   113→    }
+   114→  }
+   115→
+   116→  return (
+   117→    <header className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
+   118→      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+   119→        <div className="flex items-center gap-3">
+   120→          <div className="flex items-center gap-2">
+   121→            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+   122→              <Scale className="h-4 w-4 text-primary-foreground" />
+   123→            </div>
+   124→            <span className="font-bold text-base tracking-tight">
+   125→              FinStatements <span className="text-primary">Pro</span>
+   126→            </span>
+   127→          </div>
+   128→          {activeReportId && (
+   129→            <>
+   130→              <Separator orientation="vertical" className="h-6" />
+   131→              <div className="hidden sm:flex items-center gap-3 text-sm text-muted-foreground">
+   132→                <span className="font-medium text-foreground">{entityConfig.name}</span>
+   133→                <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{entityConfig.periodLabel}</span>
+   134→                <span className="flex items-center gap-1"><Banknote className="h-3.5 w-3.5" />{entityConfig.currency}</span>
+   135→              </div>
+   136→            </>
+   137→          )}
+   138→        </div>
+   139→        <div className="flex items-center gap-2">
+   140→          {activeReportId && (
+   141→            <TooltipProvider>
+   142→              <Tooltip>
+   143→                <TooltipTrigger asChild>
+   144→                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowAnalytics(!showAnalytics)}>
+   145→                    <BarChart3 className="h-4 w-4" />
+   146→                  </Button>
+   147→                </TooltipTrigger>
+   148→                <TooltipContent><p>Analytics Panel</p></TooltipContent>
+   149→              </Tooltip>
+   150→            </TooltipProvider>
+   151→          )}
+   152→          <TooltipProvider>
+   153→            <Tooltip>
+   154→              <TooltipTrigger asChild>
+   155→                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+   156→                  {mounted && (theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />)}
+   157→                </Button>
+   158→              </TooltipTrigger>
+   159→              <TooltipContent><p>Toggle theme</p></TooltipContent>
+   160→            </Tooltip>
+   161→          </TooltipProvider>
+   162→          <Button size="sm" onClick={handleNew} disabled={isLoading} className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5">
+   163→            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+   164→            <span className="hidden sm:inline">New Report</span>
+   165→          </Button>
+   166→        </div>
+   167→      </div>
+   168→    </header>
+   169→  )
+   170→}
+   171→
+   172→// ═══════════════════════════════════════════════════════════════════
+   173→// WIZARD PROGRESS BAR
+   174→// ═══════════════════════════════════════════════════════════════════
+   175→
+   176→function WizardProgressBar() {
+   177→  const { wizardStep, setWizardStep, entries, supplementaryData, complianceData, generatedStatements } = useFinancialStore()
+   178→
+   179→  const stepComplete = (s: number): boolean => {
+   180→    if (s === 1) return true
+   181→    if (s === 2) return true // transactions optional
+   182→    if (s === 3) return true // cashbook optional
+   183→    if (s === 4) return true // ledger optional
+   184→    if (s === 5) return entries.length > 0
+   185→    if (s === 6) return true // votebook optional
+   186→    if (s === 7) return true // abstract optional
+   187→    if (s === 8) return true // budget is optional
+   188→    if (s === 9) return supplementaryData !== null
+   189→    if (s === 10) return supplementaryData !== null
+   190→    if (s === 11) return complianceData !== null || generatedStatements !== null
+   191→    return false
+   192→  }
+   193→
+   194→  return (
+   195→    <div className="bg-muted/50 border-b border-border">
+   196→      <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
+   197→        <div className="flex items-center gap-1 py-2 overflow-x-auto">
+   198→          {WIZARD_STEPS.map(({ step, label, icon }) => {
+   199→            const isActive = wizardStep === step
+   200→            const isComplete = step < wizardStep || stepComplete(step)
+   201→            const canNavigate = isComplete && step !== wizardStep
+   202→            return (
+   203→              <React.Fragment key={step}>
+   204→                {step > 1 && <ChevronRight className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />}
+   205→                <button
+   206→                  onClick={() => canNavigate ? setWizardStep(step as WizardStep) : undefined}
+   207→                  disabled={!canNavigate && !isActive}
+   208→                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+   209→                    isActive
+   210→                      ? 'bg-primary text-primary-foreground shadow-sm'
+   211→                      : isComplete
+   212→                        ? 'bg-primary/10 text-primary hover:bg-primary/20 cursor-pointer'
+   213→                        : 'text-muted-foreground cursor-not-allowed'
+   214→                  }`}
+   215→                >
+   216→                  <span className="flex items-center justify-center h-5 w-5 rounded-full text-[10px] font-bold border current:border-current">
+   217→                    {isComplete && !isActive ? <CheckCircle2 className="h-3.5 w-3.5" /> : icon}
+   218→                  </span>
+   219→                  <span className="hidden sm:inline">{label}</span>
+   220→                </button>
+   221→              </React.Fragment>
+   222→            )
+   223→          })}
+   224→        </div>
+   225→      </div>
+   226→    </div>
+   227→  )
+   228→}
+   229→
+   230→// ═══════════════════════════════════════════════════════════════════
+   231→// STATUS BAR
+   232→// ═══════════════════════════════════════════════════════════════════
+   233→
+   234→function StatusBar() {
+   235→  const { entries, supplementaryData, complianceData, approvalWorkflow } = useFinancialStore()
+   236→  const totalDr = entries.reduce((s, e) => s + (e.debitCurrent || 0), 0)
+   237→  const totalCr = entries.reduce((s, e) => s + (e.creditCurrent || 0), 0)
+   238→  const tbBalanced = Math.abs(totalDr - totalCr) < 0.01
+   239→
+   240→  const suppFields = supplementaryData
+   241→    ? ['accountingOfficer', 'chiefFinanceOfficer', 'internalAuditHead', 'depreciationRate', 'employeeCount']
+   242→        .filter(k => { const v = supplementaryData[k as keyof typeof supplementaryData]; return v !== '' && v !== 0 })
+   243→    : []
+   244→  const suppComplete = suppFields.length
+   245→
+   246→  const moduleCounts = `${transactions.length} txns · ${cashbookEntries.length} cb · ${ledgerEntries.length} lg · ${votebookEntries.length} votes`
+   247→
+   248→  const approvalStep = approvalWorkflow?.currentStep || 'draft'
+   249→
+   250→  return (
+   251→    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 sm:px-6 py-2 text-[11px] text-muted-foreground bg-card border-b border-border">
+   252→      <span className="flex items-center gap-1">
+   253→        Trial Balance: {tbBalanced ? <CheckCircle2 className="h-3 w-3 text-primary" /> : <X className="h-3 w-3 text-destructive" />}
+   254→        <span className={tbBalanced ? 'text-primary font-medium' : 'text-destructive font-medium'}>{tbBalanced ? 'Balanced' : 'Unbalanced'}</span>
+   255→      </span>
+   256→      <span className="flex items-center gap-1">
+   257→        Supplementary: <span className="font-medium text-foreground">{suppComplete}/5</span>
+   258→      </span>
+   259→      <span className="flex items-center gap-1">
+   260→        Validation: {complianceData ? <span className="font-medium text-primary">{complianceData.score}% compliant</span> : <span className="font-medium">Not run</span>}
+   261→      </span>
+   262→      <span className="flex items-center gap-1">
+   263→        Approval: <Badge variant="outline" className="h-5 text-[10px] px-1.5 font-mono">{approvalStep}</Badge>
+   264→      </span>
+   265→      {(transactions.length > 0 || cashbookEntries.length > 0 || ledgerEntries.length > 0) && (
+   266→        <span className="flex items-center gap-1">
+   267→          Modules: <span className="font-medium text-foreground">{moduleCounts}</span>
+   268→        </span>
+   269→      )}
+   270→    </div>
+   271→  )
+   272→}
+   273→
+   274→// ═══════════════════════════════════════════════════════════════════
+   275→// STEP 1: ENTITY SETUP
+   276→// ═══════════════════════════════════════════════════════════════════
+   277→
+   278→function Step1EntitySetup() {
+   279→  const { entityConfig, setEntityConfig, wizardStep, setWizardStep, entries, activeReportId } = useFinancialStore()
+   280→
+   281→  const canProceed = entityConfig.name.trim() !== '' && entityConfig.periodEnd !== ''
+   282→
+   283→  return (
+   284→    <motion.div {...pageVariants} className="py-6 space-y-6">
+   285→      <div>
+   286→        <h2 className="text-xl font-bold text-foreground">Entity Setup</h2>
+   287→        <p className="text-sm text-muted-foreground mt-1">Configure the reporting entity details and period information.</p>
+   288→      </div>
+   289→      <Card>
+   290→        <CardHeader>
+   291→          <CardTitle className="text-base">Entity Information</CardTitle>
+   292→          <CardDescription>These details appear on all generated financial statements.</CardDescription>
+   293→        </CardHeader>
+   294→        <CardContent className="space-y-4">
+   295→          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+   296→            <div className="space-y-1.5">
+   297→              <TooltipProvider>
+   298→                <Tooltip>
+   299→                  <TooltipTrigger asChild>
+   300→                    <Label className="text-xs text-muted-foreground flex items-center gap-1">
+   301→                      Entity Name <Info className="h-3 w-3" />
+   302→                    </Label>
+   303→                  </TooltipTrigger>
+   304→                  <TooltipContent><p>The name of the government entity (e.g., Ministry of Finance)</p></TooltipContent>
+   305→                </Tooltip>
+   306→              </TooltipProvider>
+   307→              <Input className="h-9 text-sm" value={entityConfig.name} onChange={(e) => setEntityConfig({ name: e.target.value })} />
+   308→            </div>
+   309→            <div className="space-y-1.5">
+   310→              <TooltipProvider>
+   311→                <Tooltip>
+   312→                  <TooltipTrigger asChild>
+   313→                    <Label className="text-xs text-muted-foreground flex items-center gap-1">
+   314→                      Period End Date <Info className="h-3 w-3" />
+   315→                    </Label>
+   316→                  </TooltipTrigger>
+   317→                  <TooltipContent><p>The last day of the reporting period (e.g., 2025-06-30)</p></TooltipContent>
+   318→                </Tooltip>
+   319→              </TooltipProvider>
+   320→              <Input type="date" className="h-9 text-sm" value={entityConfig.periodEnd} onChange={(e) => setEntityConfig({ periodEnd: e.target.value })} />
+   321→            </div>
+   322→            <div className="space-y-1.5">
+   323→              <TooltipProvider>
+   324→                <Tooltip>
+   325→                  <TooltipTrigger asChild>
+   326→                    <Label className="text-xs text-muted-foreground flex items-center gap-1">
+   327→                      Period Label <Info className="h-3 w-3" />
+   328→                    </Label>
+   329→                  </TooltipTrigger>
+   330→                  <TooltipContent><p>Human-readable period label displayed on statements (e.g., &quot;30 June 2025&quot;)</p></TooltipContent>
+   331→                </Tooltip>
+   332→              </TooltipProvider>
+   333→              <Input className="h-9 text-sm" value={entityConfig.periodLabel} onChange={(e) => setEntityConfig({ periodLabel: e.target.value })} />
+   334→            </div>
+   335→            <div className="space-y-1.5">
+   336→              <TooltipProvider>
+   337→                <Tooltip>
+   338→                  <TooltipTrigger asChild>
+   339→                    <Label className="text-xs text-muted-foreground flex items-center gap-1">
+   340→                      Currency <Info className="h-3 w-3" />
+   341→                    </Label>
+   342→                  </TooltipTrigger>
+   343→                  <TooltipContent><p>The reporting currency symbol (e.g., Shs, UGX, USD)</p></TooltipContent>
+   344→                </Tooltip>
+   345→              </TooltipProvider>
+   346→              <Input className="h-9 text-sm" value={entityConfig.currency} onChange={(e) => setEntityConfig({ currency: e.target.value })} />
+   347→            </div>
+   348→          </div>
+   349→        </CardContent>
+   350→      </Card>
+   351→      {activeReportId && (
+   352→        <div className="flex justify-end">
+   353→          <Button onClick={() => setWizardStep(2)} disabled={!canProceed} className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2">
+   354→            Continue to Trial Balance <ArrowRight className="h-4 w-4" />
+   355→          </Button>
+   356→        </div>
+   357→      )}
+   358→    </motion.div>
+   359→  )
+   360→}
+   361→
+   362→// ═══════════════════════════════════════════════════════════════════
+   363→// STEP 2: TRIAL BALANCE
+   364→// ═══════════════════════════════════════════════════════════════════
+   365→
+   366→function Step2TrialBalance() {
+   367→  const {
+   368→    entries, entityConfig, setEntityConfig, updateEntry, deleteEntry, addEntry,
+   369→    loadTemplate, saveTrialBalance, isLoading, wizardStep, setWizardStep, autoBalance,
+   370→    clearTrialBalance, uploadExcelFile,
+   371→  } = useFinancialStore()
+   372→  const [autoBalancing, setAutoBalancing] = useState(false)
+   373→  const [showAutoBalanceDialog, setShowAutoBalanceDialog] = useState(false)
+   374→  const [showClearConfirm, setShowClearConfirm] = useState(false)
+   375→  const fileInputRef = React.useRef<HTMLInputElement>(null)
+   376→
+   377→  const totalDebitCurrent = entries.reduce((s, e) => s + (e.debitCurrent || 0), 0)
+   378→  const totalCreditCurrent = entries.reduce((s, e) => s + (e.creditCurrent || 0), 0)
+   379→  const totalDebitPrior = entries.reduce((s, e) => s + (e.debitPrior || 0), 0)
+   380→  const totalCreditPrior = entries.reduce((s, e) => s + (e.creditPrior || 0), 0)
+   381→  const diffCurrent = totalDebitCurrent - totalCreditCurrent
+   382→  const diffPrior = totalDebitPrior - totalCreditPrior
+   383→  const isBalancedCurrent = Math.abs(diffCurrent) < 0.01
+   384→  const isBalancedPrior = Math.abs(diffPrior) < 0.01
+   385→  const isBalanced = isBalancedCurrent && isBalancedPrior
+   386→
+   387→  const handleSave = async () => {
+   388→    try {
+   389→      await saveTrialBalance()
+   390→      toast.success('Trial balance saved and validated')
+   391→    } catch {
+   392→      toast.error('Failed to save trial balance')
+   393→    }
+   394→  }
+   395→
+   396→  const handleAutoBalance = async () => {
+   397→    setAutoBalancing(true)
+   398→    try {
+   399→      await autoBalance()
+   400→      toast.success('Trial balance auto-balanced')
+   401→      setShowAutoBalanceDialog(false)
+   402→    } catch {
+   403→      toast.error('Failed to auto-balance')
+   404→    } finally {
+   405→      setAutoBalancing(false)
+   406→    }
+   407→  }
+   408→
+   409→  return (
+   410→    <motion.div {...pageVariants} className="py-4 space-y-4">
+   411→      {/* Balance Indicator Banner */}
+   412→      <Card className={`border-l-4 ${isBalanced ? 'border-l-primary bg-primary/5' : 'border-l-destructive bg-destructive/5'}`}>
+   413→        <CardContent className="py-3">
+   414→          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+   415→            <div className="flex items-center gap-3">
+   416→              {isBalanced
+   417→                ? <CheckCircle2 className="h-5 w-5 text-primary" />
+   418→                : <AlertCircle className="h-5 w-5 text-destructive" />}
+   419→              <div>
+   420→                <p className="text-sm font-semibold text-foreground">
+   421→                  {isBalanced ? 'Trial Balance is Balanced' : 'Trial Balance is NOT Balanced'}
+   422→                </p>
+   423→                {!isBalanced && (
+   424→                  <p className="text-xs text-muted-foreground mt-0.5">
+   425→                    Current diff: {entityConfig.currency} {formatNum(diffCurrent)}
+   426→                    {diffPrior !== 0 && ` | Prior diff: ${entityConfig.currency} ${formatNum(diffPrior)}`}
+   427→                  </p>
+   428→                )}
+   429→              </div>
+   430→            </div>
+   431→            <div className="flex items-center gap-2">
+   432→              {!isBalanced && (
+   433→                <Dialog open={showAutoBalanceDialog} onOpenChange={setShowAutoBalanceDialog}>
+   434→                  <DialogTrigger asChild>
+   435→                    <Button variant="outline" size="sm" className="gap-1.5" disabled={entries.length === 0}>
+   436→                      <Wand2 className="h-4 w-4" /> Auto-Balance
+   437→                    </Button>
+   438→                  </DialogTrigger>
+   439→                  <DialogContent>
+   440→                    <DialogHeader>
+   441→                      <DialogTitle>Auto-Balance Trial Balance</DialogTitle>
+   442→                      <DialogDescription>
+   443→                        This will create a &quot;Suspense&quot; entry to zero out the difference between debits and credits.
+   444→                        Current difference: {entityConfig.currency} {formatNum(diffCurrent)}
+   445→                      </DialogDescription>
+   446→                    </DialogHeader>
+   447→                    <DialogFooter>
+   448→                      <Button variant="outline" onClick={() => setShowAutoBalanceDialog(false)}>Cancel</Button>
+   449→                      <Button onClick={handleAutoBalance} disabled={autoBalancing} className="bg-primary text-primary-foreground gap-2">
+   450→                        {autoBalancing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+   451→                        Auto-Balance
+   452→                      </Button>
+   453→                    </DialogFooter>
+   454→                  </DialogContent>
+   455→                </Dialog>
+   456→              )}
+   457→            </div>
+   458→          </div>
+   459→        </CardContent>
+   460→      </Card>
+   461→
+   462→      {/* Toolbar */}
+   463→      <div className="flex flex-wrap items-center gap-2">
+   464→        <TooltipProvider>
+   465→          <Tooltip>
+   466→            <TooltipTrigger asChild>
+   467→              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { loadTemplate(); toast.success('Template loaded') }}>
+   468→                <FileSpreadsheet className="h-4 w-4" /> Load Template
+   469→              </Button>
+   470→            </TooltipTrigger>
+   471→            <TooltipContent><p>Load the standard IPSAS chart of accounts template</p></TooltipContent>
+   472→          </Tooltip>
+   473→        </TooltipProvider>
+   474→        <TooltipProvider>
+   475→          <Tooltip>
+   476→            <TooltipTrigger asChild>
+   477→              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => fileInputRef.current?.click()} disabled={isLoading}>
+   478→                <Upload className="h-4 w-4" /> Upload Excel
+   479→              </Button>
+   480→            </TooltipTrigger>
+   481→            <TooltipContent><p>Upload a trial balance from Excel (.xlsx, .xls, .csv)</p></TooltipContent>
+   482→          </Tooltip>
+   483→        </TooltipProvider>
+   484→        <input
+   485→          ref={fileInputRef}
+   486→          type="file"
+   487→          accept=".xlsx,.xls,.csv"
+   488→          className="hidden"
+   489→          onChange={async (e) => {
+   490→            const file = e.target.files?.[0]
+   491→            if (!file) return
+   492→            try {
+   493→              await uploadExcelFile(file)
+   494→            } catch { /* toast already shown */ }
+   495→            e.target.value = ''
+   496→          }}
+   497→        />
+   498→        <TooltipProvider>
+   499→          <Tooltip>
+   500→            <TooltipTrigger asChild>
+   501→              <Button variant="outline" size="sm" className="gap-1.5" onClick={addEntry}>
+   502→                <Plus className="h-4 w-4" /> Add Row
+   503→              </Button>
+   504→            </TooltipTrigger>
+   505→            <TooltipContent><p>Add a new blank trial balance entry</p></TooltipContent>
+   506→          </Tooltip>
+   507→        </TooltipProvider>
+   508→        {entries.length > 0 && (
+   509→          <TooltipProvider>
+   510→            <Tooltip>
+   511→              <TooltipTrigger asChild>
+   512→                <Button variant="outline" size="sm" className="gap-1.5 text-destructive hover:text-destructive" onClick={() => setShowClearConfirm(true)}>
+   513→                  <Trash2 className="h-4 w-4" /> Clear All
+   514→                </Button>
+   515→              </TooltipTrigger>
+   516→              <TooltipContent><p>Remove all entries (e.g., if template was loaded by mistake)</p></TooltipContent>
+   517→            </Tooltip>
+   518→          </TooltipProvider>
+   519→        )}
+   520→        <Dialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+   521→          <DialogContent>
+   522→            <DialogHeader>
+   523→              <DialogTitle>Clear All Trial Balance Entries?</DialogTitle>
+   524→              <DialogDescription>
+   525→                This will remove all {entries.length} entries from the trial balance. You can then load a new template or upload an Excel file. This action cannot be undone.
+   526→              </DialogDescription>
+   527→            </DialogHeader>
+   528→            <DialogFooter>
+   529→              <Button variant="outline" onClick={() => setShowClearConfirm(false)}>Cancel</Button>
+   530→              <Button variant="destructive" className="gap-2" onClick={() => { clearTrialBalance(); setShowClearConfirm(false) }}>
+   531→                <Trash2 className="h-4 w-4" /> Clear All Entries
+   532→              </Button>
+   533→            </DialogFooter>
+   534→          </DialogContent>
+   535→        </Dialog>
+   536→        <span className="text-xs text-muted-foreground ml-2">{entries.length} entries</span>
+   537→        <div className="ml-auto flex items-center gap-3 text-xs font-mono">
+   538→          <span className="text-muted-foreground">Dr: <span className="text-foreground font-semibold">{formatNum(totalDebitCurrent)}</span></span>
+   539→          <span className="text-muted-foreground">Cr: <span className="text-foreground font-semibold">{formatNum(totalCreditCurrent)}</span></span>
+   540→          <Badge variant={isBalanced ? 'default' : 'destructive'} className="text-[10px]">
+   541→            {isBalanced ? '✓ Balanced' : `Δ ${formatNum(diffCurrent)}`}
+   542→          </Badge>
+   543→        </div>
+   544→      </div>
+   545→
+   546→      {/* Table */}
+   547→      <div className="overflow-x-auto rounded-lg border border-border">
+   548→        <table className="w-full text-sm min-w-[1400px]">
+   549→          <thead>
+   550→            <tr className="bg-foreground text-background">
+   551→              <th className="px-1 py-2.5 text-center text-xs font-medium uppercase tracking-wide w-8">#</th>
+   552→              <th className="px-1 py-2.5 text-left text-xs font-medium uppercase tracking-wide w-24">Code</th>
+   553→              <th className="px-1 py-2.5 text-left text-xs font-medium uppercase tracking-wide">Account Name</th>
+   554→              <th className="px-1 py-2.5 text-left text-xs font-medium uppercase tracking-wide w-[160px]">Classification</th>
+   555→              <th className="px-1 py-2.5 text-left text-xs font-medium uppercase tracking-wide w-[200px]">Category</th>
+   556→              <th className="px-1 py-2.5 text-center text-xs font-medium uppercase tracking-wide w-12">Note</th>
+   557→              <th className="px-1 py-2.5 text-right text-xs font-medium uppercase tracking-wide w-28">Dr. Current</th>
+   558→              <th className="px-1 py-2.5 text-right text-xs font-medium uppercase tracking-wide w-28">Cr. Current</th>
+   559→              <th className="px-1 py-2.5 text-right text-xs font-medium uppercase tracking-wide w-28">Dr. Prior</th>
+   560→              <th className="px-1 py-2.5 text-right text-xs font-medium uppercase tracking-wide w-28">Cr. Prior</th>
+   561→              <th className="px-1 py-2.5 text-right text-xs font-medium uppercase tracking-wide w-24">Budget Init</th>
+   562→              <th className="px-1 py-2.5 text-right text-xs font-medium uppercase tracking-wide w-24">Budget Adj</th>
+   563→              <th className="px-1 py-2.5 w-10" />
+   564→            </tr>
+   565→          </thead>
+   566→          <tbody>
+   567→            {entries.map((entry, index) => (
+   568→              <TBEntryRow key={(entry._id || entry._dbId) ?? index} entry={entry} index={index} onEntryChange={updateEntry} onDelete={deleteEntry} />
+   569→            ))}
+   570→            {entries.length === 0 && (
+   571→              <tr>
+   572→                <td colSpan={13} className="py-16 text-center text-muted-foreground text-sm">
+   573→                  <div className="flex flex-col items-center gap-3">
+   574→                    <FolderOpen className="h-10 w-10 text-muted-foreground/50" />
+   575→                    <p>No entries yet. Click &quot;Load Template&quot; or &quot;Add Row&quot; to begin.</p>
+   576→                  </div>
+   577→                </td>
+   578→              </tr>
+   579→            )}
+   580→          </tbody>
+   581→        </table>
+   582→      </div>
+   583→
+   584→      {/* Footer Actions */}
+   585→      <Card className="bg-muted/30">
+   586→        <CardContent className="py-3">
+   587→          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+   588→            <div className="flex gap-2">
+   589→              <Button variant="outline" size="sm" onClick={() => setWizardStep(1)} className="gap-1.5">
+   590→                <ArrowLeft className="h-4 w-4" /> Back
+   591→              </Button>
+   592→              <Button onClick={handleSave} disabled={isLoading || entries.length === 0} className="bg-primary text-primary-foreground gap-2">
+   593→                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+   594→                Save & Validate
+   595→              </Button>
+   596→            </div>
+   597→            <Button onClick={() => setWizardStep(2)} className="bg-primary text-primary-foreground gap-2">
+   598→              Continue to Rev/Exp Capture <ArrowRight className="h-4 w-4" />
+   599→            </Button>
+   600→          </div>
+   601→        </CardContent>
+   602→      </Card>
+   603→    </motion.div>
+   604→  )
+   605→}
+   606→
+   607→// ═══════════════════════════════════════════════════════════════════
+   608→// STEP 3: SUPPLEMENTARY DATA
+   609→// ═══════════════════════════════════════════════════════════════════
+   610→
+   611→function Step3Supplementary() {
+   612→  const { supplementaryData, setSupplementaryData, saveSupplementary, isLoading, fetchSupplementary, wizardStep, setWizardStep, activeReportId } = useFinancialStore()
+   613→  const [saving, setSaving] = useState(false)
+   614→  const [localData, setLocalData] = useState<Record<string, string | number>>({})
+   615→
+   616→  useEffect(() => {
+   617→    if (activeReportId) fetchSupplementary()
+   618→  }, [activeReportId, fetchSupplementary])
+   619→
+   620→  useEffect(() => {
+   621→    if (supplementaryData) {
+   622→      setLocalData({ ...supplementaryData })
+   623→    }
+   624→  }, [supplementaryData])
+   625→
+   626→  const update = (key: string, value: string | number) => {
+   627→    setLocalData(prev => ({ ...prev, [key]: value }))
+   628→  }
+   629→
+   630→  const handleSave = async () => {
+   631→    setSaving(true)
+   632→    try {
+   633→      await saveSupplementary(localData)
+   634→      toast.success('Supplementary data saved')
+   635→    } catch {
+   636→      toast.error('Failed to save supplementary data')
+   637→    } finally {
+   638→      setSaving(false)
+   639→    }
+   640→  }
+   641→
+   642→  const d = localData
+   643→
+   644→  const FieldGroup = ({ title, children }: { title: string; children: React.ReactNode }) => (
+   645→    <Card>
+   646→      <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">{title}</CardTitle></CardHeader>
+   647→      <CardContent className="pt-0">{children}</CardContent>
+   648→    </Card>
+   649→  )
+   650→
+   651→  const YearInput = ({ label, currentKey, priorKey, tooltip }: { label: string; currentKey: string; priorKey: string; tooltip: string }) => (
+   652→    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   653→      <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   654→        <div className="space-y-1.5">
+   655→          <Label className="text-xs text-muted-foreground flex items-center gap-1">{label} (Current) <Info className="h-3 w-3" /></Label>
+   656→          <Input type="number" className="h-8 text-sm font-mono" value={d[currentKey] ?? 0} onChange={e => update(currentKey, parseFloat(e.target.value) || 0)} />
+   657→        </div>
+   658→      </TooltipTrigger><TooltipContent><p>{tooltip}</p></TooltipContent></Tooltip></TooltipProvider>
+   659→      <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   660→        <div className="space-y-1.5">
+   661→          <Label className="text-xs text-muted-foreground">{label} (Prior)</Label>
+   662→          <Input type="number" className="h-8 text-sm font-mono" value={d[priorKey] ?? 0} onChange={e => update(priorKey, parseFloat(e.target.value) || 0)} />
+   663→        </div>
+   664→      </TooltipTrigger><TooltipContent><p>{tooltip}</p></TooltipContent></Tooltip></TooltipProvider>
+   665→    </div>
+   666→  )
+   667→
+   668→  return (
+   669→    <motion.div {...pageVariants} className="py-4 space-y-4">
+   670→      <div className="flex items-center justify-between">
+   671→        <div>
+   672→          <h2 className="text-xl font-bold text-foreground">Supplementary Data</h2>
+   673→          <p className="text-sm text-muted-foreground mt-1">Additional data for cash flow reconciliation, PPE schedules, and disclosures.</p>
+   674→        </div>
+   675→        <Button onClick={handleSave} disabled={saving || isLoading} className="bg-primary text-primary-foreground gap-2">
+   676→          {saving || isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+   677→          Save
+   678→        </Button>
+   679→      </div>
+   680→
+   681→      <div className="grid gap-4">
+   682→        <FieldGroup title="Cash Flow Adjustments">
+   683→          <div className="grid gap-3">
+   684→            <YearInput label="Advances Recovered" currentKey="advancesRecovered" priorKey="advancesRecoveredPrior" tooltip="Amount recovered from advances made in prior periods, added back to revenue for cash flow" />
+   685→            <YearInput label="Deposits Received" currentKey="depositsReceived" priorKey="depositsReceivedPrior" tooltip="Refundable deposits received during the period - not revenue" />
+   686→            <YearInput label="Transfers to Treasury" currentKey="transfersToTreasury" priorKey="transfersToTreasuryPrior" tooltip="Amounts transferred to the Consolidated Fund - deducted from cash flow revenue" />
+   687→            <YearInput label="Revenue in Kind / Tax Waivers" currentKey="revenueInKindTaxWaivers" priorKey="revenueInKindTaxWaiversPrior" tooltip="Non-cash revenue such as tax waivers and in-kind grants - deducted from cash flow revenue" />
+   688→          </div>
+   689→        </FieldGroup>
+   690→
+   691→        <FieldGroup title="PPE Movement Schedule">
+   692→          <div className="grid gap-3">
+   693→            <YearInput label="Opening Balance (PPE)" currentKey="ppeOpeningCurrent" priorKey="ppeOpeningPrior" tooltip="Opening balance of property, plant and equipment" />
+   694→            <YearInput label="Additions (PPE)" currentKey="ppeAdditionsCurrent" priorKey="ppeAdditionsPrior" tooltip="New PPE acquired during the period" />
+   695→            <YearInput label="Disposals (PPE)" currentKey="ppeDisposalsCurrent" priorKey="ppeDisposalsPrior" tooltip="PPE disposed of during the period at cost" />
+   696→            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   697→              <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   698→                <div className="space-y-1.5">
+   699→                  <Label className="text-xs text-muted-foreground flex items-center gap-1">Depreciation Rate (%) <Info className="h-3 w-3" /></Label>
+   700→                  <Input type="number" className="h-8 text-sm font-mono" value={d.depreciationRate ?? 0} onChange={e => update('depreciationRate', parseFloat(e.target.value) || 0)} />
+   701→                </div>
+   702→              </TooltipTrigger><TooltipContent><p>Annual depreciation rate as a percentage</p></TooltipContent></Tooltip></TooltipProvider>
+   703→              <div className="space-y-1.5">
+   704→                <Label className="text-xs text-muted-foreground">Depreciation Method</Label>
+   705→                <Select value={d.depreciationMethod as string || 'straight-line'} onValueChange={v => update('depreciationMethod', v)}>
+   706→                  <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+   707→                  <SelectContent>
+   708→                    <SelectItem value="straight-line">Straight-Line</SelectItem>
+   709→                    <SelectItem value="reducing-balance">Reducing Balance</SelectItem>
+   710→                  </SelectContent>
+   711→                </Select>
+   712→              </div>
+   713→            </div>
+   714→          </div>
+   715→        </FieldGroup>
+   716→
+   717→        <FieldGroup title="Employee Costs (Note 9)">
+   718→          <div className="grid gap-3">
+   719→            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   720→              <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   721→                <div className="space-y-1.5">
+   722→                  <Label className="text-xs text-muted-foreground flex items-center gap-1">Employee Headcount <Info className="h-3 w-3" /></Label>
+   723→                  <Input type="number" className="h-8 text-sm font-mono" value={d.employeeCount ?? 0} onChange={e => update('employeeCount', parseInt(e.target.value) || 0)} />
+   724→                </div>
+   725→              </TooltipTrigger><TooltipContent><p>Total number of employees at period end</p></TooltipContent></Tooltip></TooltipProvider>
+   726→              <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   727→                <div className="space-y-1.5">
+   728→                  <Label className="text-xs text-muted-foreground">Salaries & Wages</Label>
+   729→                  <Input type="number" className="h-8 text-sm font-mono" value={d.salariesWages ?? 0} onChange={e => update('salariesWages', parseFloat(e.target.value) || 0)} />
+   730→                </div>
+   731→              </TooltipTrigger><TooltipContent><p>Total gross salaries and wages for the period</p></TooltipContent></Tooltip></TooltipProvider>
+   732→            </div>
+   733→            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+   734→              <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   735→                <div className="space-y-1.5">
+   736→                  <Label className="text-xs text-muted-foreground">Pension Contributions</Label>
+   737→                  <Input type="number" className="h-8 text-sm font-mono" value={d.pensionContributions ?? 0} onChange={e => update('pensionContributions', parseFloat(e.target.value) || 0)} />
+   738→                </div>
+   739→              </TooltipTrigger><TooltipContent><p>Employer pension contributions for the period</p></TooltipContent></Tooltip></TooltipProvider>
+   740→              <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   741→                <div className="space-y-1.5">
+   742→                  <Label className="text-xs text-muted-foreground">Payroll Taxes</Label>
+   743→                  <Input type="number" className="h-8 text-sm font-mono" value={d.payrollTaxes ?? 0} onChange={e => update('payrollTaxes', parseFloat(e.target.value) || 0)} />
+   744→                </div>
+   745→              </TooltipTrigger><TooltipContent><p>PAYE and other payroll taxes paid</p></TooltipContent></Tooltip></TooltipProvider>
+   746→              <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   747→                <div className="space-y-1.5">
+   748→                  <Label className="text-xs text-muted-foreground">Other Benefits</Label>
+   749→                  <Input type="number" className="h-8 text-sm font-mono" value={d.otherEmployeeBenefits ?? 0} onChange={e => update('otherEmployeeBenefits', parseFloat(e.target.value) || 0)} />
+   750→                </div>
+   751→              </TooltipTrigger><TooltipContent><p>Medical, housing, transport, and other employee benefits</p></TooltipContent></Tooltip></TooltipProvider>
+   752→            </div>
+   753→          </div>
+   754→        </FieldGroup>
+   755→
+   756→        <FieldGroup title="Prior Year Adjustments & Reserves">
+   757→          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+   758→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   759→              <div className="space-y-1.5">
+   760→                <Label className="text-xs text-muted-foreground flex items-center gap-1">Adjustments <Info className="h-3 w-3" /></Label>
+   761→                <Input type="number" className="h-8 text-sm font-mono" value={d.priorYearAdjustments ?? 0} onChange={e => update('priorYearAdjustments', parseFloat(e.target.value) || 0)} />
+   762→              </div>
+   763→            </TooltipTrigger><TooltipContent><p>Prior year error corrections and adjustments</p></TooltipContent></Tooltip></TooltipProvider>
+   764→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   765→              <div className="space-y-1.5">
+   766→                <Label className="text-xs text-muted-foreground">Revaluation Reserves</Label>
+   767→                <Input type="number" className="h-8 text-sm font-mono" value={d.revaluationReserves ?? 0} onChange={e => update('revaluationReserves', parseFloat(e.target.value) || 0)} />
+   768→              </div>
+   769→            </TooltipTrigger><TooltipContent><p>Asset revaluation surplus/deficit for the period</p></TooltipContent></Tooltip></TooltipProvider>
+   770→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   771→              <div className="space-y-1.5">
+   772→                <Label className="text-xs text-muted-foreground">Transfers to UCF</Label>
+   773→                <Input type="number" className="h-8 text-sm font-mono" value={d.transfersToUCF ?? 0} onChange={e => update('transfersToUCF', parseFloat(e.target.value) || 0)} />
+   774→              </div>
+   775→            </TooltipTrigger><TooltipContent><p>Transfers to the Uniform Clearing Fund</p></TooltipContent></Tooltip></TooltipProvider>
+   776→          </div>
+   777→        </FieldGroup>
+   778→
+   779→        <FieldGroup title="Signatory Details">
+   780→          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   781→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   782→              <div className="space-y-1.5">
+   783→                <Label className="text-xs text-muted-foreground flex items-center gap-1">Accounting Officer <Info className="h-3 w-3" /></Label>
+   784→                <Input className="h-8 text-sm" value={d.accountingOfficer ?? ''} onChange={e => update('accountingOfficer', e.target.value)} />
+   785→              </div>
+   786→            </TooltipTrigger><TooltipContent><p>Name of the Accounting Officer who signs off the statements</p></TooltipContent></Tooltip></TooltipProvider>
+   787→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   788→              <div className="space-y-1.5">
+   789→                <Label className="text-xs text-muted-foreground">Chief Finance Officer</Label>
+   790→                <Input className="h-8 text-sm" value={d.chiefFinanceOfficer ?? ''} onChange={e => update('chiefFinanceOfficer', e.target.value)} />
+   791→              </div>
+   792→            </TooltipTrigger><TooltipContent><p>Name of the CFO</p></TooltipContent></Tooltip></TooltipProvider>
+   793→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   794→              <div className="space-y-1.5">
+   795→                <Label className="text-xs text-muted-foreground">Internal Audit Head</Label>
+   796→                <Input className="h-8 text-sm" value={d.internalAuditHead ?? ''} onChange={e => update('internalAuditHead', e.target.value)} />
+   797→              </div>
+   798→            </TooltipTrigger><TooltipContent><p>Name of the Head of Internal Audit</p></TooltipContent></Tooltip></TooltipProvider>
+   799→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   800→              <div className="space-y-1.5">
+   801→                <Label className="text-xs text-muted-foreground">Signatory Date</Label>
+   802→                <Input type="date" className="h-8 text-sm" value={d.signatoryDate ?? ''} onChange={e => update('signatoryDate', e.target.value)} />
+   803→              </div>
+   804→            </TooltipTrigger><TooltipContent><p>Date the statements are signed</p></TooltipContent></Tooltip></TooltipProvider>
+   805→          </div>
+   806→        </FieldGroup>
+   807→
+   808→        <FieldGroup title="Accounting Policies & Exchange Rates">
+   809→          <div className="grid gap-3">
+   810→            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   811→              <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   812→                <div className="space-y-1.5">
+   813→                  <Label className="text-xs text-muted-foreground flex items-center gap-1">IPSAS Basis <Info className="h-3 w-3" /></Label>
+   814→                  <Select value={d.ipsasBasis as string || 'IPSAS Accrual Basis'} onValueChange={v => update('ipsasBasis', v)}>
+   815→                    <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+   816→                    <SelectContent>
+   817→                      <SelectItem value="IPSAS Accrual Basis">IPSAS Accrual Basis</SelectItem>
+   818→                      <SelectItem value="IPSAS Cash Basis">IPSAS Cash Basis</SelectItem>
+   819→                    </SelectContent>
+   820→                  </Select>
+   821→                </div>
+   822→              </TooltipTrigger><TooltipContent><p>The basis of accounting used</p></TooltipContent></Tooltip></TooltipProvider>
+   823→              <div className="space-y-1.5">
+   824→                <Label className="text-xs text-muted-foreground">USD Exchange Rate</Label>
+   825→                <Input type="number" className="h-8 text-sm font-mono" step="0.0001" value={d.exchangeRateUSD ?? 1} onChange={e => update('exchangeRateUSD', parseFloat(e.target.value) || 1)} />
+   826→              </div>
+   827→            </div>
+   828→            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   829→              <div className="space-y-1.5">
+   830→                <Label className="text-xs text-muted-foreground">EUR Exchange Rate</Label>
+   831→                <Input type="number" className="h-8 text-sm font-mono" step="0.0001" value={d.exchangeRateEUR ?? 1} onChange={e => update('exchangeRateEUR', parseFloat(e.target.value) || 1)} />
+   832→              </div>
+   833→            </div>
+   834→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   835→              <div className="space-y-1.5">
+   836→                <Label className="text-xs text-muted-foreground flex items-center gap-1">Accounting Policies (free text) <Info className="h-3 w-3" /></Label>
+   837→                <Textarea className="min-h-[80px] text-sm" value={d.accountingPolicies ?? ''} onChange={e => update('accountingPolicies', e.target.value)} placeholder="Describe the entity's significant accounting policies..." />
+   838→              </div>
+   839→            </TooltipTrigger><TooltipContent><p>Disclosure of significant accounting policies per IPSAS 1</p></TooltipContent></Tooltip></TooltipProvider>
+   840→          </div>
+   841→        </FieldGroup>
+   842→      </div>
+   843→
+   844→      <Card className="bg-muted/30">
+   845→        <CardContent className="py-3">
+   846→          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+   847→            <Button variant="outline" size="sm" onClick={() => setWizardStep(3)} className="gap-1.5">
+   848→              <ArrowLeft className="h-4 w-4" /> Back to Budget
+   849→            </Button>
+   850→            <Button onClick={async () => { await handleSave(); setWizardStep(5); }} className="bg-primary text-primary-foreground gap-2">
+   851→              Continue to Review <ArrowRight className="h-4 w-4" />
+   852→            </Button>
+   853→          </div>
+   854→        </CardContent>
+   855→      </Card>
+   856→    </motion.div>
+   857→  )
+   858→}
+   859→
+   860→// ═══════════════════════════════════════════════════════════════════
+   861→// STEP 4: REVIEW & VALIDATE
+   862→// ═══════════════════════════════════════════════════════════════════
+   863→
+   864→function Step4Review() {
+   865→  const { entries, complianceData, fetchCompliance, auditLog, fetchAuditLog, activeReportId, autoBalance, isLoading, wizardStep, setWizardStep, saveTrialBalance } = useFinancialStore()
+   866→  const [loadingCompliance, setLoadingCompliance] = useState(false)
+   867→  const [loadingAudit, setLoadingAudit] = useState(false)
+   868→  const [autoBalancing, setAutoBalancing] = useState(false)
+   869→
+   870→  const totalDr = entries.reduce((s, e) => s + (e.debitCurrent || 0), 0)
+   871→  const totalCr = entries.reduce((s, e) => s + (e.creditCurrent || 0), 0)
+   872→  const tbBalanced = Math.abs(totalDr - totalCr) < 0.01
+   873→  const allMapped = entries.every(e => e.category && e.category.trim() !== '')
+   874→  const hasBudget = entries.some(e => e.budgetInitial > 0 || e.budgetAdjusted > 0)
+   875→  const hasPrior = entries.some(e => e.debitPrior !== 0 || e.creditPrior !== 0)
+   876→
+   877→  const handleRunCompliance = async () => {
+   878→    setLoadingCompliance(true)
+   879→    try {
+   880→      await saveTrialBalance()
+   881→      await fetchCompliance()
+   882→      toast.success('Compliance check completed')
+   883→    } catch {
+   884→      toast.error('Failed to run compliance check')
+   885→    } finally {
+   886→      setLoadingCompliance(false)
+   887→    }
+   888→  }
+   889→
+   890→  const handleLoadAudit = async () => {
+   891→    setLoadingAudit(true)
+   892→    try {
+   893→      await fetchAuditLog()
+   894→    } catch {
+   895→      // silent
+   896→    } finally {
+   897→      setLoadingAudit(false)
+   898→    }
+   899→  }
+   900→
+   901→  const handleAutoBalance = async () => {
+   902→    setAutoBalancing(true)
+   903→    try {
+   904→      await autoBalance()
+   905→      toast.success('Auto-balanced successfully')
+   906→    } catch {
+   907→      toast.error('Failed to auto-balance')
+   908→    } finally {
+   909→      setAutoBalancing(false)
+   910→    }
+   911→  }
+   912→
+   913→  useEffect(() => {
+   914→    if (activeReportId) handleLoadAudit()
+   915→  }, [activeReportId])
+   916→
+   917→  const validationItems = [
+   918→    { label: 'Trial Balance balanced', pass: tbBalanced },
+   919→    { label: 'All categories mapped', pass: allMapped },
+   920→    { label: 'Budget data provided', pass: hasBudget },
+   921→    { label: 'Prior year data present', pass: hasPrior },
+   922→    { label: `Entries count: ${entries.length}`, pass: entries.length > 0 },
+   923→  ]
+   924→
+   925→  const complianceScore = complianceData?.score ?? 0
+   926→
+   927→  return (
+   928→    <motion.div {...pageVariants} className="py-4 space-y-4">
+   929→      <div className="flex items-center justify-between">
+   930→        <div>
+   931→          <h2 className="text-xl font-bold text-foreground">Review & Validate</h2>
+   932→          <p className="text-sm text-muted-foreground mt-1">Validate your data and check IPSAS compliance before generating statements.</p>
+   933→        </div>
+   934→        <div className="flex gap-2">
+   935→          <Button variant="outline" size="sm" onClick={handleLoadAudit} disabled={loadingAudit} className="gap-1.5">
+   936→            {loadingAudit ? <Loader2 className="h-4 w-4 animate-spin" /> : <History className="h-4 w-4" />}
+   937→            Refresh Audit Log
+   938→          </Button>
+   939→          <Button onClick={handleRunCompliance} disabled={loadingCompliance || isLoading} className="bg-primary text-primary-foreground gap-2">
+   940→            {loadingCompliance || isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Shield className="h-4 w-4" />}
+   941→            Run Compliance Check
+   942→          </Button>
+   943→        </div>
+   944→      </div>
+   945→
+   946→      <div className="grid gap-4 lg:grid-cols-3">
+   947→        {/* Validation Panel */}
+   948→        <Card className="lg:col-span-1">
+   949→          <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">Validation Status</CardTitle></CardHeader>
+   950→          <CardContent className="pt-0 space-y-2">
+   951→            {validationItems.map((item, i) => (
+   952→              <div key={i} className="flex items-center gap-2 text-sm">
+   953→                {item.pass
+   954→                  ? <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+   955→                  : <X className="h-4 w-4 text-destructive flex-shrink-0" />}
+   956→                <span className={item.pass ? 'text-foreground' : 'text-destructive'}>{item.label}</span>
+   957→              </div>
+   958→            ))}
+   959→            {!tbBalanced && (
+   960→              <Button variant="outline" size="sm" className="w-full mt-3 gap-1.5" onClick={handleAutoBalance} disabled={autoBalancing}>
+   961→                {autoBalancing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+   962→                Auto-Balance
+   963→              </Button>
+   964→            )}
+   965→          </CardContent>
+   966→        </Card>
+   967→
+   968→        {/* Compliance Score + Checklist */}
+   969→        <Card className="lg:col-span-1">
+   970→          <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">IPSAS Compliance</CardTitle></CardHeader>
+   971→          <CardContent className="pt-0">
+   972→            {complianceData ? (
+   973→              <div className="space-y-4">
+   974→                <div className="flex flex-col items-center">
+   975→                  <div className="relative h-24 w-24">
+   976→                    <svg className="h-24 w-24 -rotate-90" viewBox="0 0 100 100">
+   977→                      <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="8" className="text-muted" />
+   978→                      <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="8" className={complianceScore >= 80 ? 'text-primary' : complianceScore >= 50 ? 'text-yellow-500' : 'text-destructive'}
+   979→                        strokeDasharray={`${complianceScore * 2.64} 264`} strokeLinecap="round" />
+   980→                    </svg>
+   981→                    <div className="absolute inset-0 flex items-center justify-center">
+   982→                      <span className="text-2xl font-bold text-foreground">{complianceScore}%</span>
+   983→                    </div>
+   984→                  </div>
+   985→                  <p className="text-xs text-muted-foreground mt-2">{complianceData.metCount}/{complianceData.totalCount} requirements met</p>
+   986→                </div>
+   987→                <ScrollArea className="h-48 custom-scrollbar">
+   988→                  <div className="space-y-1.5 pr-2">
+   989→                    {complianceData.checklist.map((item: ComplianceItem) => (
+   990→                      <div key={item.id} className="flex items-start gap-2 text-xs">
+   991→                        {item.status === 'met'
+   992→                          ? <CheckCircle2 className="h-3.5 w-3.5 text-primary mt-0.5 flex-shrink-0" />
+   993→                          : item.status === 'partial'
+   994→                            ? <AlertTriangle className="h-3.5 w-3.5 text-yellow-500 mt-0.5 flex-shrink-0" />
+   995→                            : <X className="h-3.5 w-3.5 text-destructive mt-0.5 flex-shrink-0" />}
+   996→                        <div>
+   997→                          <p className="text-foreground font-medium">{item.requirement}</p>
+   998→                          <p className="text-muted-foreground">{item.ipsasReference}</p>
+   999→                        </div>
+  1000→                      </div>
+  1001→                    ))}
+  1002→                  </div>
+  1003→                </ScrollArea>
+  1004→              </div>
+  1005→            ) : (
+  1006→              <div className="flex flex-col items-center py-8 text-center text-muted-foreground">
+  1007→                <Shield className="h-10 w-10 mb-2 opacity-30" />
+  1008→                <p className="text-sm">Click &quot;Run Compliance Check&quot; to validate IPSAS requirements.</p>
+  1009→              </div>
+  1010→            )}
+  1011→          </CardContent>
+  1012→        </Card>
+  1013→
+  1014→        {/* Audit Trail */}
+  1015→        <Card className="lg:col-span-1">
+  1016→          <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">Audit Trail</CardTitle></CardHeader>
+  1017→          <CardContent className="pt-0">
+  1018→            {auditLog.length > 0 ? (
+  1019→              <ScrollArea className="h-64 custom-scrollbar">
+  1020→                <div className="space-y-3 pr-2">
+  1021→                  {auditLog.slice(0, 15).map((entry: AuditLogEntry) => (
+  1022→                    <div key={entry.id} className="flex items-start gap-2 text-xs">
+  1023→                      <Clock className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+  1024→                      <div className="flex-1 min-w-0">
+  1025→                        <p className="text-foreground font-medium truncate">{entry.action.replace(/_/g, ' ')}</p>
+  1026→                        <p className="text-muted-foreground">{entry.field} {entry.oldValue && `— ${entry.oldValue} → ${entry.newValue}`}</p>
+  1027→                        <p className="text-muted-foreground/60">{new Date(entry.timestamp).toLocaleString()}</p>
+  1028→                      </div>
+  1029→                    </div>
+  1030→                  ))}
+  1031→                </div>
+  1032→              </ScrollArea>
+  1033→            ) : (
+  1034→              <div className="flex flex-col items-center py-8 text-center text-muted-foreground">
+  1035→                <History className="h-10 w-10 mb-2 opacity-30" />
+  1036→                <p className="text-sm">No audit entries yet.</p>
+  1037→              </div>
+  1038→            )}
+  1039→          </CardContent>
+  1040→        </Card>
+  1041→      </div>
+  1042→
+  1043→      <Card className="bg-muted/30">
+  1044→        <CardContent className="py-3">
+  1045→          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+  1046→            <Button variant="outline" size="sm" onClick={() => setWizardStep(4)} className="gap-1.5">
+  1047→              <ArrowLeft className="h-4 w-4" /> Back
+  1048→            </Button>
+  1049→            <Button onClick={() => setWizardStep(6)} className="bg-primary text-primary-foreground gap-2">
+  1050→              Continue to Generate <ArrowRight className="h-4 w-4" />
+  1051→            </Button>
+  1052→          </div>
+  1053→        </CardContent>
+  1054→      </Card>
+  1055→    </motion.div>
+  1056→  )
+  1057→}
+  1058→
+  1059→// ═══════════════════════════════════════════════════════════════════
+  1060→// STEP 5: GENERATE & EXPORT
+  1061→// ═══════════════════════════════════════════════════════════════════
+  1062→
+  1063→function Step5Generate() {
+  1064→  const {
+  1065→    generatedStatements, entityConfig, activeReportId, generateStatements,
+  1066→    statementSubTab, setStatementSubTab, isLoading, wizardStep, setWizardStep,
+  1067→    approvalWorkflow, fetchApprovalWorkflow, advanceApproval,
+  1068→    versions, fetchVersions, createVersion,
+  1069→  } = useFinancialStore()
+  1070→  const [isExporting, setIsExporting] = useState(false)
+  1071→  const [approverName, setApproverName] = useState('')
+  1072→  const [versionLabel, setVersionLabel] = useState('')
+  1073→  const [showVersionDialog, setShowVersionDialog] = useState(false)
+  1074→  const [showPdfPreview, setShowPdfPreview] = useState(false)
+  1075→
+  1076→  useEffect(() => {
+  1077→    if (activeReportId) {
+  1078→      fetchApprovalWorkflow()
+  1079→      fetchVersions()
+  1080→    }
+  1081→  }, [activeReportId, fetchApprovalWorkflow, fetchVersions])
+  1082→
+  1083→  const handleGenerate = async () => {
+  1084→    try {
+  1085→      await generateStatements()
+  1086→      toast.success('Statements generated successfully')
+  1087→    } catch {
+  1088→      toast.error('Failed to generate statements')
+  1089→    }
+  1090→  }
+  1091→
+  1092→  const handleDownloadPdf = async () => {
+  1093→    if (!activeReportId) return
+  1094→    setIsExporting(true)
+  1095→    try {
+  1096→      const res = await fetch(`/api/reports/${activeReportId}/pdf`)
+  1097→      if (!res.ok) throw new Error('PDF generation failed')
+  1098→      const blob = await res.blob()
+  1099→      const url = URL.createObjectURL(blob)
+  1100→      const a = document.createElement('a')
+  1101→      a.href = url
+  1102→      a.download = `${entityConfig.name.replace(/\s+/g, '_')}_Financial_Statements.pdf`
+  1103→      document.body.appendChild(a)
+  1104→      a.click()
+  1105→      document.body.removeChild(a)
+  1106→      URL.revokeObjectURL(url)
+  1107→      toast.success('PDF downloaded successfully')
+  1108→    } catch {
+  1109→      toast.error('Failed to generate PDF')
+  1110→    } finally {
+  1111→      setIsExporting(false)
+  1112→    }
+  1113→  }
+  1114→
+  1115→  const handleDownloadExcel = async () => {
+  1116→    if (!activeReportId) return
+  1117→    setIsExporting(true)
+  1118→    try {
+  1119→      const res = await fetch(`/api/reports/${activeReportId}/export/excel`)
+  1120→      if (!res.ok) throw new Error('Excel generation failed')
+  1121→      const blob = await res.blob()
+  1122→      const url = URL.createObjectURL(blob)
+  1123→      const a = document.createElement('a')
+  1124→      a.href = url
+  1125→      a.download = `${entityConfig.name.replace(/\s+/g, '_')}_Financial_Statements.xlsx`
+  1126→      document.body.appendChild(a)
+  1127→      a.click()
+  1128→      document.body.removeChild(a)
+  1129→      URL.revokeObjectURL(url)
+  1130→      toast.success('Excel downloaded successfully')
+  1131→    } catch {
+  1132→      toast.error('Failed to generate Excel')
+  1133→    } finally {
+  1134→      setIsExporting(false)
+  1135→    }
+  1136→  }
+  1137→
+  1138→  const handleAdvanceApproval = async () => {
+  1139→    try {
+  1140→      await advanceApproval(approverName || 'system')
+  1141→      setApproverName('')
+  1142→      toast.success('Approval advanced')
+  1143→    } catch {
+  1144→      toast.error('Failed to advance approval')
+  1145→    }
+  1146→  }
+  1147→
+  1148→  const handleCreateVersion = async () => {
+  1149→    try {
+  1150→      await createVersion(versionLabel)
+  1151→      setShowVersionDialog(false)
+  1152→      setVersionLabel('')
+  1153→      toast.success('Version created successfully')
+  1154→    } catch {
+  1155→      toast.error('Failed to create version')
+  1156→    }
+  1157→  }
+  1158→
+  1159→  const subTabs: { value: StatementSubTab; label: string }[] = [
+  1160→    { value: 'sfp', label: 'Fin. Performance' },
+  1161→    { value: 'balance-sheet', label: 'Fin. Position' },
+  1162→    { value: 'changes-na', label: 'Changes in NA' },
+  1163→    { value: 'cash-flow', label: 'Cash Flow' },
+  1164→    { value: 'revenue-recon', label: 'Revenue Recon' },
+  1165→    { value: 'cash-recon', label: 'Cash Recon' },
+  1166→    { value: 'budget-variance', label: 'Budget Variance' },
+  1167→  ]
+  1168→
+  1169→  const approvalSteps = ['draft', 'preparer_review', 'management_review', 'cfo_approval', 'final']
+  1170→  const currentStepIdx = approvalSteps.indexOf(approvalWorkflow?.currentStep || 'draft')
+  1171→
+  1172→  if (!generatedStatements) {
+  1173→    return (
+  1174→      <motion.div {...pageVariants} className="py-6 space-y-6">
+  1175→        <div className="flex items-center justify-between">
+  1176→          <div>
+  1177→            <h2 className="text-xl font-bold text-foreground">Generate & Export</h2>
+  1178→            <p className="text-sm text-muted-foreground mt-1">Generate financial statements and export to PDF or Excel.</p>
+  1179→          </div>
+  1180→          <Button variant="outline" size="sm" onClick={() => setWizardStep(5)} className="gap-1.5">
+  1181→            <ArrowLeft className="h-4 w-4" /> Back
+  1182→          </Button>
+  1183→        </div>
+  1184→
+  1185→        <div className="flex flex-col items-center justify-center py-16 text-center">
+  1186→          <div className="rounded-full bg-primary/10 p-6 mb-6">
+  1187→            <Sparkles className="h-12 w-12 text-primary" />
+  1188→          </div>
+  1189→          <h2 className="text-xl font-semibold text-foreground mb-2">Generate Financial Statements</h2>
+  1190→          <p className="text-muted-foreground mb-6 max-w-md">Generate IPSAS-compliant financial statements including the SFP, Balance Sheet, Cash Flow, and supporting schedules.</p>
+  1191→          <Button onClick={handleGenerate} disabled={isLoading} className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2" size="lg">
+  1192→            {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Play className="h-5 w-5" />}
+  1193→            Generate Financial Statements
+  1194→          </Button>
+  1195→        </div>
+  1196→
+  1197→        {/* Version History */}
+  1198→        {versions.length > 1 && (
+  1199→          <Card>
+  1200→            <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">Version History</CardTitle></CardHeader>
+  1201→            <CardContent className="pt-0">
+  1202→              <div className="space-y-2">
+  1203→                {versions.map((v: VersionEntry) => (
+  1204→                  <div key={v.id} className={`flex items-center justify-between p-2 rounded-lg text-sm ${v.id === activeReportId ? 'bg-primary/10 border border-primary/20' : 'bg-muted/50'}`}>
+  1205→                    <div className="flex items-center gap-3">
+  1206→                      <GitBranch className="h-4 w-4 text-muted-foreground" />
+  1207→                      <div>
+  1208→                        <p className="font-medium text-foreground">{v.versionLabel || `Version ${v.version}`}</p>
+  1209→                        <p className="text-xs text-muted-foreground">{new Date(v.createdAt).toLocaleString()} · {v._count.entries} entries</p>
+  1210→                      </div>
+  1211→                    </div>
+  1212→                    <Badge variant="outline" className={statusColor(v.status)}>{v.status}</Badge>
+  1213→                  </div>
+  1214→                ))}
+  1215→              </div>
+  1216→            </CardContent>
+  1217→          </Card>
+  1218→        )}
+  1219→      </motion.div>
+  1220→    )
+  1221→  }
+  1222→
+  1223→  const hasErrors = generatedStatements.validationErrors && generatedStatements.validationErrors.length > 0
+  1224→
+  1225→  return (
+  1226→    <motion.div {...pageVariants} className="py-4 space-y-4">
+  1227→      <div className="flex items-center justify-between">
+  1228→        <div>
+  1229→          <h2 className="text-xl font-bold text-foreground">Generate & Export</h2>
+  1230→          <p className="text-sm text-muted-foreground mt-1">Review generated statements and export.</p>
+  1231→        </div>
+  1232→        <div className="flex gap-2">
+  1233→          <Dialog open={showVersionDialog} onOpenChange={setShowVersionDialog}>
+  1234→            <DialogTrigger asChild>
+  1235→              <Button variant="outline" size="sm" className="gap-1.5">
+  1236→                <GitBranch className="h-4 w-4" /> Save Version
+  1237→              </Button>
+  1238→            </DialogTrigger>
+  1239→            <DialogContent>
+  1240→              <DialogHeader>
+  1241→                <DialogTitle>Create New Version</DialogTitle>
+  1242→                <DialogDescription>Save a snapshot of the current report as a new version.</DialogDescription>
+  1243→              </DialogHeader>
+  1244→              <div className="space-y-3">
+  1245→                <div className="space-y-1.5">
+  1246→                  <Label className="text-xs text-muted-foreground">Version Label</Label>
+  1247→                  <Input value={versionLabel} onChange={e => setVersionLabel(e.target.value)} placeholder="e.g., v2 - Draft revisions" />
+  1248→                </div>
+  1249→              </div>
+  1250→              <DialogFooter>
+  1251→                <Button variant="outline" onClick={() => setShowVersionDialog(false)}>Cancel</Button>
+  1252→                <Button onClick={handleCreateVersion} disabled={isLoading} className="bg-primary text-primary-foreground">Create Version</Button>
+  1253→              </DialogFooter>
+  1254→            </DialogContent>
+  1255→          </Dialog>
+  1256→          <Button variant="outline" size="sm" onClick={handleGenerate} disabled={isLoading} className="gap-1.5">
+  1257→            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Re-generate
+  1258→          </Button>
+  1259→        </div>
+  1260→      </div>
+  1261→
+  1262→      {/* Validation alerts */}
+  1263→      {hasErrors ? (
+  1264→        <Alert variant="destructive">
+  1265→          <AlertTriangle className="h-4 w-4" />
+  1266→          <AlertTitle>{generatedStatements.validationErrors.length} Validation Issue(s)</AlertTitle>
+  1267→          <AlertDescription><ul className="mt-2 space-y-1 list-disc list-inside text-sm">{generatedStatements.validationErrors.map((err, i) => <li key={i}>{err}</li>)}</ul></AlertDescription>
+  1268→        </Alert>
+  1269→      ) : (
+  1270→        <Alert className="border-primary/30 bg-primary/5">
+  1271→          <CheckCircle2 className="h-4 w-4 text-primary" />
+  1272→          <AlertTitle className="text-primary">All checks passed</AlertTitle>
+  1273→          <AlertDescription className="text-muted-foreground">The generated statements have passed all validation checks.</AlertDescription>
+  1274→        </Alert>
+  1275→      )}
+  1276→
+  1277→      {/* Summary Cards */}
+  1278→      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+  1279→        {[
+  1280→          { label: 'Revenue', value: generatedStatements.sfp.totalRevenueCurrent, prior: generatedStatements.sfp.totalRevenuePrior },
+  1281→          { label: 'Expenses', value: generatedStatements.sfp.totalExpensesCurrent, prior: generatedStatements.sfp.totalExpensesPrior },
+  1282→          { label: 'Surplus', value: generatedStatements.sfp.surplusCurrent, prior: generatedStatements.sfp.surplusPrior, color: generatedStatements.sfp.surplusCurrent >= 0 ? 'text-primary' : 'text-destructive' },
+  1283→          { label: 'Assets', value: generatedStatements.balanceSheet.totalAssetsCurrent, prior: generatedStatements.balanceSheet.totalAssetsPrior },
+  1284→          { label: 'Liabilities', value: generatedStatements.balanceSheet.totalLiabilitiesCurrent, prior: generatedStatements.balanceSheet.totalLiabilitiesPrior },
+  1285→          { label: 'Net Assets', value: generatedStatements.balanceSheet.netAssetsCurrent, prior: generatedStatements.balanceSheet.netAssetsPrior },
+  1286→        ].map((item) => (
+  1287→          <Card key={item.label} className="p-3">
+  1288→            <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">{item.label}</p>
+  1289→            <p className={`text-lg font-bold font-mono ${item.color || 'text-foreground'}`}>{entityConfig.currency} {formatNum(item.value)}</p>
+  1290→            <p className="text-[10px] text-muted-foreground">Prior: {formatNum(item.prior)}</p>
+  1291→          </Card>
+  1292→        ))}
+  1293→      </div>
+  1294→
+  1295→      {/* Sub-tabs */}
+  1296→      <div className="overflow-x-auto">
+  1297→        <div className="flex gap-1 min-w-max">
+  1298→          {subTabs.map((tab) => (
+  1299→            <button key={tab.value} onClick={() => setStatementSubTab(tab.value)}
+  1300→              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${statementSubTab === tab.value ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>
+  1301→              {tab.label}
+  1302→            </button>
+  1303→          ))}
+  1304→        </div>
+  1305→      </div>
+  1306→
+  1307→      {/* Statement content */}
+  1308→      {statementSubTab === 'sfp' && <SFPSection data={generatedStatements.sfp} currency={entityConfig.currency} />}
+  1309→      {statementSubTab === 'balance-sheet' && <BalanceSheetSection data={generatedStatements.balanceSheet} currency={entityConfig.currency} />}
+  1310→      {statementSubTab === 'changes-na' && <ChangesNASection data={generatedStatements.changesInNA} currency={entityConfig.currency} />}
+  1311→      {statementSubTab === 'cash-flow' && <CashFlowSection data={generatedStatements.cashFlow} currency={entityConfig.currency} />}
+  1312→      {statementSubTab === 'revenue-recon' && <RevenueReconSection data={generatedStatements.revenueReconciliation} currency={entityConfig.currency} />}
+  1313→      {statementSubTab === 'cash-recon' && <CashReconSection data={generatedStatements.cashReconciliation} currency={entityConfig.currency} />}
+  1314→      {statementSubTab === 'budget-variance' && <BudgetVarianceSection data={generatedStatements.budgetVariance} currency={entityConfig.currency} />}
+  1315→
+  1316→      {/* Export & Approval Row */}
+  1317→      <div className="grid gap-4 lg:grid-cols-2">
+  1318→        {/* Export Card */}
+  1319→        <Card>
+  1320→          <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">Export</CardTitle></CardHeader>
+  1321→          <CardContent className="pt-0 space-y-3">
+  1322→            <div className="flex gap-2">
+  1323→              <Button onClick={handleDownloadPdf} disabled={isExporting} className="flex-1 bg-primary text-primary-foreground gap-2">
+  1324→                {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} PDF
+  1325→              </Button>
+  1326→              <Button onClick={handleDownloadExcel} disabled={isExporting} variant="outline" className="flex-1 gap-2">
+  1327→                {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />} Excel
+  1328→              </Button>
+  1329→            </div>
+  1330→            <Button variant="ghost" size="sm" className="w-full gap-1.5" onClick={() => setShowPdfPreview(!showPdfPreview)}>
+  1331→              <Eye className="h-4 w-4" /> {showPdfPreview ? 'Hide' : 'Show'} PDF Preview
+  1332→            </Button>
+  1333→            {showPdfPreview && activeReportId && (
+  1334→              <div className="border border-border rounded-lg overflow-hidden">
+  1335→                <iframe src={`/api/reports/${activeReportId}/pdf`} className="w-full h-[600px]" title="PDF Preview" />
+  1336→              </div>
+  1337→            )}
+  1338→          </CardContent>
+  1339→        </Card>
+  1340→
+  1341→        {/* Approval Workflow Card */}
+  1342→        <Card>
+  1343→          <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">Approval Workflow</CardTitle></CardHeader>
+  1344→          <CardContent className="pt-0 space-y-3">
+  1345→            <div className="flex items-center gap-1">
+  1346→              {approvalSteps.map((step, i) => (
+  1347→                <React.Fragment key={step}>
+  1348→                  <div className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium ${i <= currentStepIdx ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+  1349→                    {i < currentStepIdx ? <CheckCircle2 className="h-3 w-3" /> : <CircleDot className="h-3 w-3" />}
+  1350→                    {step.replace(/_/g, ' ')}
+  1351→                  </div>
+  1352→                  {i < approvalSteps.length - 1 && <ChevronRight className="h-3 w-3 text-muted-foreground" />}
+  1353→                </React.Fragment>
+  1354→              ))}
+  1355→            </div>
+  1356→            {approvalWorkflow && (
+  1357→              <div className="text-xs text-muted-foreground space-y-1">
+  1358→                {approvalWorkflow.preparerName && <p>Preparer: {approvalWorkflow.preparerName} {approvalWorkflow.preparerApprovedAt && `· ${new Date(approvalWorkflow.preparerApprovedAt).toLocaleDateString()}`}</p>}
+  1359→                {approvalWorkflow.reviewerName && <p>Reviewer: {approvalWorkflow.reviewerName} {approvalWorkflow.reviewerApprovedAt && `· ${new Date(approvalWorkflow.reviewerApprovedAt).toLocaleDateString()}`}</p>}
+  1360→                {approvalWorkflow.cfoName && <p>CFO: {approvalWorkflow.cfoName} {approvalWorkflow.cfoApprovedAt && `· ${new Date(approvalWorkflow.cfoApprovedAt).toLocaleDateString()}`}</p>}
+  1361→              </div>
+  1362→            )}
+  1363→            <div className="flex gap-2">
+  1364→              <Input placeholder="Approver name" value={approverName} onChange={e => setApproverName(e.target.value)} className="h-8 text-sm flex-1" />
+  1365→              <Button onClick={handleAdvanceApproval} disabled={currentStepIdx >= approvalSteps.length - 1 || isLoading} size="sm" className="bg-primary text-primary-foreground gap-1">
+  1366→                <ArrowRight className="h-3.5 w-3.5" /> Advance
+  1367→              </Button>
+  1368→            </div>
+  1369→          </CardContent>
+  1370→        </Card>
+  1371→      </div>
+  1372→
+  1373→      {/* Version History */}
+  1374→      {versions.length > 1 && (
+  1375→        <Card>
+  1376→          <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">Version History</CardTitle></CardHeader>
+  1377→          <CardContent className="pt-0">
+  1378→            <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+  1379→              {versions.map((v: VersionEntry) => (
+  1380→                <div key={v.id} className={`flex items-center justify-between p-2 rounded-lg text-sm ${v.id === activeReportId ? 'bg-primary/10 border border-primary/20' : 'hover:bg-muted/50'}`}>
+  1381→                  <div className="flex items-center gap-3">
+  1382→                    <GitBranch className="h-4 w-4 text-muted-foreground" />
+  1383→                    <div>
+  1384→                      <p className="font-medium text-foreground">{v.versionLabel || `Version ${v.version}`}</p>
+  1385→                      <p className="text-xs text-muted-foreground">{new Date(v.createdAt).toLocaleString()} · {v._count.entries} entries</p>
+  1386→                    </div>
+  1387→                  </div>
+  1388→                  <div className="flex items-center gap-2">
+  1389→                    <Badge variant="outline" className={statusColor(v.status)}>{v.status}</Badge>
+  1390→                    {v.id !== activeReportId && (
+  1391→                      <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={async () => {
+  1392→                        const { loadReport } = useFinancialStore.getState()
+  1393→                        try { await loadReport(v.id); toast.success('Version loaded') } catch { toast.error('Failed to load version') }
+  1394→                      }}>Load</Button>
+  1395→                    )}
+  1396→                  </div>
+  1397→                </div>
+  1398→              ))}
+  1399→            </div>
+  1400→          </CardContent>
+  1401→        </Card>
+  1402→      )}
+  1403→
+  1404→      <Card className="bg-muted/30">
+  1405→        <CardContent className="py-3">
+  1406→          <Button variant="outline" size="sm" onClick={() => setWizardStep(5)} className="gap-1.5">
+  1407→            <ArrowLeft className="h-4 w-4" /> Back to Review
+  1408→          </Button>
+  1409→        </CardContent>
+  1410→      </Card>
+  1411→    </motion.div>
+  1412→  )
+  1413→}
+  1414→
+  1415→// ═══════════════════════════════════════════════════════════════════
+  1416→// ANALYTICS PANEL (Sheet)
+  1417→// ═══════════════════════════════════════════════════════════════════
+  1418→
+  1419→function AnalyticsPanel() {
+  1420→  const { analyticsData, fetchAnalytics, entries, activeReportId, generatedStatements, entityConfig } = useFinancialStore()
+  1421→  const [loading, setLoading] = useState(false)
+  1422→
+  1423→  const load = async () => {
+  1424→    setLoading(true)
+  1425→    try { await fetchAnalytics() } catch { /* silent */ } finally { setLoading(false) }
+  1426→  }
+  1427→
+  1428→  useEffect(() => {
+  1429→    if (activeReportId && !analyticsData) load()
+  1430→  }, [activeReportId])
+  1431→
+  1432→  const gs = generatedStatements
+  1433→  const totalRevenue = gs?.sfp.totalRevenueCurrent ?? 0
+  1434→  const totalExpenses = gs?.sfp.totalExpensesCurrent ?? 0
+  1435→  const surplus = gs?.sfp.surplusCurrent ?? 0
+  1436→  const cashBalance = entries.reduce((s, e) => e.category === 'cash' ? s + e.debitCurrent - e.creditCurrent : s, 0)
+  1437→
+  1438→  // Build bar chart data
+  1439→  const barData = analyticsData?.trends ? [
+  1440→    { name: 'Revenue', current: totalRevenue, prior: gs?.sfp.totalRevenuePrior ?? 0, change: analyticsData.trends.revenueChange },
+  1441→    { name: 'Expenses', current: totalExpenses, prior: gs?.sfp.totalExpensesPrior ?? 0, change: analyticsData.trends.expenseChange },
+  1442→  ] : []
+  1443→
+  1444→  const ratios = analyticsData?.ratios
+  1445→
+  1446→  return (
+  1447→    <Sheet open={true} onOpenChange={(open) => useFinancialStore.getState().setShowAnalytics(open)}>
+  1448→      <SheetContent side="right" className="w-[400px] sm:w-[480px] overflow-y-auto custom-scrollbar">
+  1449→        <SheetHeader>
+  1450→          <SheetTitle className="flex items-center gap-2">
+  1451→            <BarChart3 className="h-5 w-5 text-primary" /> Analytics Dashboard
+  1452→          </SheetTitle>
+  1453→        </SheetHeader>
+  1454→        <div className="mt-4 space-y-4">
+  1455→          {loading ? (
+  1456→            <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+  1457→          ) : !analyticsData ? (
+  1458→            <div className="text-center py-12 text-muted-foreground">
+  1459→              <BarChart3 className="h-10 w-10 mx-auto mb-2 opacity-30" />
+  1460→              <p className="text-sm">Generate statements first to see analytics.</p>
+  1461→            </div>
+  1462→          ) : (
+  1463→            <>
+  1464→              {/* KPI Cards */}
+  1465→              <div className="grid grid-cols-2 gap-3">
+  1466→                {[
+  1467→                  { label: 'Total Revenue', value: `${entityConfig.currency} ${formatNum(totalRevenue)}`, icon: <TrendingUp className="h-4 w-4 text-primary" /> },
+  1468→                  { label: 'Total Expenses', value: `${entityConfig.currency} ${formatNum(totalExpenses)}`, icon: <TrendingDown className="h-4 w-4 text-destructive" /> },
+  1469→                  { label: 'Net Surplus', value: `${entityConfig.currency} ${formatNum(surplus)}`, icon: surplus >= 0 ? <TrendingUp className="h-4 w-4 text-primary" /> : <TrendingDown className="h-4 w-4 text-destructive" /> },
+  1470→                  { label: 'Cash Balance', value: `${entityConfig.currency} ${formatNum(cashBalance)}`, icon: <Banknote className="h-4 w-4 text-primary" /> },
+  1471→                ].map(kpi => (
+  1472→                  <Card key={kpi.label} className="p-3">
+  1473→                    <div className="flex items-center gap-2 mb-1">
+  1474→                      {kpi.icon}
+  1475→                      <span className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">{kpi.label}</span>
+  1476→                    </div>
+  1477→                    <p className="text-sm font-bold font-mono text-foreground">{kpi.value}</p>
+  1478→                  </Card>
+  1479→                ))}
+  1480→              </div>
+  1481→
+  1482→              {/* Key Ratios */}
+  1483→              {ratios && (
+  1484→                <Card className="p-4">
+  1485→                  <p className="text-xs font-semibold text-foreground mb-3">Key Financial Ratios</p>
+  1486→                  <div className="grid grid-cols-2 gap-2">
+  1487→                    {[
+  1488→                      { label: 'Surplus Ratio', value: `${ratios.surplusRatio?.toFixed(1)}%` },
+  1489→                      { label: 'Expense Ratio', value: `${ratios.expenseRatio?.toFixed(1)}%` },
+  1490→                      { label: 'Current Ratio', value: `${ratios.currentRatio?.toFixed(2)}x` },
+  1491→                      { label: 'Cash Ratio', value: `${ratios.cashRatio?.toFixed(2)}x` },
+  1492→                      { label: 'Receivables Days', value: `${ratios.receivablesDays?.toFixed(0)}d` },
+  1493→                      { label: 'Payables Days', value: `${ratios.payablesDays?.toFixed(0)}d` },
+  1494→                      { label: 'Dependency Ratio', value: `${ratios.dependencyRatio?.toFixed(1)}%` },
+  1495→                      { label: 'Personnel Ratio', value: `${ratios.personnelRatio?.toFixed(1)}%` },
+  1496→                    ].map(r => (
+  1497→                      <div key={r.label} className="flex justify-between text-xs p-1.5 rounded bg-muted/50">
+  1498→                        <span className="text-muted-foreground">{r.label}</span>
+  1499→                        <span className="font-mono font-medium text-foreground">{r.value}</span>
+  1500→                      </div>
+  1501→                    ))}
+  1502→                  </div>
+  1503→                </Card>
+  1504→              )}
+  1505→
+  1506→              {/* Bar Chart: Revenue vs Expense */}
+  1507→              {barData.length > 0 && (
+  1508→                <Card className="p-4">
+  1509→                  <p className="text-xs font-semibold text-foreground mb-3">Revenue vs Expenses (Current / Prior)</p>
+  1510→                  <ResponsiveContainer width="100%" height={180}>
+  1511→                    <BarChart data={barData}>
+  1512→                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+  1513→                      <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" />
+  1514→                      <YAxis tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" />
+  1515→                      <Bar dataKey="current" fill="var(--primary)" radius={[4, 4, 0, 0]} name="Current" />
+  1516→                      <Bar dataKey="prior" fill="var(--muted-foreground)" radius={[4, 4, 0, 0]} name="Prior" />
+  1517→                    </BarChart>
+  1518→                  </ResponsiveContainer>
+  1519→                </Card>
+  1520→              )}
+  1521→
+  1522→              {/* Trend Indicators */}
+  1523→              {analyticsData.trends && (
+  1524→                <Card className="p-4">
+  1525→                  <p className="text-xs font-semibold text-foreground mb-3">Year-over-Year Trends</p>
+  1526→                  <div className="space-y-2">
+  1527→                    {Object.entries(analyticsData.trends).map(([key, value]) => (
+  1528→                      <div key={key} className="flex items-center justify-between text-xs">
+  1529→                        <span className="text-muted-foreground capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
+  1530→                        <span className={`flex items-center gap-1 font-mono font-medium ${value >= 0 ? 'text-primary' : 'text-destructive'}`}>
+  1531→                          {value >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+  1532→                          {value >= 0 ? '+' : ''}{value.toFixed(1)}%
+  1533→                        </span>
+  1534→                      </div>
+  1535→                    ))}
+  1536→                  </div>
+  1537→                </Card>
+  1538→              )}
+  1539→
+  1540→              {/* Anomaly Alerts */}
+  1541→              {analyticsData.anomalies.length > 0 && (
+  1542→                <Card className="p-4">
+  1543→                  <p className="text-xs font-semibold text-foreground mb-3">Anomaly Alerts</p>
+  1544→                  <div className="space-y-2">
+  1545→                    {analyticsData.anomalies.map((a, i) => (
+  1546→                      <Alert key={i} variant={a.severity === 'critical' ? 'destructive' : 'default'} className="py-2">
+  1547→                        <AlertCircle className="h-4 w-4" />
+  1548→                        <AlertTitle className="text-xs">{a.description}</AlertTitle>
+  1549→                        <AlertDescription className="text-xs text-muted-foreground">{a.detail}</AlertDescription>
+  1550→                      </Alert>
+  1551→                    ))}
+  1552→                  </div>
+  1553→                </Card>
+  1554→              )}
+  1555→
+  1556→              <Button variant="outline" size="sm" className="w-full gap-1.5" onClick={load}>
+  1557→                <RefreshCw className="h-4 w-4" /> Refresh Analytics
+  1558→              </Button>
+  1559→            </>
+  1560→          )}
+  1561→        </div>
+  1562→      </SheetContent>
+  1563→    </Sheet>
+  1564→  )
+  1565→}
+  1566→
+  1567→// ═══════════════════════════════════════════════════════════════════
+  1568→// DASHBOARD
+  1569→// ═══════════════════════════════════════════════════════════════════
+  1570→
+  1571→function DashboardView() {
+  1572→  const { reports, loadReport, deleteReport, isLoading, createReport } = useFinancialStore()
+  1573→
+  1574→  const handleLoad = async (id: string) => {
+  1575→    try { await loadReport(id); toast.success('Report loaded') } catch { toast.error('Failed to load report') }
+  1576→  }
+  1577→  const handleDelete = async (id: string, e: React.MouseEvent) => {
+  1578→    e.stopPropagation()
+  1579→    try { await deleteReport(id); toast.success('Report deleted') } catch { toast.error('Failed to delete report') }
+  1580→  }
+  1581→  const handleNew = async () => {
+  1582→    try { await createReport(); toast.success('Report created successfully') } catch { toast.error('Failed to create report') }
+  1583→  }
+  1584→
+  1585→  const totalReports = reports.length
+  1586→  const generatedReports = reports.filter(r => r.status === 'generated' || r.status === 'approved').length
+  1587→  const draftReports = reports.filter(r => r.status === 'draft').length
+  1588→
+  1589→  const recentActivity = reports.slice(0, 5).map(r => ({
+  1590→    id: r.id,
+  1591→    action: `Report ${r.entityName} — ${r.status}`,
+  1592→    date: r.updatedAt || r.createdAt,
+  1593→  }))
+  1594→
+  1595→  if (reports.length === 0) {
+  1596→    return (
+  1597→      <motion.div {...pageVariants} className="flex flex-col items-center justify-center py-24 text-center">
+  1598→        <div className="rounded-full bg-primary/10 p-6 mb-6">
+  1599→          <FolderOpen className="h-12 w-12 text-primary/60" />
+  1600→        </div>
+  1601→        <h2 className="text-xl font-semibold text-foreground mb-2">No Reports Yet</h2>
+  1602→        <p className="text-muted-foreground mb-6 max-w-md">Create your first financial report to get started. Set up entity details, enter trial balance data, and generate IPSAS-compliant statements.</p>
+  1603→        <Button onClick={handleNew} className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2" size="lg">
+  1604→          <Plus className="h-4 w-4" /> Create Your First Report
+  1605→        </Button>
+  1606→      </motion.div>
+  1607→    )
+  1608→  }
+  1609→
+  1610→  return (
+  1611→    <motion.div {...pageVariants} className="py-6 space-y-6">
+  1612→      <div className="flex items-center justify-between">
+  1613→        <div>
+  1614→          <h2 className="text-xl font-bold text-foreground">Dashboard</h2>
+  1615→          <p className="text-sm text-muted-foreground mt-1">Welcome to FinStatements Pro. Manage your financial reports here.</p>
+  1616→        </div>
+  1617→        <Button onClick={handleNew} className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2">
+  1618→          <Plus className="h-4 w-4" /> New Report
+  1619→        </Button>
+  1620→      </div>
+  1621→
+  1622→      {/* KPI Cards */}
+  1623→      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+  1624→        <Card className="p-4 hover:shadow-md transition-shadow">
+  1625→          <div className="flex items-center gap-3">
+  1626→            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+  1627→              <FileText className="h-5 w-5 text-primary" />
+  1628→            </div>
+  1629→            <div>
+  1630→              <p className="text-2xl font-bold text-foreground">{totalReports}</p>
+  1631→              <p className="text-xs text-muted-foreground">Total Reports</p>
+  1632→            </div>
+  1633→          </div>
+  1634→        </Card>
+  1635→        <Card className="p-4 hover:shadow-md transition-shadow">
+  1636→          <div className="flex items-center gap-3">
+  1637→            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+  1638→              <CheckCircle2 className="h-5 w-5 text-primary" />
+  1639→            </div>
+  1640→            <div>
+  1641→              <p className="text-2xl font-bold text-foreground">{generatedReports}</p>
+  1642→              <p className="text-xs text-muted-foreground">Generated</p>
+  1643→            </div>
+  1644→          </div>
+  1645→        </Card>
+  1646→        <Card className="p-4 hover:shadow-md transition-shadow">
+  1647→          <div className="flex items-center gap-3">
+  1648→            <div className="h-10 w-10 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
+  1649→              <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+  1650→            </div>
+  1651→            <div>
+  1652→              <p className="text-2xl font-bold text-foreground">{draftReports}</p>
+  1653→              <p className="text-xs text-muted-foreground">Draft</p>
+  1654→            </div>
+  1655→          </div>
+  1656→        </Card>
+  1657→      </div>
+  1658→
+  1659→      <div className="grid gap-4 lg:grid-cols-3">
+  1660→        {/* Report Cards */}
+  1661→        <div className="lg:col-span-2 space-y-4">
+  1662→          <h3 className="text-sm font-semibold text-foreground">Financial Reports</h3>
+  1663→          <div className="grid gap-3 sm:grid-cols-2">
+  1664→            {reports.map((report: Report) => (
+  1665→              <Card key={report.id} className="cursor-pointer hover:border-primary/50 hover:shadow-md transition-all group" onClick={() => handleLoad(report.id)}>
+  1666→                <CardHeader className="pb-2">
+  1667→                  <div className="flex items-start justify-between">
+  1668→                    <CardTitle className="text-sm font-semibold text-foreground leading-snug">{report.entityName}</CardTitle>
+  1669→                    <Badge variant="secondary" className={`text-[10px] ${statusColor(report.status)}`}>{report.status}</Badge>
+  1670→                  </div>
+  1671→                </CardHeader>
+  1672→                <CardContent className="pt-0">
+  1673→                  <div className="space-y-1.5 text-xs text-muted-foreground">
+  1674→                    <div className="flex items-center gap-2"><Calendar className="h-3.5 w-3.5" />{report.periodLabel}</div>
+  1675→                    <div className="flex items-center gap-2"><Table className="h-3.5 w-3.5" />{report.entries?.length || 0} entries</div>
+  1676→                    <div className="flex items-center justify-between pt-1">
+  1677→                      <span>{new Date(report.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+  1678→                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => handleDelete(report.id, e)}>
+  1679→                        <Trash2 className="h-3 w-3" />
+  1680→                      </Button>
+  1681→                    </div>
+  1682→                  </div>
+  1683→                </CardContent>
+  1684→              </Card>
+  1685→            ))}
+  1686→          </div>
+  1687→        </div>
+  1688→
+  1689→        {/* Recent Activity */}
+  1690→        <div className="space-y-4">
+  1691→          <h3 className="text-sm font-semibold text-foreground">Recent Activity</h3>
+  1692→          <Card>
+  1693→            <CardContent className="pt-4">
+  1694→              <div className="space-y-3">
+  1695→                {recentActivity.map((item) => (
+  1696→                  <div key={item.id} className="flex items-start gap-2 text-xs">
+  1697→                    <Clock className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+  1698→                    <div>
+  1699→                      <p className="text-foreground">{item.action}</p>
+  1700→                      <p className="text-muted-foreground">{new Date(item.date).toLocaleString()}</p>
+  1701→                    </div>
+  1702→                  </div>
+  1703→                ))}
+  1704→              </div>
+  1705→            </CardContent>
+  1706→          </Card>
+  1707→        </div>
+  1708→      </div>
+  1709→    </motion.div>
+  1710→  )
+  1711→}
+  1712→
+  1713→// ═══════════════════════════════════════════════════════════════════
+  1714→// STATEMENT SUB-SECTIONS (reused from original)
+  1715→// ═══════════════════════════════════════════════════════════════════
+  1716→
+  1717→function toStatementRow(line: SFPLine | BSLine): StatementRow {
+  1718→  return { label: line.label, noteRef: line.noteRef, current: line.current, prior: line.prior, indent: line.indent, isBold: line.isBold, isSubtotal: line.isSubtotal, isTotal: line.isTotal, isSection: line.isSection }
+  1719→}
+  1720→
+  1721→function SFPSection({ data, currency }: { data: GeneratedStatements['sfp']; currency: string }) {
+  1722→  const allRows: StatementRow[] = [
+  1723→    ...data.revenueLines.map(toStatementRow),
+  1724→    { label: '', noteRef: '', current: 0, prior: 0 },
+  1725→    ...data.expenseLines.map(toStatementRow),
+  1726→    { label: '', noteRef: '', current: 0, prior: 0, isSection: true },
+  1727→    { label: 'SURPLUS / (DEFICIT)', noteRef: '', current: data.surplusCurrent, prior: data.surplusPrior, isBold: true, isTotal: true },
+  1728→  ]
+  1729→  return <StatementTable title="Statement of Financial Performance" rows={allRows} currency={currency} />
+  1730→}
+  1731→
+  1732→function BalanceSheetSection({ data, currency }: { data: GeneratedStatements['balanceSheet']; currency: string }) {
+  1733→  const allRows: StatementRow[] = [...data.assetLines.map(toStatementRow), { label: '', noteRef: '', current: 0, prior: 0 }, ...data.liabilityLines.map(toStatementRow)]
+  1734→  return <StatementTable title="Statement of Financial Position" rows={allRows} currency={currency} />
+  1735→}
+  1736→
+  1737→function ChangesNASection({ data, currency }: { data: GeneratedStatements['changesInNA']; currency: string }) {
+  1738→  const rows: StatementRow[] = [
+  1739→    { label: 'NET ASSETS', noteRef: '', current: 0, prior: 0, isBold: true, isSection: true },
+  1740→    { label: 'Brought forward', noteRef: '', current: data.bfCurrent, prior: data.bfPrior, indent: 1 },
+  1741→    { label: 'Adjustments', noteRef: '', current: data.adjustmentsCurrent, prior: data.adjustmentsPrior, indent: 1 },
+  1742→    { label: 'Surplus/(Deficit) for the year', noteRef: '', current: data.surplusCurrent, prior: data.surplusPrior, indent: 1, isBold: true },
+  1743→    { label: 'Closing Net Assets', noteRef: '', current: data.closingCurrent, prior: data.closingPrior, indent: 1, isBold: true, isTotal: true },
+  1744→  ]
+  1745→  return <StatementTable title="Statement of Changes in Net Assets" rows={rows} currency={currency} />
+  1746→}
+  1747→
+  1748→function CashFlowSection({ data, currency }: { data: CashFlowData; currency: string }) {
+  1749→  const rows: StatementRow[] = [
+  1750→    { label: 'CASH FLOWS FROM OPERATING ACTIVITIES', noteRef: '', current: 0, prior: 0, isBold: true, isSection: true },
+  1751→    { label: 'Operating revenue received', noteRef: '', current: data.operatingRevenueCurrent, prior: data.operatingRevenuePrior, indent: 1 },
+  1752→    ...data.payments.map((p): StatementRow => ({ label: `Payments - ${p.label}`, noteRef: p.noteRef, current: -Math.abs(p.current), prior: -Math.abs(p.prior), indent: 1 })),
+  1753→    { label: 'Net cash from operating activities', noteRef: '', current: data.netOperatingCurrent, prior: data.netOperatingPrior, isBold: true, isTotal: true },
+  1754→    { label: '', noteRef: '', current: 0, prior: 0 },
+  1755→    { label: 'CASH FLOWS FROM INVESTING ACTIVITIES', noteRef: '', current: 0, prior: 0, isBold: true, isSection: true },
+  1756→    ...data.investing.map((inv): StatementRow => ({ label: inv.label, noteRef: '', current: inv.current, prior: inv.prior, indent: 1 })),
+  1757→    { label: 'Net cash from investing activities', noteRef: '', current: data.netInvestingCurrent, prior: data.netInvestingPrior, isBold: true, isTotal: true },
+  1758→    { label: '', noteRef: '', current: 0, prior: 0 },
+  1759→    { label: 'CASH FLOWS FROM FINANCING ACTIVITIES', noteRef: '', current: 0, prior: 0, isBold: true, isSection: true },
+  1760→    ...(data.financing.length > 0 ? data.financing.map((f): StatementRow => ({ label: f.label, noteRef: '', current: f.current, prior: f.prior, indent: 1 })) : [{ label: '(None)', noteRef: '', current: 0, prior: 0, indent: 1 } as StatementRow]),
+  1761→    { label: 'Net cash from financing activities', noteRef: '', current: data.netFinancingCurrent, prior: data.netFinancingPrior, isBold: true, isTotal: true },
+  1762→    { label: '', noteRef: '', current: 0, prior: 0 },
+  1763→    { label: 'Net increase/(decrease) in cash', noteRef: '', current: data.netChangeCurrent, prior: data.netChangePrior, isBold: true, isTotal: true },
+  1764→  ]
+  1765→  return <StatementTable title="Cash Flow Statement" rows={rows} currency={currency} />
+  1766→}
+  1767→
+  1768→function RevenueReconSection({ data, currency }: { data: RevenueReconciliationData; currency: string }) {
+  1769→  const rows: StatementRow[] = [
+  1770→    { label: 'REVENUE RECONCILIATION', noteRef: '', current: 0, prior: 0, isBold: true, isSection: true },
+  1771→    { label: 'Revenue per SFP', noteRef: '', current: data.sfpRevenueCurrent, prior: data.sfpRevenuePrior, indent: 1 },
+  1772→    { label: 'Advances recovered', noteRef: '', current: data.advancesRecoveredCurrent, prior: data.advancesRecoveredPrior, indent: 1 },
+  1773→    { label: 'Revenue receivable collected during the period', noteRef: '', current: data.revenueReceivableCollectedCurrent, prior: data.revenueReceivableCollectedPrior, indent: 1 },
+  1774→    { label: 'Deposits received', noteRef: '', current: data.depositsReceivedCurrent, prior: data.depositsReceivedPrior, indent: 1 },
+  1775→    { label: 'Total Revenue for CF purposes', noteRef: '', current: data.totalRevenueCFCurrent, prior: data.totalRevenueCFPrior, isBold: true, indent: 1 },
+  1776→    { label: 'Less: Grants in kind', noteRef: '', current: -data.grantsInKindCurrent, prior: -data.grantsInKindPrior, indent: 1 },
+  1777→    { label: 'Less: Transfers to Treasury', noteRef: '', current: -data.transfersToTreasuryCurrent, prior: -data.transfersToTreasuryPrior, indent: 1 },
+  1778→    { label: 'Less: Revenue receivable at period end', noteRef: '', current: -data.revenueReceivablePeriodCurrent, prior: -data.revenueReceivablePeriodPrior, indent: 1 },
+  1779→    { label: 'Total Revenue in Cash Flow Statement', noteRef: '', current: data.totalRevenueCashFlowCurrent, prior: data.totalRevenueCashFlowPrior, isBold: true, isTotal: true },
+  1780→  ]
+  1781→  return <StatementTable title="Revenue Reconciliation to Cash Flow Statement" rows={rows} currency={currency} />
+  1782→}
+  1783→
+  1784→function CashReconSection({ data, currency }: { data: CashReconciliationData; currency: string }) {
+  1785→  const rows: StatementRow[] = [
+  1786→    { label: 'CASH RECONCILIATION', noteRef: '', current: 0, prior: 0, isBold: true, isSection: true },
+  1787→    { label: 'Cash at beginning of period', noteRef: '', current: data.openingCashCurrent, prior: data.openingCashPrior, indent: 1 },
+  1788→    { label: 'Net increase/(decrease) in cash', noteRef: '', current: data.netChangeCurrent, prior: data.netChangePrior, indent: 1 },
+  1789→    { label: 'Cash at end of period', noteRef: '', current: data.closingCashCurrent, prior: data.closingCashPrior, isBold: true, isTotal: true },
+  1790→  ]
+  1791→  return <StatementTable title="Cash and Cash Equivalents Reconciliation" rows={rows} currency={currency} />
+  1792→}
+  1793→
+  1794→function BudgetVarianceSection({ data, currency }: { data: BudgetVarianceData[]; currency: string }) {
+  1795→  if (data.length === 0) return <div className="text-center py-12 text-muted-foreground text-sm">No budget data available. Enter budget amounts in the trial balance to see variance analysis.</div>
+  1796→  return (
+  1797→    <div className="space-y-3">
+  1798→      <h3 className="text-sm font-semibold text-foreground">Budget Variance Analysis</h3>
+  1799→      <div className="overflow-x-auto rounded-lg border border-border">
+  1800→        <table className="w-full text-sm">
+  1801→          <thead><tr className="bg-foreground text-background">
+  1802→            <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide">Line Item</th>
+  1803→            <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide">Initial</th>
+  1804→            <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide">Adjusted</th>
+  1805→            <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide">Revised</th>
+  1806→            <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide">Actual</th>
+  1807→            <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide">Variance</th>
+  1808→            <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide">Var %</th>
+  1809→          </tr></thead>
+  1810→          <tbody>{data.map((row, i) => {
+  1811→            const vp = row.variance >= 0
+  1812→            return (<tr key={i} className="border-b border-border hover:bg-muted/30">
+  1813→              <td className="px-4 py-2 text-foreground">{row.label}</td>
+  1814→              <td className="px-4 py-2 text-right font-mono text-foreground">{formatNum(row.initialBudget)}</td>
+  1815→              <td className="px-4 py-2 text-right font-mono text-foreground">{formatNum(row.adjustments)}</td>
+  1816→              <td className="px-4 py-2 text-right font-mono font-semibold text-foreground">{formatNum(row.revisedBudget)}</td>
+  1817→              <td className="px-4 py-2 text-right font-mono text-foreground">{formatNum(row.actual)}</td>
+  1818→              <td className={`px-4 py-2 text-right font-mono font-semibold ${vp ? 'text-primary' : 'text-destructive'}`}>{formatNum(row.variance)}</td>
+  1819→              <td className={`px-4 py-2 text-right font-mono text-xs ${vp ? 'text-primary' : 'text-destructive'}`}>{row.variancePercent.toFixed(1)}%</td>
+  1820→            </tr>)
+  1821→          })}</tbody>
+  1822→        </table>
+  1823→      </div>
+  1824→    </div>
+  1825→  )
+  1826→}
+  1827→
+  1828→// ═══════════════════════════════════════════════════════════════════
+  1829→// MAIN PAGE
+  1830→// ═══════════════════════════════════════════════════════════════════
+  1831→
+  1832→export default function Home() {
+  1833→  const { activeReportId, wizardStep, fetchReports, showAnalytics } = useFinancialStore()
+  1834→
+  1835→  const stableFetch = useCallback(() => { fetchReports() }, [fetchReports])
+  1836→  useEffect(() => { stableFetch() }, [stableFetch])
+  1837→
+  1838→  return (
+  1839→    <TooltipProvider>
+  1840→      <div className="min-h-screen flex flex-col bg-background">
+  1841→        <Header />
+  1842→        {activeReportId && <WizardProgressBar />}
+  1843→        {activeReportId && <StatusBar />}
+  1844→        <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6">
+  1845→          <AnimatePresence mode="wait">
+  1846→            {!activeReportId ? (
+  1847→              <DashboardView key="dashboard" />
+  1848→            ) : (
+  1849→              <>
+  1850→                {wizardStep === 1 && <Step1EntitySetup key="step1" />}
+  1851→                {wizardStep === 2 && <Step2TrialBalance key="step2" />}
+  1852→                {wizardStep === 3 && <Step3Budget key="step3" />}
+  1853→                {wizardStep === 4 && <Step3Supplementary key="step4" />}
+  1854→                {wizardStep === 5 && <Step4Review key="step5" />}
+  1855→                {wizardStep === 6 && <Step5Generate key="step6" />}
+  1856→              </>
+  1857→            )}
+  1858→          </AnimatePresence>
+  1859→        </main>
+  1860→        <footer className="border-t border-border mt-auto">
+  1861→          <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
+  1862→            <span>FinStatements Pro — Government Financial Statements Generator</span>
+  1863→            <span>IPSAS Compliant</span>
+  1864→          </div>
+  1865→        </footer>
+  1866→        {showAnalytics && activeReportId && <AnalyticsPanel />}
+  1867→      </div>
+  1868→    </TooltipProvider>
+  1869→  )
+  1870→}
+  1871→

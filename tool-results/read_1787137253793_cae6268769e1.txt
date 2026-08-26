@@ -1,0 +1,1848 @@
+     1→'use client'
+     2→
+     3→import React, { useEffect, useCallback, useState } from 'react'
+     4→import { useTheme } from 'next-themes'
+     5→import { toast } from 'sonner'
+     6→import { motion, AnimatePresence } from 'framer-motion'
+     7→import {
+     8→  Scale, Plus, LayoutDashboard, Table, FileText, Download, Trash2,
+     9→  FileSpreadsheet, CheckCircle2, AlertTriangle, ArrowRight, FolderOpen,
+    10→  Loader2, Calendar, Banknote, Sun, Moon, X, BarChart3, TrendingUp,
+    11→  TrendingDown, Shield, Clock, ClipboardCheck, User, ChevronRight,
+    12→  Info, Sparkles, Copy, Eye, GitBranch, Play, AlertCircle, ArrowLeft,
+    13→  CircleDot, Save, Wand2, History, RefreshCw, Upload, Pencil,
+    14→} from 'lucide-react'
+    15→import { Button } from '@/components/ui/button'
+    16→import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+    17→import { Input } from '@/components/ui/input'
+    18→import { Label } from '@/components/ui/label'
+    19→import { Badge } from '@/components/ui/badge'
+    20→import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+    21→import { Separator } from '@/components/ui/separator'
+    22→import { ScrollArea } from '@/components/ui/scroll-area'
+    23→import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+    24→import {
+    25→  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+    26→} from '@/components/ui/select'
+    27→import {
+    28→  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
+    29→} from '@/components/ui/tooltip'
+    30→import {
+    31→  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+    32→} from '@/components/ui/dialog'
+    33→import { Textarea } from '@/components/ui/textarea'
+    34→import {
+    35→  useFinancialStore,
+    36→  type WizardStep, type StatementSubTab,
+    37→  type Report, type AuditLogEntry, type ComplianceItem,
+    38→  type ApprovalWorkflow, type VersionEntry, type BudgetEntry,
+    39→} from '@/components/financials/store'
+    40→import { TBEntryRow } from '@/components/financials/tb-entry-row'
+    41→import { StatementTable, type StatementRow } from '@/components/financials/statement-table'
+    42→import Step3Budget from '@/components/financials/budget-step'
+    43→import type {
+    44→  GeneratedStatements, SFPLine, BSLine, CashFlowData,
+    45→  RevenueReconciliationData, CashReconciliationData, BudgetVarianceData,
+    46→} from '@/lib/financial-engine'
+    47→import {
+    48→  BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
+    49→} from 'recharts'
+    50→
+    51→// ═══════════════════════════════════════════════════════════════════
+    52→// UTILITIES
+    53→// ═══════════════════════════════════════════════════════════════════
+    54→
+    55→function formatNum(n: number): string {
+    56→  return Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+    57→}
+    58→
+    59→function statusColor(status: string) {
+    60→  switch (status) {
+    61→    case 'draft': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+    62→    case 'complete': return 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-400'
+    63→    case 'generated': return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400'
+    64→    case 'in_review': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+    65→    case 'pending_approval': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
+    66→    case 'approved': return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400'
+    67→    default: return 'bg-muted text-muted-foreground'
+    68→  }
+    69→}
+    70→
+    71→const WIZARD_STEPS = [
+    72→  { step: 1, label: 'Entity Setup', icon: <User className="h-4 w-4" /> },
+    73→  { step: 2, label: 'Trial Balance', icon: <Table className="h-4 w-4" /> },
+    74→  { step: 3, label: 'Budget', icon: <Banknote className="h-4 w-4" /> },
+    75→  { step: 4, label: 'Supplementary', icon: <ClipboardCheck className="h-4 w-4" /> },
+    76→  { step: 5, label: 'Review', icon: <Shield className="h-4 w-4" /> },
+    77→  { step: 6, label: 'Generate & Export', icon: <FileText className="h-4 w-4" /> },
+    78→]
+    79→
+    80→const pageVariants = {
+    81→  initial: { opacity: 0, y: 12 },
+    82→  animate: { opacity: 1, y: 0 },
+    83→  exit: { opacity: 0, y: -12 },
+    84→}
+    85→
+    86→// ═══════════════════════════════════════════════════════════════════
+    87→// HEADER
+    88→// ═══════════════════════════════════════════════════════════════════
+    89→
+    90→function Header() {
+    91→  const { theme, setTheme } = useTheme()
+    92→  const { entityConfig, activeReportId, isLoading, createReport, showAnalytics, setShowAnalytics } = useFinancialStore()
+    93→  const [mounted, setMounted] = React.useState(false)
+    94→  React.useEffect(() => setMounted(true), [])
+    95→
+    96→  const handleNew = async () => {
+    97→    try {
+    98→      await createReport()
+    99→      toast.success('Report created successfully')
+   100→    } catch {
+   101→      toast.error('Failed to create report')
+   102→    }
+   103→  }
+   104→
+   105→  return (
+   106→    <header className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
+   107→      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+   108→        <div className="flex items-center gap-3">
+   109→          <div className="flex items-center gap-2">
+   110→            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+   111→              <Scale className="h-4 w-4 text-primary-foreground" />
+   112→            </div>
+   113→            <span className="font-bold text-base tracking-tight">
+   114→              FinStatements <span className="text-primary">Pro</span>
+   115→            </span>
+   116→          </div>
+   117→          {activeReportId && (
+   118→            <>
+   119→              <Separator orientation="vertical" className="h-6" />
+   120→              <div className="hidden sm:flex items-center gap-3 text-sm text-muted-foreground">
+   121→                <span className="font-medium text-foreground">{entityConfig.name}</span>
+   122→                <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{entityConfig.periodLabel}</span>
+   123→                <span className="flex items-center gap-1"><Banknote className="h-3.5 w-3.5" />{entityConfig.currency}</span>
+   124→              </div>
+   125→            </>
+   126→          )}
+   127→        </div>
+   128→        <div className="flex items-center gap-2">
+   129→          {activeReportId && (
+   130→            <TooltipProvider>
+   131→              <Tooltip>
+   132→                <TooltipTrigger asChild>
+   133→                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowAnalytics(!showAnalytics)}>
+   134→                    <BarChart3 className="h-4 w-4" />
+   135→                  </Button>
+   136→                </TooltipTrigger>
+   137→                <TooltipContent><p>Analytics Panel</p></TooltipContent>
+   138→              </Tooltip>
+   139→            </TooltipProvider>
+   140→          )}
+   141→          <TooltipProvider>
+   142→            <Tooltip>
+   143→              <TooltipTrigger asChild>
+   144→                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+   145→                  {mounted && (theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />)}
+   146→                </Button>
+   147→              </TooltipTrigger>
+   148→              <TooltipContent><p>Toggle theme</p></TooltipContent>
+   149→            </Tooltip>
+   150→          </TooltipProvider>
+   151→          <Button size="sm" onClick={handleNew} disabled={isLoading} className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5">
+   152→            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+   153→            <span className="hidden sm:inline">New Report</span>
+   154→          </Button>
+   155→        </div>
+   156→      </div>
+   157→    </header>
+   158→  )
+   159→}
+   160→
+   161→// ═══════════════════════════════════════════════════════════════════
+   162→// WIZARD PROGRESS BAR
+   163→// ═══════════════════════════════════════════════════════════════════
+   164→
+   165→function WizardProgressBar() {
+   166→  const { wizardStep, setWizardStep, entries, supplementaryData, complianceData, generatedStatements } = useFinancialStore()
+   167→
+   168→  const stepComplete = (s: number): boolean => {
+   169→    if (s === 1) return true
+   170→    if (s === 2) return entries.length > 0
+   171→    if (s === 3) return true // budget is optional
+   172→    if (s === 4) return supplementaryData !== null
+   173→    if (s === 5) return supplementaryData !== null
+   174→    if (s === 6) return complianceData !== null || generatedStatements !== null
+   175→    return false
+   176→  }
+   177→
+   178→  return (
+   179→    <div className="bg-muted/50 border-b border-border">
+   180→      <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
+   181→        <div className="flex items-center gap-1 py-2 overflow-x-auto">
+   182→          {WIZARD_STEPS.map(({ step, label, icon }) => {
+   183→            const isActive = wizardStep === step
+   184→            const isComplete = step < wizardStep || stepComplete(step)
+   185→            const canNavigate = isComplete && step !== wizardStep
+   186→            return (
+   187→              <React.Fragment key={step}>
+   188→                {step > 1 && <ChevronRight className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />}
+   189→                <button
+   190→                  onClick={() => canNavigate ? setWizardStep(step as WizardStep) : undefined}
+   191→                  disabled={!canNavigate && !isActive}
+   192→                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+   193→                    isActive
+   194→                      ? 'bg-primary text-primary-foreground shadow-sm'
+   195→                      : isComplete
+   196→                        ? 'bg-primary/10 text-primary hover:bg-primary/20 cursor-pointer'
+   197→                        : 'text-muted-foreground cursor-not-allowed'
+   198→                  }`}
+   199→                >
+   200→                  <span className="flex items-center justify-center h-5 w-5 rounded-full text-[10px] font-bold border current:border-current">
+   201→                    {isComplete && !isActive ? <CheckCircle2 className="h-3.5 w-3.5" /> : icon}
+   202→                  </span>
+   203→                  <span className="hidden sm:inline">{label}</span>
+   204→                </button>
+   205→              </React.Fragment>
+   206→            )
+   207→          })}
+   208→        </div>
+   209→      </div>
+   210→    </div>
+   211→  )
+   212→}
+   213→
+   214→// ═══════════════════════════════════════════════════════════════════
+   215→// STATUS BAR
+   216→// ═══════════════════════════════════════════════════════════════════
+   217→
+   218→function StatusBar() {
+   219→  const { entries, supplementaryData, complianceData, approvalWorkflow } = useFinancialStore()
+   220→  const totalDr = entries.reduce((s, e) => s + (e.debitCurrent || 0), 0)
+   221→  const totalCr = entries.reduce((s, e) => s + (e.creditCurrent || 0), 0)
+   222→  const tbBalanced = Math.abs(totalDr - totalCr) < 0.01
+   223→
+   224→  const suppFields = supplementaryData
+   225→    ? ['accountingOfficer', 'chiefFinanceOfficer', 'internalAuditHead', 'depreciationRate', 'employeeCount']
+   226→        .filter(k => { const v = supplementaryData[k as keyof typeof supplementaryData]; return v !== '' && v !== 0 })
+   227→    : []
+   228→  const suppComplete = suppFields.length
+   229→
+   230→  const approvalStep = approvalWorkflow?.currentStep || 'draft'
+   231→
+   232→  return (
+   233→    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 sm:px-6 py-2 text-[11px] text-muted-foreground bg-card border-b border-border">
+   234→      <span className="flex items-center gap-1">
+   235→        Trial Balance: {tbBalanced ? <CheckCircle2 className="h-3 w-3 text-primary" /> : <X className="h-3 w-3 text-destructive" />}
+   236→        <span className={tbBalanced ? 'text-primary font-medium' : 'text-destructive font-medium'}>{tbBalanced ? 'Balanced' : 'Unbalanced'}</span>
+   237→      </span>
+   238→      <span className="flex items-center gap-1">
+   239→        Supplementary: <span className="font-medium text-foreground">{suppComplete}/5</span>
+   240→      </span>
+   241→      <span className="flex items-center gap-1">
+   242→        Validation: {complianceData ? <span className="font-medium text-primary">{complianceData.score}% compliant</span> : <span className="font-medium">Not run</span>}
+   243→      </span>
+   244→      <span className="flex items-center gap-1">
+   245→        Approval: <Badge variant="outline" className="h-5 text-[10px] px-1.5 font-mono">{approvalStep}</Badge>
+   246→      </span>
+   247→    </div>
+   248→  )
+   249→}
+   250→
+   251→// ═══════════════════════════════════════════════════════════════════
+   252→// STEP 1: ENTITY SETUP
+   253→// ═══════════════════════════════════════════════════════════════════
+   254→
+   255→function Step1EntitySetup() {
+   256→  const { entityConfig, setEntityConfig, wizardStep, setWizardStep, entries, activeReportId } = useFinancialStore()
+   257→
+   258→  const canProceed = entityConfig.name.trim() !== '' && entityConfig.periodEnd !== ''
+   259→
+   260→  return (
+   261→    <motion.div {...pageVariants} className="py-6 space-y-6">
+   262→      <div>
+   263→        <h2 className="text-xl font-bold text-foreground">Entity Setup</h2>
+   264→        <p className="text-sm text-muted-foreground mt-1">Configure the reporting entity details and period information.</p>
+   265→      </div>
+   266→      <Card>
+   267→        <CardHeader>
+   268→          <CardTitle className="text-base">Entity Information</CardTitle>
+   269→          <CardDescription>These details appear on all generated financial statements.</CardDescription>
+   270→        </CardHeader>
+   271→        <CardContent className="space-y-4">
+   272→          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+   273→            <div className="space-y-1.5">
+   274→              <TooltipProvider>
+   275→                <Tooltip>
+   276→                  <TooltipTrigger asChild>
+   277→                    <Label className="text-xs text-muted-foreground flex items-center gap-1">
+   278→                      Entity Name <Info className="h-3 w-3" />
+   279→                    </Label>
+   280→                  </TooltipTrigger>
+   281→                  <TooltipContent><p>The name of the government entity (e.g., Ministry of Finance)</p></TooltipContent>
+   282→                </Tooltip>
+   283→              </TooltipProvider>
+   284→              <Input className="h-9 text-sm" value={entityConfig.name} onChange={(e) => setEntityConfig({ name: e.target.value })} />
+   285→            </div>
+   286→            <div className="space-y-1.5">
+   287→              <TooltipProvider>
+   288→                <Tooltip>
+   289→                  <TooltipTrigger asChild>
+   290→                    <Label className="text-xs text-muted-foreground flex items-center gap-1">
+   291→                      Period End Date <Info className="h-3 w-3" />
+   292→                    </Label>
+   293→                  </TooltipTrigger>
+   294→                  <TooltipContent><p>The last day of the reporting period (e.g., 2025-06-30)</p></TooltipContent>
+   295→                </Tooltip>
+   296→              </TooltipProvider>
+   297→              <Input type="date" className="h-9 text-sm" value={entityConfig.periodEnd} onChange={(e) => setEntityConfig({ periodEnd: e.target.value })} />
+   298→            </div>
+   299→            <div className="space-y-1.5">
+   300→              <TooltipProvider>
+   301→                <Tooltip>
+   302→                  <TooltipTrigger asChild>
+   303→                    <Label className="text-xs text-muted-foreground flex items-center gap-1">
+   304→                      Period Label <Info className="h-3 w-3" />
+   305→                    </Label>
+   306→                  </TooltipTrigger>
+   307→                  <TooltipContent><p>Human-readable period label displayed on statements (e.g., &quot;30 June 2025&quot;)</p></TooltipContent>
+   308→                </Tooltip>
+   309→              </TooltipProvider>
+   310→              <Input className="h-9 text-sm" value={entityConfig.periodLabel} onChange={(e) => setEntityConfig({ periodLabel: e.target.value })} />
+   311→            </div>
+   312→            <div className="space-y-1.5">
+   313→              <TooltipProvider>
+   314→                <Tooltip>
+   315→                  <TooltipTrigger asChild>
+   316→                    <Label className="text-xs text-muted-foreground flex items-center gap-1">
+   317→                      Currency <Info className="h-3 w-3" />
+   318→                    </Label>
+   319→                  </TooltipTrigger>
+   320→                  <TooltipContent><p>The reporting currency symbol (e.g., Shs, UGX, USD)</p></TooltipContent>
+   321→                </Tooltip>
+   322→              </TooltipProvider>
+   323→              <Input className="h-9 text-sm" value={entityConfig.currency} onChange={(e) => setEntityConfig({ currency: e.target.value })} />
+   324→            </div>
+   325→          </div>
+   326→        </CardContent>
+   327→      </Card>
+   328→      {activeReportId && (
+   329→        <div className="flex justify-end">
+   330→          <Button onClick={() => setWizardStep(2)} disabled={!canProceed} className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2">
+   331→            Continue to Trial Balance <ArrowRight className="h-4 w-4" />
+   332→          </Button>
+   333→        </div>
+   334→      )}
+   335→    </motion.div>
+   336→  )
+   337→}
+   338→
+   339→// ═══════════════════════════════════════════════════════════════════
+   340→// STEP 2: TRIAL BALANCE
+   341→// ═══════════════════════════════════════════════════════════════════
+   342→
+   343→function Step2TrialBalance() {
+   344→  const {
+   345→    entries, entityConfig, setEntityConfig, updateEntry, deleteEntry, addEntry,
+   346→    loadTemplate, saveTrialBalance, isLoading, wizardStep, setWizardStep, autoBalance,
+   347→    clearTrialBalance, uploadExcelFile,
+   348→  } = useFinancialStore()
+   349→  const [autoBalancing, setAutoBalancing] = useState(false)
+   350→  const [showAutoBalanceDialog, setShowAutoBalanceDialog] = useState(false)
+   351→  const [showClearConfirm, setShowClearConfirm] = useState(false)
+   352→  const fileInputRef = React.useRef<HTMLInputElement>(null)
+   353→
+   354→  const totalDebitCurrent = entries.reduce((s, e) => s + (e.debitCurrent || 0), 0)
+   355→  const totalCreditCurrent = entries.reduce((s, e) => s + (e.creditCurrent || 0), 0)
+   356→  const totalDebitPrior = entries.reduce((s, e) => s + (e.debitPrior || 0), 0)
+   357→  const totalCreditPrior = entries.reduce((s, e) => s + (e.creditPrior || 0), 0)
+   358→  const diffCurrent = totalDebitCurrent - totalCreditCurrent
+   359→  const diffPrior = totalDebitPrior - totalCreditPrior
+   360→  const isBalancedCurrent = Math.abs(diffCurrent) < 0.01
+   361→  const isBalancedPrior = Math.abs(diffPrior) < 0.01
+   362→  const isBalanced = isBalancedCurrent && isBalancedPrior
+   363→
+   364→  const handleSave = async () => {
+   365→    try {
+   366→      await saveTrialBalance()
+   367→      toast.success('Trial balance saved and validated')
+   368→    } catch {
+   369→      toast.error('Failed to save trial balance')
+   370→    }
+   371→  }
+   372→
+   373→  const handleAutoBalance = async () => {
+   374→    setAutoBalancing(true)
+   375→    try {
+   376→      await autoBalance()
+   377→      toast.success('Trial balance auto-balanced')
+   378→      setShowAutoBalanceDialog(false)
+   379→    } catch {
+   380→      toast.error('Failed to auto-balance')
+   381→    } finally {
+   382→      setAutoBalancing(false)
+   383→    }
+   384→  }
+   385→
+   386→  return (
+   387→    <motion.div {...pageVariants} className="py-4 space-y-4">
+   388→      {/* Balance Indicator Banner */}
+   389→      <Card className={`border-l-4 ${isBalanced ? 'border-l-primary bg-primary/5' : 'border-l-destructive bg-destructive/5'}`}>
+   390→        <CardContent className="py-3">
+   391→          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+   392→            <div className="flex items-center gap-3">
+   393→              {isBalanced
+   394→                ? <CheckCircle2 className="h-5 w-5 text-primary" />
+   395→                : <AlertCircle className="h-5 w-5 text-destructive" />}
+   396→              <div>
+   397→                <p className="text-sm font-semibold text-foreground">
+   398→                  {isBalanced ? 'Trial Balance is Balanced' : 'Trial Balance is NOT Balanced'}
+   399→                </p>
+   400→                {!isBalanced && (
+   401→                  <p className="text-xs text-muted-foreground mt-0.5">
+   402→                    Current diff: {entityConfig.currency} {formatNum(diffCurrent)}
+   403→                    {diffPrior !== 0 && ` | Prior diff: ${entityConfig.currency} ${formatNum(diffPrior)}`}
+   404→                  </p>
+   405→                )}
+   406→              </div>
+   407→            </div>
+   408→            <div className="flex items-center gap-2">
+   409→              {!isBalanced && (
+   410→                <Dialog open={showAutoBalanceDialog} onOpenChange={setShowAutoBalanceDialog}>
+   411→                  <DialogTrigger asChild>
+   412→                    <Button variant="outline" size="sm" className="gap-1.5" disabled={entries.length === 0}>
+   413→                      <Wand2 className="h-4 w-4" /> Auto-Balance
+   414→                    </Button>
+   415→                  </DialogTrigger>
+   416→                  <DialogContent>
+   417→                    <DialogHeader>
+   418→                      <DialogTitle>Auto-Balance Trial Balance</DialogTitle>
+   419→                      <DialogDescription>
+   420→                        This will create a &quot;Suspense&quot; entry to zero out the difference between debits and credits.
+   421→                        Current difference: {entityConfig.currency} {formatNum(diffCurrent)}
+   422→                      </DialogDescription>
+   423→                    </DialogHeader>
+   424→                    <DialogFooter>
+   425→                      <Button variant="outline" onClick={() => setShowAutoBalanceDialog(false)}>Cancel</Button>
+   426→                      <Button onClick={handleAutoBalance} disabled={autoBalancing} className="bg-primary text-primary-foreground gap-2">
+   427→                        {autoBalancing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+   428→                        Auto-Balance
+   429→                      </Button>
+   430→                    </DialogFooter>
+   431→                  </DialogContent>
+   432→                </Dialog>
+   433→              )}
+   434→            </div>
+   435→          </div>
+   436→        </CardContent>
+   437→      </Card>
+   438→
+   439→      {/* Toolbar */}
+   440→      <div className="flex flex-wrap items-center gap-2">
+   441→        <TooltipProvider>
+   442→          <Tooltip>
+   443→            <TooltipTrigger asChild>
+   444→              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { loadTemplate(); toast.success('Template loaded') }}>
+   445→                <FileSpreadsheet className="h-4 w-4" /> Load Template
+   446→              </Button>
+   447→            </TooltipTrigger>
+   448→            <TooltipContent><p>Load the standard IPSAS chart of accounts template</p></TooltipContent>
+   449→          </Tooltip>
+   450→        </TooltipProvider>
+   451→        <TooltipProvider>
+   452→          <Tooltip>
+   453→            <TooltipTrigger asChild>
+   454→              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => fileInputRef.current?.click()} disabled={isLoading}>
+   455→                <Upload className="h-4 w-4" /> Upload Excel
+   456→              </Button>
+   457→            </TooltipTrigger>
+   458→            <TooltipContent><p>Upload a trial balance from Excel (.xlsx, .xls, .csv)</p></TooltipContent>
+   459→          </Tooltip>
+   460→        </TooltipProvider>
+   461→        <input
+   462→          ref={fileInputRef}
+   463→          type="file"
+   464→          accept=".xlsx,.xls,.csv"
+   465→          className="hidden"
+   466→          onChange={async (e) => {
+   467→            const file = e.target.files?.[0]
+   468→            if (!file) return
+   469→            try {
+   470→              await uploadExcelFile(file)
+   471→            } catch { /* toast already shown */ }
+   472→            e.target.value = ''
+   473→          }}
+   474→        />
+   475→        <TooltipProvider>
+   476→          <Tooltip>
+   477→            <TooltipTrigger asChild>
+   478→              <Button variant="outline" size="sm" className="gap-1.5" onClick={addEntry}>
+   479→                <Plus className="h-4 w-4" /> Add Row
+   480→              </Button>
+   481→            </TooltipTrigger>
+   482→            <TooltipContent><p>Add a new blank trial balance entry</p></TooltipContent>
+   483→          </Tooltip>
+   484→        </TooltipProvider>
+   485→        {entries.length > 0 && (
+   486→          <TooltipProvider>
+   487→            <Tooltip>
+   488→              <TooltipTrigger asChild>
+   489→                <Button variant="outline" size="sm" className="gap-1.5 text-destructive hover:text-destructive" onClick={() => setShowClearConfirm(true)}>
+   490→                  <Trash2 className="h-4 w-4" /> Clear All
+   491→                </Button>
+   492→              </TooltipTrigger>
+   493→              <TooltipContent><p>Remove all entries (e.g., if template was loaded by mistake)</p></TooltipContent>
+   494→            </Tooltip>
+   495→          </TooltipProvider>
+   496→        )}
+   497→        <Dialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+   498→          <DialogContent>
+   499→            <DialogHeader>
+   500→              <DialogTitle>Clear All Trial Balance Entries?</DialogTitle>
+   501→              <DialogDescription>
+   502→                This will remove all {entries.length} entries from the trial balance. You can then load a new template or upload an Excel file. This action cannot be undone.
+   503→              </DialogDescription>
+   504→            </DialogHeader>
+   505→            <DialogFooter>
+   506→              <Button variant="outline" onClick={() => setShowClearConfirm(false)}>Cancel</Button>
+   507→              <Button variant="destructive" className="gap-2" onClick={() => { clearTrialBalance(); setShowClearConfirm(false) }}>
+   508→                <Trash2 className="h-4 w-4" /> Clear All Entries
+   509→              </Button>
+   510→            </DialogFooter>
+   511→          </DialogContent>
+   512→        </Dialog>
+   513→        <span className="text-xs text-muted-foreground ml-2">{entries.length} entries</span>
+   514→        <div className="ml-auto flex items-center gap-3 text-xs font-mono">
+   515→          <span className="text-muted-foreground">Dr: <span className="text-foreground font-semibold">{formatNum(totalDebitCurrent)}</span></span>
+   516→          <span className="text-muted-foreground">Cr: <span className="text-foreground font-semibold">{formatNum(totalCreditCurrent)}</span></span>
+   517→          <Badge variant={isBalanced ? 'default' : 'destructive'} className="text-[10px]">
+   518→            {isBalanced ? '✓ Balanced' : `Δ ${formatNum(diffCurrent)}`}
+   519→          </Badge>
+   520→        </div>
+   521→      </div>
+   522→
+   523→      {/* Table */}
+   524→      <div className="overflow-x-auto rounded-lg border border-border">
+   525→        <table className="w-full text-sm min-w-[1400px]">
+   526→          <thead>
+   527→            <tr className="bg-foreground text-background">
+   528→              <th className="px-1 py-2.5 text-center text-xs font-medium uppercase tracking-wide w-8">#</th>
+   529→              <th className="px-1 py-2.5 text-left text-xs font-medium uppercase tracking-wide w-24">Code</th>
+   530→              <th className="px-1 py-2.5 text-left text-xs font-medium uppercase tracking-wide">Account Name</th>
+   531→              <th className="px-1 py-2.5 text-left text-xs font-medium uppercase tracking-wide w-[160px]">Classification</th>
+   532→              <th className="px-1 py-2.5 text-left text-xs font-medium uppercase tracking-wide w-[200px]">Category</th>
+   533→              <th className="px-1 py-2.5 text-center text-xs font-medium uppercase tracking-wide w-12">Note</th>
+   534→              <th className="px-1 py-2.5 text-right text-xs font-medium uppercase tracking-wide w-28">Dr. Current</th>
+   535→              <th className="px-1 py-2.5 text-right text-xs font-medium uppercase tracking-wide w-28">Cr. Current</th>
+   536→              <th className="px-1 py-2.5 text-right text-xs font-medium uppercase tracking-wide w-28">Dr. Prior</th>
+   537→              <th className="px-1 py-2.5 text-right text-xs font-medium uppercase tracking-wide w-28">Cr. Prior</th>
+   538→              <th className="px-1 py-2.5 text-right text-xs font-medium uppercase tracking-wide w-24">Budget Init</th>
+   539→              <th className="px-1 py-2.5 text-right text-xs font-medium uppercase tracking-wide w-24">Budget Adj</th>
+   540→              <th className="px-1 py-2.5 w-10" />
+   541→            </tr>
+   542→          </thead>
+   543→          <tbody>
+   544→            {entries.map((entry, index) => (
+   545→              <TBEntryRow key={(entry._id || entry._dbId) ?? index} entry={entry} index={index} onEntryChange={updateEntry} onDelete={deleteEntry} />
+   546→            ))}
+   547→            {entries.length === 0 && (
+   548→              <tr>
+   549→                <td colSpan={13} className="py-16 text-center text-muted-foreground text-sm">
+   550→                  <div className="flex flex-col items-center gap-3">
+   551→                    <FolderOpen className="h-10 w-10 text-muted-foreground/50" />
+   552→                    <p>No entries yet. Click &quot;Load Template&quot; or &quot;Add Row&quot; to begin.</p>
+   553→                  </div>
+   554→                </td>
+   555→              </tr>
+   556→            )}
+   557→          </tbody>
+   558→        </table>
+   559→      </div>
+   560→
+   561→      {/* Footer Actions */}
+   562→      <Card className="bg-muted/30">
+   563→        <CardContent className="py-3">
+   564→          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+   565→            <div className="flex gap-2">
+   566→              <Button variant="outline" size="sm" onClick={() => setWizardStep(1)} className="gap-1.5">
+   567→                <ArrowLeft className="h-4 w-4" /> Back
+   568→              </Button>
+   569→              <Button onClick={handleSave} disabled={isLoading || entries.length === 0} className="bg-primary text-primary-foreground gap-2">
+   570→                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+   571→                Save & Validate
+   572→              </Button>
+   573→            </div>
+   574→            <Button onClick={() => setWizardStep(3)} className="bg-primary text-primary-foreground gap-2">
+   575→              Continue to Budget <ArrowRight className="h-4 w-4" />
+   576→            </Button>
+   577→          </div>
+   578→        </CardContent>
+   579→      </Card>
+   580→    </motion.div>
+   581→  )
+   582→}
+   583→
+   584→// ═══════════════════════════════════════════════════════════════════
+   585→// STEP 3: SUPPLEMENTARY DATA
+   586→// ═══════════════════════════════════════════════════════════════════
+   587→
+   588→function Step3Supplementary() {
+   589→  const { supplementaryData, setSupplementaryData, saveSupplementary, isLoading, fetchSupplementary, wizardStep, setWizardStep, activeReportId } = useFinancialStore()
+   590→  const [saving, setSaving] = useState(false)
+   591→  const [localData, setLocalData] = useState<Record<string, string | number>>({})
+   592→
+   593→  useEffect(() => {
+   594→    if (activeReportId) fetchSupplementary()
+   595→  }, [activeReportId, fetchSupplementary])
+   596→
+   597→  useEffect(() => {
+   598→    if (supplementaryData) {
+   599→      setLocalData({ ...supplementaryData })
+   600→    }
+   601→  }, [supplementaryData])
+   602→
+   603→  const update = (key: string, value: string | number) => {
+   604→    setLocalData(prev => ({ ...prev, [key]: value }))
+   605→  }
+   606→
+   607→  const handleSave = async () => {
+   608→    setSaving(true)
+   609→    try {
+   610→      await saveSupplementary(localData)
+   611→      toast.success('Supplementary data saved')
+   612→    } catch {
+   613→      toast.error('Failed to save supplementary data')
+   614→    } finally {
+   615→      setSaving(false)
+   616→    }
+   617→  }
+   618→
+   619→  const d = localData
+   620→
+   621→  const FieldGroup = ({ title, children }: { title: string; children: React.ReactNode }) => (
+   622→    <Card>
+   623→      <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">{title}</CardTitle></CardHeader>
+   624→      <CardContent className="pt-0">{children}</CardContent>
+   625→    </Card>
+   626→  )
+   627→
+   628→  const YearInput = ({ label, currentKey, priorKey, tooltip }: { label: string; currentKey: string; priorKey: string; tooltip: string }) => (
+   629→    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   630→      <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   631→        <div className="space-y-1.5">
+   632→          <Label className="text-xs text-muted-foreground flex items-center gap-1">{label} (Current) <Info className="h-3 w-3" /></Label>
+   633→          <Input type="number" className="h-8 text-sm font-mono" value={d[currentKey] ?? 0} onChange={e => update(currentKey, parseFloat(e.target.value) || 0)} />
+   634→        </div>
+   635→      </TooltipTrigger><TooltipContent><p>{tooltip}</p></TooltipContent></Tooltip></TooltipProvider>
+   636→      <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   637→        <div className="space-y-1.5">
+   638→          <Label className="text-xs text-muted-foreground">{label} (Prior)</Label>
+   639→          <Input type="number" className="h-8 text-sm font-mono" value={d[priorKey] ?? 0} onChange={e => update(priorKey, parseFloat(e.target.value) || 0)} />
+   640→        </div>
+   641→      </TooltipTrigger><TooltipContent><p>{tooltip}</p></TooltipContent></Tooltip></TooltipProvider>
+   642→    </div>
+   643→  )
+   644→
+   645→  return (
+   646→    <motion.div {...pageVariants} className="py-4 space-y-4">
+   647→      <div className="flex items-center justify-between">
+   648→        <div>
+   649→          <h2 className="text-xl font-bold text-foreground">Supplementary Data</h2>
+   650→          <p className="text-sm text-muted-foreground mt-1">Additional data for cash flow reconciliation, PPE schedules, and disclosures.</p>
+   651→        </div>
+   652→        <Button onClick={handleSave} disabled={saving || isLoading} className="bg-primary text-primary-foreground gap-2">
+   653→          {saving || isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+   654→          Save
+   655→        </Button>
+   656→      </div>
+   657→
+   658→      <div className="grid gap-4">
+   659→        <FieldGroup title="Cash Flow Adjustments">
+   660→          <div className="grid gap-3">
+   661→            <YearInput label="Advances Recovered" currentKey="advancesRecovered" priorKey="advancesRecoveredPrior" tooltip="Amount recovered from advances made in prior periods, added back to revenue for cash flow" />
+   662→            <YearInput label="Deposits Received" currentKey="depositsReceived" priorKey="depositsReceivedPrior" tooltip="Refundable deposits received during the period - not revenue" />
+   663→            <YearInput label="Transfers to Treasury" currentKey="transfersToTreasury" priorKey="transfersToTreasuryPrior" tooltip="Amounts transferred to the Consolidated Fund - deducted from cash flow revenue" />
+   664→            <YearInput label="Revenue in Kind / Tax Waivers" currentKey="revenueInKindTaxWaivers" priorKey="revenueInKindTaxWaiversPrior" tooltip="Non-cash revenue such as tax waivers and in-kind grants - deducted from cash flow revenue" />
+   665→          </div>
+   666→        </FieldGroup>
+   667→
+   668→        <FieldGroup title="PPE Movement Schedule">
+   669→          <div className="grid gap-3">
+   670→            <YearInput label="Opening Balance (PPE)" currentKey="ppeOpeningCurrent" priorKey="ppeOpeningPrior" tooltip="Opening balance of property, plant and equipment" />
+   671→            <YearInput label="Additions (PPE)" currentKey="ppeAdditionsCurrent" priorKey="ppeAdditionsPrior" tooltip="New PPE acquired during the period" />
+   672→            <YearInput label="Disposals (PPE)" currentKey="ppeDisposalsCurrent" priorKey="ppeDisposalsPrior" tooltip="PPE disposed of during the period at cost" />
+   673→            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   674→              <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   675→                <div className="space-y-1.5">
+   676→                  <Label className="text-xs text-muted-foreground flex items-center gap-1">Depreciation Rate (%) <Info className="h-3 w-3" /></Label>
+   677→                  <Input type="number" className="h-8 text-sm font-mono" value={d.depreciationRate ?? 0} onChange={e => update('depreciationRate', parseFloat(e.target.value) || 0)} />
+   678→                </div>
+   679→              </TooltipTrigger><TooltipContent><p>Annual depreciation rate as a percentage</p></TooltipContent></Tooltip></TooltipProvider>
+   680→              <div className="space-y-1.5">
+   681→                <Label className="text-xs text-muted-foreground">Depreciation Method</Label>
+   682→                <Select value={d.depreciationMethod as string || 'straight-line'} onValueChange={v => update('depreciationMethod', v)}>
+   683→                  <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+   684→                  <SelectContent>
+   685→                    <SelectItem value="straight-line">Straight-Line</SelectItem>
+   686→                    <SelectItem value="reducing-balance">Reducing Balance</SelectItem>
+   687→                  </SelectContent>
+   688→                </Select>
+   689→              </div>
+   690→            </div>
+   691→          </div>
+   692→        </FieldGroup>
+   693→
+   694→        <FieldGroup title="Employee Costs (Note 9)">
+   695→          <div className="grid gap-3">
+   696→            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   697→              <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   698→                <div className="space-y-1.5">
+   699→                  <Label className="text-xs text-muted-foreground flex items-center gap-1">Employee Headcount <Info className="h-3 w-3" /></Label>
+   700→                  <Input type="number" className="h-8 text-sm font-mono" value={d.employeeCount ?? 0} onChange={e => update('employeeCount', parseInt(e.target.value) || 0)} />
+   701→                </div>
+   702→              </TooltipTrigger><TooltipContent><p>Total number of employees at period end</p></TooltipContent></Tooltip></TooltipProvider>
+   703→              <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   704→                <div className="space-y-1.5">
+   705→                  <Label className="text-xs text-muted-foreground">Salaries & Wages</Label>
+   706→                  <Input type="number" className="h-8 text-sm font-mono" value={d.salariesWages ?? 0} onChange={e => update('salariesWages', parseFloat(e.target.value) || 0)} />
+   707→                </div>
+   708→              </TooltipTrigger><TooltipContent><p>Total gross salaries and wages for the period</p></TooltipContent></Tooltip></TooltipProvider>
+   709→            </div>
+   710→            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+   711→              <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   712→                <div className="space-y-1.5">
+   713→                  <Label className="text-xs text-muted-foreground">Pension Contributions</Label>
+   714→                  <Input type="number" className="h-8 text-sm font-mono" value={d.pensionContributions ?? 0} onChange={e => update('pensionContributions', parseFloat(e.target.value) || 0)} />
+   715→                </div>
+   716→              </TooltipTrigger><TooltipContent><p>Employer pension contributions for the period</p></TooltipContent></Tooltip></TooltipProvider>
+   717→              <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   718→                <div className="space-y-1.5">
+   719→                  <Label className="text-xs text-muted-foreground">Payroll Taxes</Label>
+   720→                  <Input type="number" className="h-8 text-sm font-mono" value={d.payrollTaxes ?? 0} onChange={e => update('payrollTaxes', parseFloat(e.target.value) || 0)} />
+   721→                </div>
+   722→              </TooltipTrigger><TooltipContent><p>PAYE and other payroll taxes paid</p></TooltipContent></Tooltip></TooltipProvider>
+   723→              <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   724→                <div className="space-y-1.5">
+   725→                  <Label className="text-xs text-muted-foreground">Other Benefits</Label>
+   726→                  <Input type="number" className="h-8 text-sm font-mono" value={d.otherEmployeeBenefits ?? 0} onChange={e => update('otherEmployeeBenefits', parseFloat(e.target.value) || 0)} />
+   727→                </div>
+   728→              </TooltipTrigger><TooltipContent><p>Medical, housing, transport, and other employee benefits</p></TooltipContent></Tooltip></TooltipProvider>
+   729→            </div>
+   730→          </div>
+   731→        </FieldGroup>
+   732→
+   733→        <FieldGroup title="Prior Year Adjustments & Reserves">
+   734→          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+   735→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   736→              <div className="space-y-1.5">
+   737→                <Label className="text-xs text-muted-foreground flex items-center gap-1">Adjustments <Info className="h-3 w-3" /></Label>
+   738→                <Input type="number" className="h-8 text-sm font-mono" value={d.priorYearAdjustments ?? 0} onChange={e => update('priorYearAdjustments', parseFloat(e.target.value) || 0)} />
+   739→              </div>
+   740→            </TooltipTrigger><TooltipContent><p>Prior year error corrections and adjustments</p></TooltipContent></Tooltip></TooltipProvider>
+   741→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   742→              <div className="space-y-1.5">
+   743→                <Label className="text-xs text-muted-foreground">Revaluation Reserves</Label>
+   744→                <Input type="number" className="h-8 text-sm font-mono" value={d.revaluationReserves ?? 0} onChange={e => update('revaluationReserves', parseFloat(e.target.value) || 0)} />
+   745→              </div>
+   746→            </TooltipTrigger><TooltipContent><p>Asset revaluation surplus/deficit for the period</p></TooltipContent></Tooltip></TooltipProvider>
+   747→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   748→              <div className="space-y-1.5">
+   749→                <Label className="text-xs text-muted-foreground">Transfers to UCF</Label>
+   750→                <Input type="number" className="h-8 text-sm font-mono" value={d.transfersToUCF ?? 0} onChange={e => update('transfersToUCF', parseFloat(e.target.value) || 0)} />
+   751→              </div>
+   752→            </TooltipTrigger><TooltipContent><p>Transfers to the Uniform Clearing Fund</p></TooltipContent></Tooltip></TooltipProvider>
+   753→          </div>
+   754→        </FieldGroup>
+   755→
+   756→        <FieldGroup title="Signatory Details">
+   757→          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   758→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   759→              <div className="space-y-1.5">
+   760→                <Label className="text-xs text-muted-foreground flex items-center gap-1">Accounting Officer <Info className="h-3 w-3" /></Label>
+   761→                <Input className="h-8 text-sm" value={d.accountingOfficer ?? ''} onChange={e => update('accountingOfficer', e.target.value)} />
+   762→              </div>
+   763→            </TooltipTrigger><TooltipContent><p>Name of the Accounting Officer who signs off the statements</p></TooltipContent></Tooltip></TooltipProvider>
+   764→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   765→              <div className="space-y-1.5">
+   766→                <Label className="text-xs text-muted-foreground">Chief Finance Officer</Label>
+   767→                <Input className="h-8 text-sm" value={d.chiefFinanceOfficer ?? ''} onChange={e => update('chiefFinanceOfficer', e.target.value)} />
+   768→              </div>
+   769→            </TooltipTrigger><TooltipContent><p>Name of the CFO</p></TooltipContent></Tooltip></TooltipProvider>
+   770→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   771→              <div className="space-y-1.5">
+   772→                <Label className="text-xs text-muted-foreground">Internal Audit Head</Label>
+   773→                <Input className="h-8 text-sm" value={d.internalAuditHead ?? ''} onChange={e => update('internalAuditHead', e.target.value)} />
+   774→              </div>
+   775→            </TooltipTrigger><TooltipContent><p>Name of the Head of Internal Audit</p></TooltipContent></Tooltip></TooltipProvider>
+   776→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   777→              <div className="space-y-1.5">
+   778→                <Label className="text-xs text-muted-foreground">Signatory Date</Label>
+   779→                <Input type="date" className="h-8 text-sm" value={d.signatoryDate ?? ''} onChange={e => update('signatoryDate', e.target.value)} />
+   780→              </div>
+   781→            </TooltipTrigger><TooltipContent><p>Date the statements are signed</p></TooltipContent></Tooltip></TooltipProvider>
+   782→          </div>
+   783→        </FieldGroup>
+   784→
+   785→        <FieldGroup title="Accounting Policies & Exchange Rates">
+   786→          <div className="grid gap-3">
+   787→            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   788→              <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   789→                <div className="space-y-1.5">
+   790→                  <Label className="text-xs text-muted-foreground flex items-center gap-1">IPSAS Basis <Info className="h-3 w-3" /></Label>
+   791→                  <Select value={d.ipsasBasis as string || 'IPSAS Accrual Basis'} onValueChange={v => update('ipsasBasis', v)}>
+   792→                    <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+   793→                    <SelectContent>
+   794→                      <SelectItem value="IPSAS Accrual Basis">IPSAS Accrual Basis</SelectItem>
+   795→                      <SelectItem value="IPSAS Cash Basis">IPSAS Cash Basis</SelectItem>
+   796→                    </SelectContent>
+   797→                  </Select>
+   798→                </div>
+   799→              </TooltipTrigger><TooltipContent><p>The basis of accounting used</p></TooltipContent></Tooltip></TooltipProvider>
+   800→              <div className="space-y-1.5">
+   801→                <Label className="text-xs text-muted-foreground">USD Exchange Rate</Label>
+   802→                <Input type="number" className="h-8 text-sm font-mono" step="0.0001" value={d.exchangeRateUSD ?? 1} onChange={e => update('exchangeRateUSD', parseFloat(e.target.value) || 1)} />
+   803→              </div>
+   804→            </div>
+   805→            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   806→              <div className="space-y-1.5">
+   807→                <Label className="text-xs text-muted-foreground">EUR Exchange Rate</Label>
+   808→                <Input type="number" className="h-8 text-sm font-mono" step="0.0001" value={d.exchangeRateEUR ?? 1} onChange={e => update('exchangeRateEUR', parseFloat(e.target.value) || 1)} />
+   809→              </div>
+   810→            </div>
+   811→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   812→              <div className="space-y-1.5">
+   813→                <Label className="text-xs text-muted-foreground flex items-center gap-1">Accounting Policies (free text) <Info className="h-3 w-3" /></Label>
+   814→                <Textarea className="min-h-[80px] text-sm" value={d.accountingPolicies ?? ''} onChange={e => update('accountingPolicies', e.target.value)} placeholder="Describe the entity's significant accounting policies..." />
+   815→              </div>
+   816→            </TooltipTrigger><TooltipContent><p>Disclosure of significant accounting policies per IPSAS 1</p></TooltipContent></Tooltip></TooltipProvider>
+   817→          </div>
+   818→        </FieldGroup>
+   819→      </div>
+   820→
+   821→      <Card className="bg-muted/30">
+   822→        <CardContent className="py-3">
+   823→          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+   824→            <Button variant="outline" size="sm" onClick={() => setWizardStep(3)} className="gap-1.5">
+   825→              <ArrowLeft className="h-4 w-4" /> Back to Budget
+   826→            </Button>
+   827→            <Button onClick={async () => { await handleSave(); setWizardStep(5); }} className="bg-primary text-primary-foreground gap-2">
+   828→              Continue to Review <ArrowRight className="h-4 w-4" />
+   829→            </Button>
+   830→          </div>
+   831→        </CardContent>
+   832→      </Card>
+   833→    </motion.div>
+   834→  )
+   835→}
+   836→
+   837→// ═══════════════════════════════════════════════════════════════════
+   838→// STEP 4: REVIEW & VALIDATE
+   839→// ═══════════════════════════════════════════════════════════════════
+   840→
+   841→function Step4Review() {
+   842→  const { entries, complianceData, fetchCompliance, auditLog, fetchAuditLog, activeReportId, autoBalance, isLoading, wizardStep, setWizardStep, saveTrialBalance } = useFinancialStore()
+   843→  const [loadingCompliance, setLoadingCompliance] = useState(false)
+   844→  const [loadingAudit, setLoadingAudit] = useState(false)
+   845→  const [autoBalancing, setAutoBalancing] = useState(false)
+   846→
+   847→  const totalDr = entries.reduce((s, e) => s + (e.debitCurrent || 0), 0)
+   848→  const totalCr = entries.reduce((s, e) => s + (e.creditCurrent || 0), 0)
+   849→  const tbBalanced = Math.abs(totalDr - totalCr) < 0.01
+   850→  const allMapped = entries.every(e => e.category && e.category.trim() !== '')
+   851→  const hasBudget = entries.some(e => e.budgetInitial > 0 || e.budgetAdjusted > 0)
+   852→  const hasPrior = entries.some(e => e.debitPrior !== 0 || e.creditPrior !== 0)
+   853→
+   854→  const handleRunCompliance = async () => {
+   855→    setLoadingCompliance(true)
+   856→    try {
+   857→      await saveTrialBalance()
+   858→      await fetchCompliance()
+   859→      toast.success('Compliance check completed')
+   860→    } catch {
+   861→      toast.error('Failed to run compliance check')
+   862→    } finally {
+   863→      setLoadingCompliance(false)
+   864→    }
+   865→  }
+   866→
+   867→  const handleLoadAudit = async () => {
+   868→    setLoadingAudit(true)
+   869→    try {
+   870→      await fetchAuditLog()
+   871→    } catch {
+   872→      // silent
+   873→    } finally {
+   874→      setLoadingAudit(false)
+   875→    }
+   876→  }
+   877→
+   878→  const handleAutoBalance = async () => {
+   879→    setAutoBalancing(true)
+   880→    try {
+   881→      await autoBalance()
+   882→      toast.success('Auto-balanced successfully')
+   883→    } catch {
+   884→      toast.error('Failed to auto-balance')
+   885→    } finally {
+   886→      setAutoBalancing(false)
+   887→    }
+   888→  }
+   889→
+   890→  useEffect(() => {
+   891→    if (activeReportId) handleLoadAudit()
+   892→  }, [activeReportId])
+   893→
+   894→  const validationItems = [
+   895→    { label: 'Trial Balance balanced', pass: tbBalanced },
+   896→    { label: 'All categories mapped', pass: allMapped },
+   897→    { label: 'Budget data provided', pass: hasBudget },
+   898→    { label: 'Prior year data present', pass: hasPrior },
+   899→    { label: `Entries count: ${entries.length}`, pass: entries.length > 0 },
+   900→  ]
+   901→
+   902→  const complianceScore = complianceData?.score ?? 0
+   903→
+   904→  return (
+   905→    <motion.div {...pageVariants} className="py-4 space-y-4">
+   906→      <div className="flex items-center justify-between">
+   907→        <div>
+   908→          <h2 className="text-xl font-bold text-foreground">Review & Validate</h2>
+   909→          <p className="text-sm text-muted-foreground mt-1">Validate your data and check IPSAS compliance before generating statements.</p>
+   910→        </div>
+   911→        <div className="flex gap-2">
+   912→          <Button variant="outline" size="sm" onClick={handleLoadAudit} disabled={loadingAudit} className="gap-1.5">
+   913→            {loadingAudit ? <Loader2 className="h-4 w-4 animate-spin" /> : <History className="h-4 w-4" />}
+   914→            Refresh Audit Log
+   915→          </Button>
+   916→          <Button onClick={handleRunCompliance} disabled={loadingCompliance || isLoading} className="bg-primary text-primary-foreground gap-2">
+   917→            {loadingCompliance || isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Shield className="h-4 w-4" />}
+   918→            Run Compliance Check
+   919→          </Button>
+   920→        </div>
+   921→      </div>
+   922→
+   923→      <div className="grid gap-4 lg:grid-cols-3">
+   924→        {/* Validation Panel */}
+   925→        <Card className="lg:col-span-1">
+   926→          <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">Validation Status</CardTitle></CardHeader>
+   927→          <CardContent className="pt-0 space-y-2">
+   928→            {validationItems.map((item, i) => (
+   929→              <div key={i} className="flex items-center gap-2 text-sm">
+   930→                {item.pass
+   931→                  ? <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+   932→                  : <X className="h-4 w-4 text-destructive flex-shrink-0" />}
+   933→                <span className={item.pass ? 'text-foreground' : 'text-destructive'}>{item.label}</span>
+   934→              </div>
+   935→            ))}
+   936→            {!tbBalanced && (
+   937→              <Button variant="outline" size="sm" className="w-full mt-3 gap-1.5" onClick={handleAutoBalance} disabled={autoBalancing}>
+   938→                {autoBalancing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+   939→                Auto-Balance
+   940→              </Button>
+   941→            )}
+   942→          </CardContent>
+   943→        </Card>
+   944→
+   945→        {/* Compliance Score + Checklist */}
+   946→        <Card className="lg:col-span-1">
+   947→          <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">IPSAS Compliance</CardTitle></CardHeader>
+   948→          <CardContent className="pt-0">
+   949→            {complianceData ? (
+   950→              <div className="space-y-4">
+   951→                <div className="flex flex-col items-center">
+   952→                  <div className="relative h-24 w-24">
+   953→                    <svg className="h-24 w-24 -rotate-90" viewBox="0 0 100 100">
+   954→                      <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="8" className="text-muted" />
+   955→                      <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="8" className={complianceScore >= 80 ? 'text-primary' : complianceScore >= 50 ? 'text-yellow-500' : 'text-destructive'}
+   956→                        strokeDasharray={`${complianceScore * 2.64} 264`} strokeLinecap="round" />
+   957→                    </svg>
+   958→                    <div className="absolute inset-0 flex items-center justify-center">
+   959→                      <span className="text-2xl font-bold text-foreground">{complianceScore}%</span>
+   960→                    </div>
+   961→                  </div>
+   962→                  <p className="text-xs text-muted-foreground mt-2">{complianceData.metCount}/{complianceData.totalCount} requirements met</p>
+   963→                </div>
+   964→                <ScrollArea className="h-48 custom-scrollbar">
+   965→                  <div className="space-y-1.5 pr-2">
+   966→                    {complianceData.checklist.map((item: ComplianceItem) => (
+   967→                      <div key={item.id} className="flex items-start gap-2 text-xs">
+   968→                        {item.status === 'met'
+   969→                          ? <CheckCircle2 className="h-3.5 w-3.5 text-primary mt-0.5 flex-shrink-0" />
+   970→                          : item.status === 'partial'
+   971→                            ? <AlertTriangle className="h-3.5 w-3.5 text-yellow-500 mt-0.5 flex-shrink-0" />
+   972→                            : <X className="h-3.5 w-3.5 text-destructive mt-0.5 flex-shrink-0" />}
+   973→                        <div>
+   974→                          <p className="text-foreground font-medium">{item.requirement}</p>
+   975→                          <p className="text-muted-foreground">{item.ipsasReference}</p>
+   976→                        </div>
+   977→                      </div>
+   978→                    ))}
+   979→                  </div>
+   980→                </ScrollArea>
+   981→              </div>
+   982→            ) : (
+   983→              <div className="flex flex-col items-center py-8 text-center text-muted-foreground">
+   984→                <Shield className="h-10 w-10 mb-2 opacity-30" />
+   985→                <p className="text-sm">Click &quot;Run Compliance Check&quot; to validate IPSAS requirements.</p>
+   986→              </div>
+   987→            )}
+   988→          </CardContent>
+   989→        </Card>
+   990→
+   991→        {/* Audit Trail */}
+   992→        <Card className="lg:col-span-1">
+   993→          <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">Audit Trail</CardTitle></CardHeader>
+   994→          <CardContent className="pt-0">
+   995→            {auditLog.length > 0 ? (
+   996→              <ScrollArea className="h-64 custom-scrollbar">
+   997→                <div className="space-y-3 pr-2">
+   998→                  {auditLog.slice(0, 15).map((entry: AuditLogEntry) => (
+   999→                    <div key={entry.id} className="flex items-start gap-2 text-xs">
+  1000→                      <Clock className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+  1001→                      <div className="flex-1 min-w-0">
+  1002→                        <p className="text-foreground font-medium truncate">{entry.action.replace(/_/g, ' ')}</p>
+  1003→                        <p className="text-muted-foreground">{entry.field} {entry.oldValue && `— ${entry.oldValue} → ${entry.newValue}`}</p>
+  1004→                        <p className="text-muted-foreground/60">{new Date(entry.timestamp).toLocaleString()}</p>
+  1005→                      </div>
+  1006→                    </div>
+  1007→                  ))}
+  1008→                </div>
+  1009→              </ScrollArea>
+  1010→            ) : (
+  1011→              <div className="flex flex-col items-center py-8 text-center text-muted-foreground">
+  1012→                <History className="h-10 w-10 mb-2 opacity-30" />
+  1013→                <p className="text-sm">No audit entries yet.</p>
+  1014→              </div>
+  1015→            )}
+  1016→          </CardContent>
+  1017→        </Card>
+  1018→      </div>
+  1019→
+  1020→      <Card className="bg-muted/30">
+  1021→        <CardContent className="py-3">
+  1022→          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+  1023→            <Button variant="outline" size="sm" onClick={() => setWizardStep(4)} className="gap-1.5">
+  1024→              <ArrowLeft className="h-4 w-4" /> Back
+  1025→            </Button>
+  1026→            <Button onClick={() => setWizardStep(6)} className="bg-primary text-primary-foreground gap-2">
+  1027→              Continue to Generate <ArrowRight className="h-4 w-4" />
+  1028→            </Button>
+  1029→          </div>
+  1030→        </CardContent>
+  1031→      </Card>
+  1032→    </motion.div>
+  1033→  )
+  1034→}
+  1035→
+  1036→// ═══════════════════════════════════════════════════════════════════
+  1037→// STEP 5: GENERATE & EXPORT
+  1038→// ═══════════════════════════════════════════════════════════════════
+  1039→
+  1040→function Step5Generate() {
+  1041→  const {
+  1042→    generatedStatements, entityConfig, activeReportId, generateStatements,
+  1043→    statementSubTab, setStatementSubTab, isLoading, wizardStep, setWizardStep,
+  1044→    approvalWorkflow, fetchApprovalWorkflow, advanceApproval,
+  1045→    versions, fetchVersions, createVersion,
+  1046→  } = useFinancialStore()
+  1047→  const [isExporting, setIsExporting] = useState(false)
+  1048→  const [approverName, setApproverName] = useState('')
+  1049→  const [versionLabel, setVersionLabel] = useState('')
+  1050→  const [showVersionDialog, setShowVersionDialog] = useState(false)
+  1051→  const [showPdfPreview, setShowPdfPreview] = useState(false)
+  1052→
+  1053→  useEffect(() => {
+  1054→    if (activeReportId) {
+  1055→      fetchApprovalWorkflow()
+  1056→      fetchVersions()
+  1057→    }
+  1058→  }, [activeReportId, fetchApprovalWorkflow, fetchVersions])
+  1059→
+  1060→  const handleGenerate = async () => {
+  1061→    try {
+  1062→      await generateStatements()
+  1063→      toast.success('Statements generated successfully')
+  1064→    } catch {
+  1065→      toast.error('Failed to generate statements')
+  1066→    }
+  1067→  }
+  1068→
+  1069→  const handleDownloadPdf = async () => {
+  1070→    if (!activeReportId) return
+  1071→    setIsExporting(true)
+  1072→    try {
+  1073→      const res = await fetch(`/api/reports/${activeReportId}/pdf`)
+  1074→      if (!res.ok) throw new Error('PDF generation failed')
+  1075→      const blob = await res.blob()
+  1076→      const url = URL.createObjectURL(blob)
+  1077→      const a = document.createElement('a')
+  1078→      a.href = url
+  1079→      a.download = `${entityConfig.name.replace(/\s+/g, '_')}_Financial_Statements.pdf`
+  1080→      document.body.appendChild(a)
+  1081→      a.click()
+  1082→      document.body.removeChild(a)
+  1083→      URL.revokeObjectURL(url)
+  1084→      toast.success('PDF downloaded successfully')
+  1085→    } catch {
+  1086→      toast.error('Failed to generate PDF')
+  1087→    } finally {
+  1088→      setIsExporting(false)
+  1089→    }
+  1090→  }
+  1091→
+  1092→  const handleDownloadExcel = async () => {
+  1093→    if (!activeReportId) return
+  1094→    setIsExporting(true)
+  1095→    try {
+  1096→      const res = await fetch(`/api/reports/${activeReportId}/export/excel`)
+  1097→      if (!res.ok) throw new Error('Excel generation failed')
+  1098→      const blob = await res.blob()
+  1099→      const url = URL.createObjectURL(blob)
+  1100→      const a = document.createElement('a')
+  1101→      a.href = url
+  1102→      a.download = `${entityConfig.name.replace(/\s+/g, '_')}_Financial_Statements.xlsx`
+  1103→      document.body.appendChild(a)
+  1104→      a.click()
+  1105→      document.body.removeChild(a)
+  1106→      URL.revokeObjectURL(url)
+  1107→      toast.success('Excel downloaded successfully')
+  1108→    } catch {
+  1109→      toast.error('Failed to generate Excel')
+  1110→    } finally {
+  1111→      setIsExporting(false)
+  1112→    }
+  1113→  }
+  1114→
+  1115→  const handleAdvanceApproval = async () => {
+  1116→    try {
+  1117→      await advanceApproval(approverName || 'system')
+  1118→      setApproverName('')
+  1119→      toast.success('Approval advanced')
+  1120→    } catch {
+  1121→      toast.error('Failed to advance approval')
+  1122→    }
+  1123→  }
+  1124→
+  1125→  const handleCreateVersion = async () => {
+  1126→    try {
+  1127→      await createVersion(versionLabel)
+  1128→      setShowVersionDialog(false)
+  1129→      setVersionLabel('')
+  1130→      toast.success('Version created successfully')
+  1131→    } catch {
+  1132→      toast.error('Failed to create version')
+  1133→    }
+  1134→  }
+  1135→
+  1136→  const subTabs: { value: StatementSubTab; label: string }[] = [
+  1137→    { value: 'sfp', label: 'Fin. Performance' },
+  1138→    { value: 'balance-sheet', label: 'Fin. Position' },
+  1139→    { value: 'changes-na', label: 'Changes in NA' },
+  1140→    { value: 'cash-flow', label: 'Cash Flow' },
+  1141→    { value: 'revenue-recon', label: 'Revenue Recon' },
+  1142→    { value: 'cash-recon', label: 'Cash Recon' },
+  1143→    { value: 'budget-variance', label: 'Budget Variance' },
+  1144→  ]
+  1145→
+  1146→  const approvalSteps = ['draft', 'preparer_review', 'management_review', 'cfo_approval', 'final']
+  1147→  const currentStepIdx = approvalSteps.indexOf(approvalWorkflow?.currentStep || 'draft')
+  1148→
+  1149→  if (!generatedStatements) {
+  1150→    return (
+  1151→      <motion.div {...pageVariants} className="py-6 space-y-6">
+  1152→        <div className="flex items-center justify-between">
+  1153→          <div>
+  1154→            <h2 className="text-xl font-bold text-foreground">Generate & Export</h2>
+  1155→            <p className="text-sm text-muted-foreground mt-1">Generate financial statements and export to PDF or Excel.</p>
+  1156→          </div>
+  1157→          <Button variant="outline" size="sm" onClick={() => setWizardStep(5)} className="gap-1.5">
+  1158→            <ArrowLeft className="h-4 w-4" /> Back
+  1159→          </Button>
+  1160→        </div>
+  1161→
+  1162→        <div className="flex flex-col items-center justify-center py-16 text-center">
+  1163→          <div className="rounded-full bg-primary/10 p-6 mb-6">
+  1164→            <Sparkles className="h-12 w-12 text-primary" />
+  1165→          </div>
+  1166→          <h2 className="text-xl font-semibold text-foreground mb-2">Generate Financial Statements</h2>
+  1167→          <p className="text-muted-foreground mb-6 max-w-md">Generate IPSAS-compliant financial statements including the SFP, Balance Sheet, Cash Flow, and supporting schedules.</p>
+  1168→          <Button onClick={handleGenerate} disabled={isLoading} className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2" size="lg">
+  1169→            {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Play className="h-5 w-5" />}
+  1170→            Generate Financial Statements
+  1171→          </Button>
+  1172→        </div>
+  1173→
+  1174→        {/* Version History */}
+  1175→        {versions.length > 1 && (
+  1176→          <Card>
+  1177→            <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">Version History</CardTitle></CardHeader>
+  1178→            <CardContent className="pt-0">
+  1179→              <div className="space-y-2">
+  1180→                {versions.map((v: VersionEntry) => (
+  1181→                  <div key={v.id} className={`flex items-center justify-between p-2 rounded-lg text-sm ${v.id === activeReportId ? 'bg-primary/10 border border-primary/20' : 'bg-muted/50'}`}>
+  1182→                    <div className="flex items-center gap-3">
+  1183→                      <GitBranch className="h-4 w-4 text-muted-foreground" />
+  1184→                      <div>
+  1185→                        <p className="font-medium text-foreground">{v.versionLabel || `Version ${v.version}`}</p>
+  1186→                        <p className="text-xs text-muted-foreground">{new Date(v.createdAt).toLocaleString()} · {v._count.entries} entries</p>
+  1187→                      </div>
+  1188→                    </div>
+  1189→                    <Badge variant="outline" className={statusColor(v.status)}>{v.status}</Badge>
+  1190→                  </div>
+  1191→                ))}
+  1192→              </div>
+  1193→            </CardContent>
+  1194→          </Card>
+  1195→        )}
+  1196→      </motion.div>
+  1197→    )
+  1198→  }
+  1199→
+  1200→  const hasErrors = generatedStatements.validationErrors && generatedStatements.validationErrors.length > 0
+  1201→
+  1202→  return (
+  1203→    <motion.div {...pageVariants} className="py-4 space-y-4">
+  1204→      <div className="flex items-center justify-between">
+  1205→        <div>
+  1206→          <h2 className="text-xl font-bold text-foreground">Generate & Export</h2>
+  1207→          <p className="text-sm text-muted-foreground mt-1">Review generated statements and export.</p>
+  1208→        </div>
+  1209→        <div className="flex gap-2">
+  1210→          <Dialog open={showVersionDialog} onOpenChange={setShowVersionDialog}>
+  1211→            <DialogTrigger asChild>
+  1212→              <Button variant="outline" size="sm" className="gap-1.5">
+  1213→                <GitBranch className="h-4 w-4" /> Save Version
+  1214→              </Button>
+  1215→            </DialogTrigger>
+  1216→            <DialogContent>
+  1217→              <DialogHeader>
+  1218→                <DialogTitle>Create New Version</DialogTitle>
+  1219→                <DialogDescription>Save a snapshot of the current report as a new version.</DialogDescription>
+  1220→              </DialogHeader>
+  1221→              <div className="space-y-3">
+  1222→                <div className="space-y-1.5">
+  1223→                  <Label className="text-xs text-muted-foreground">Version Label</Label>
+  1224→                  <Input value={versionLabel} onChange={e => setVersionLabel(e.target.value)} placeholder="e.g., v2 - Draft revisions" />
+  1225→                </div>
+  1226→              </div>
+  1227→              <DialogFooter>
+  1228→                <Button variant="outline" onClick={() => setShowVersionDialog(false)}>Cancel</Button>
+  1229→                <Button onClick={handleCreateVersion} disabled={isLoading} className="bg-primary text-primary-foreground">Create Version</Button>
+  1230→              </DialogFooter>
+  1231→            </DialogContent>
+  1232→          </Dialog>
+  1233→          <Button variant="outline" size="sm" onClick={handleGenerate} disabled={isLoading} className="gap-1.5">
+  1234→            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Re-generate
+  1235→          </Button>
+  1236→        </div>
+  1237→      </div>
+  1238→
+  1239→      {/* Validation alerts */}
+  1240→      {hasErrors ? (
+  1241→        <Alert variant="destructive">
+  1242→          <AlertTriangle className="h-4 w-4" />
+  1243→          <AlertTitle>{generatedStatements.validationErrors.length} Validation Issue(s)</AlertTitle>
+  1244→          <AlertDescription><ul className="mt-2 space-y-1 list-disc list-inside text-sm">{generatedStatements.validationErrors.map((err, i) => <li key={i}>{err}</li>)}</ul></AlertDescription>
+  1245→        </Alert>
+  1246→      ) : (
+  1247→        <Alert className="border-primary/30 bg-primary/5">
+  1248→          <CheckCircle2 className="h-4 w-4 text-primary" />
+  1249→          <AlertTitle className="text-primary">All checks passed</AlertTitle>
+  1250→          <AlertDescription className="text-muted-foreground">The generated statements have passed all validation checks.</AlertDescription>
+  1251→        </Alert>
+  1252→      )}
+  1253→
+  1254→      {/* Summary Cards */}
+  1255→      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+  1256→        {[
+  1257→          { label: 'Revenue', value: generatedStatements.sfp.totalRevenueCurrent, prior: generatedStatements.sfp.totalRevenuePrior },
+  1258→          { label: 'Expenses', value: generatedStatements.sfp.totalExpensesCurrent, prior: generatedStatements.sfp.totalExpensesPrior },
+  1259→          { label: 'Surplus', value: generatedStatements.sfp.surplusCurrent, prior: generatedStatements.sfp.surplusPrior, color: generatedStatements.sfp.surplusCurrent >= 0 ? 'text-primary' : 'text-destructive' },
+  1260→          { label: 'Assets', value: generatedStatements.balanceSheet.totalAssetsCurrent, prior: generatedStatements.balanceSheet.totalAssetsPrior },
+  1261→          { label: 'Liabilities', value: generatedStatements.balanceSheet.totalLiabilitiesCurrent, prior: generatedStatements.balanceSheet.totalLiabilitiesPrior },
+  1262→          { label: 'Net Assets', value: generatedStatements.balanceSheet.netAssetsCurrent, prior: generatedStatements.balanceSheet.netAssetsPrior },
+  1263→        ].map((item) => (
+  1264→          <Card key={item.label} className="p-3">
+  1265→            <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">{item.label}</p>
+  1266→            <p className={`text-lg font-bold font-mono ${item.color || 'text-foreground'}`}>{entityConfig.currency} {formatNum(item.value)}</p>
+  1267→            <p className="text-[10px] text-muted-foreground">Prior: {formatNum(item.prior)}</p>
+  1268→          </Card>
+  1269→        ))}
+  1270→      </div>
+  1271→
+  1272→      {/* Sub-tabs */}
+  1273→      <div className="overflow-x-auto">
+  1274→        <div className="flex gap-1 min-w-max">
+  1275→          {subTabs.map((tab) => (
+  1276→            <button key={tab.value} onClick={() => setStatementSubTab(tab.value)}
+  1277→              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${statementSubTab === tab.value ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>
+  1278→              {tab.label}
+  1279→            </button>
+  1280→          ))}
+  1281→        </div>
+  1282→      </div>
+  1283→
+  1284→      {/* Statement content */}
+  1285→      {statementSubTab === 'sfp' && <SFPSection data={generatedStatements.sfp} currency={entityConfig.currency} />}
+  1286→      {statementSubTab === 'balance-sheet' && <BalanceSheetSection data={generatedStatements.balanceSheet} currency={entityConfig.currency} />}
+  1287→      {statementSubTab === 'changes-na' && <ChangesNASection data={generatedStatements.changesInNA} currency={entityConfig.currency} />}
+  1288→      {statementSubTab === 'cash-flow' && <CashFlowSection data={generatedStatements.cashFlow} currency={entityConfig.currency} />}
+  1289→      {statementSubTab === 'revenue-recon' && <RevenueReconSection data={generatedStatements.revenueReconciliation} currency={entityConfig.currency} />}
+  1290→      {statementSubTab === 'cash-recon' && <CashReconSection data={generatedStatements.cashReconciliation} currency={entityConfig.currency} />}
+  1291→      {statementSubTab === 'budget-variance' && <BudgetVarianceSection data={generatedStatements.budgetVariance} currency={entityConfig.currency} />}
+  1292→
+  1293→      {/* Export & Approval Row */}
+  1294→      <div className="grid gap-4 lg:grid-cols-2">
+  1295→        {/* Export Card */}
+  1296→        <Card>
+  1297→          <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">Export</CardTitle></CardHeader>
+  1298→          <CardContent className="pt-0 space-y-3">
+  1299→            <div className="flex gap-2">
+  1300→              <Button onClick={handleDownloadPdf} disabled={isExporting} className="flex-1 bg-primary text-primary-foreground gap-2">
+  1301→                {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} PDF
+  1302→              </Button>
+  1303→              <Button onClick={handleDownloadExcel} disabled={isExporting} variant="outline" className="flex-1 gap-2">
+  1304→                {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />} Excel
+  1305→              </Button>
+  1306→            </div>
+  1307→            <Button variant="ghost" size="sm" className="w-full gap-1.5" onClick={() => setShowPdfPreview(!showPdfPreview)}>
+  1308→              <Eye className="h-4 w-4" /> {showPdfPreview ? 'Hide' : 'Show'} PDF Preview
+  1309→            </Button>
+  1310→            {showPdfPreview && activeReportId && (
+  1311→              <div className="border border-border rounded-lg overflow-hidden">
+  1312→                <iframe src={`/api/reports/${activeReportId}/pdf`} className="w-full h-[600px]" title="PDF Preview" />
+  1313→              </div>
+  1314→            )}
+  1315→          </CardContent>
+  1316→        </Card>
+  1317→
+  1318→        {/* Approval Workflow Card */}
+  1319→        <Card>
+  1320→          <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">Approval Workflow</CardTitle></CardHeader>
+  1321→          <CardContent className="pt-0 space-y-3">
+  1322→            <div className="flex items-center gap-1">
+  1323→              {approvalSteps.map((step, i) => (
+  1324→                <React.Fragment key={step}>
+  1325→                  <div className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium ${i <= currentStepIdx ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+  1326→                    {i < currentStepIdx ? <CheckCircle2 className="h-3 w-3" /> : <CircleDot className="h-3 w-3" />}
+  1327→                    {step.replace(/_/g, ' ')}
+  1328→                  </div>
+  1329→                  {i < approvalSteps.length - 1 && <ChevronRight className="h-3 w-3 text-muted-foreground" />}
+  1330→                </React.Fragment>
+  1331→              ))}
+  1332→            </div>
+  1333→            {approvalWorkflow && (
+  1334→              <div className="text-xs text-muted-foreground space-y-1">
+  1335→                {approvalWorkflow.preparerName && <p>Preparer: {approvalWorkflow.preparerName} {approvalWorkflow.preparerApprovedAt && `· ${new Date(approvalWorkflow.preparerApprovedAt).toLocaleDateString()}`}</p>}
+  1336→                {approvalWorkflow.reviewerName && <p>Reviewer: {approvalWorkflow.reviewerName} {approvalWorkflow.reviewerApprovedAt && `· ${new Date(approvalWorkflow.reviewerApprovedAt).toLocaleDateString()}`}</p>}
+  1337→                {approvalWorkflow.cfoName && <p>CFO: {approvalWorkflow.cfoName} {approvalWorkflow.cfoApprovedAt && `· ${new Date(approvalWorkflow.cfoApprovedAt).toLocaleDateString()}`}</p>}
+  1338→              </div>
+  1339→            )}
+  1340→            <div className="flex gap-2">
+  1341→              <Input placeholder="Approver name" value={approverName} onChange={e => setApproverName(e.target.value)} className="h-8 text-sm flex-1" />
+  1342→              <Button onClick={handleAdvanceApproval} disabled={currentStepIdx >= approvalSteps.length - 1 || isLoading} size="sm" className="bg-primary text-primary-foreground gap-1">
+  1343→                <ArrowRight className="h-3.5 w-3.5" /> Advance
+  1344→              </Button>
+  1345→            </div>
+  1346→          </CardContent>
+  1347→        </Card>
+  1348→      </div>
+  1349→
+  1350→      {/* Version History */}
+  1351→      {versions.length > 1 && (
+  1352→        <Card>
+  1353→          <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">Version History</CardTitle></CardHeader>
+  1354→          <CardContent className="pt-0">
+  1355→            <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+  1356→              {versions.map((v: VersionEntry) => (
+  1357→                <div key={v.id} className={`flex items-center justify-between p-2 rounded-lg text-sm ${v.id === activeReportId ? 'bg-primary/10 border border-primary/20' : 'hover:bg-muted/50'}`}>
+  1358→                  <div className="flex items-center gap-3">
+  1359→                    <GitBranch className="h-4 w-4 text-muted-foreground" />
+  1360→                    <div>
+  1361→                      <p className="font-medium text-foreground">{v.versionLabel || `Version ${v.version}`}</p>
+  1362→                      <p className="text-xs text-muted-foreground">{new Date(v.createdAt).toLocaleString()} · {v._count.entries} entries</p>
+  1363→                    </div>
+  1364→                  </div>
+  1365→                  <div className="flex items-center gap-2">
+  1366→                    <Badge variant="outline" className={statusColor(v.status)}>{v.status}</Badge>
+  1367→                    {v.id !== activeReportId && (
+  1368→                      <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={async () => {
+  1369→                        const { loadReport } = useFinancialStore.getState()
+  1370→                        try { await loadReport(v.id); toast.success('Version loaded') } catch { toast.error('Failed to load version') }
+  1371→                      }}>Load</Button>
+  1372→                    )}
+  1373→                  </div>
+  1374→                </div>
+  1375→              ))}
+  1376→            </div>
+  1377→          </CardContent>
+  1378→        </Card>
+  1379→      )}
+  1380→
+  1381→      <Card className="bg-muted/30">
+  1382→        <CardContent className="py-3">
+  1383→          <Button variant="outline" size="sm" onClick={() => setWizardStep(5)} className="gap-1.5">
+  1384→            <ArrowLeft className="h-4 w-4" /> Back to Review
+  1385→          </Button>
+  1386→        </CardContent>
+  1387→      </Card>
+  1388→    </motion.div>
+  1389→  )
+  1390→}
+  1391→
+  1392→// ═══════════════════════════════════════════════════════════════════
+  1393→// ANALYTICS PANEL (Sheet)
+  1394→// ═══════════════════════════════════════════════════════════════════
+  1395→
+  1396→function AnalyticsPanel() {
+  1397→  const { analyticsData, fetchAnalytics, entries, activeReportId, generatedStatements, entityConfig } = useFinancialStore()
+  1398→  const [loading, setLoading] = useState(false)
+  1399→
+  1400→  const load = async () => {
+  1401→    setLoading(true)
+  1402→    try { await fetchAnalytics() } catch { /* silent */ } finally { setLoading(false) }
+  1403→  }
+  1404→
+  1405→  useEffect(() => {
+  1406→    if (activeReportId && !analyticsData) load()
+  1407→  }, [activeReportId])
+  1408→
+  1409→  const gs = generatedStatements
+  1410→  const totalRevenue = gs?.sfp.totalRevenueCurrent ?? 0
+  1411→  const totalExpenses = gs?.sfp.totalExpensesCurrent ?? 0
+  1412→  const surplus = gs?.sfp.surplusCurrent ?? 0
+  1413→  const cashBalance = entries.reduce((s, e) => e.category === 'cash' ? s + e.debitCurrent - e.creditCurrent : s, 0)
+  1414→
+  1415→  // Build bar chart data
+  1416→  const barData = analyticsData?.trends ? [
+  1417→    { name: 'Revenue', current: totalRevenue, prior: gs?.sfp.totalRevenuePrior ?? 0, change: analyticsData.trends.revenueChange },
+  1418→    { name: 'Expenses', current: totalExpenses, prior: gs?.sfp.totalExpensesPrior ?? 0, change: analyticsData.trends.expenseChange },
+  1419→  ] : []
+  1420→
+  1421→  const ratios = analyticsData?.ratios
+  1422→
+  1423→  return (
+  1424→    <Sheet open={true} onOpenChange={(open) => useFinancialStore.getState().setShowAnalytics(open)}>
+  1425→      <SheetContent side="right" className="w-[400px] sm:w-[480px] overflow-y-auto custom-scrollbar">
+  1426→        <SheetHeader>
+  1427→          <SheetTitle className="flex items-center gap-2">
+  1428→            <BarChart3 className="h-5 w-5 text-primary" /> Analytics Dashboard
+  1429→          </SheetTitle>
+  1430→        </SheetHeader>
+  1431→        <div className="mt-4 space-y-4">
+  1432→          {loading ? (
+  1433→            <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+  1434→          ) : !analyticsData ? (
+  1435→            <div className="text-center py-12 text-muted-foreground">
+  1436→              <BarChart3 className="h-10 w-10 mx-auto mb-2 opacity-30" />
+  1437→              <p className="text-sm">Generate statements first to see analytics.</p>
+  1438→            </div>
+  1439→          ) : (
+  1440→            <>
+  1441→              {/* KPI Cards */}
+  1442→              <div className="grid grid-cols-2 gap-3">
+  1443→                {[
+  1444→                  { label: 'Total Revenue', value: `${entityConfig.currency} ${formatNum(totalRevenue)}`, icon: <TrendingUp className="h-4 w-4 text-primary" /> },
+  1445→                  { label: 'Total Expenses', value: `${entityConfig.currency} ${formatNum(totalExpenses)}`, icon: <TrendingDown className="h-4 w-4 text-destructive" /> },
+  1446→                  { label: 'Net Surplus', value: `${entityConfig.currency} ${formatNum(surplus)}`, icon: surplus >= 0 ? <TrendingUp className="h-4 w-4 text-primary" /> : <TrendingDown className="h-4 w-4 text-destructive" /> },
+  1447→                  { label: 'Cash Balance', value: `${entityConfig.currency} ${formatNum(cashBalance)}`, icon: <Banknote className="h-4 w-4 text-primary" /> },
+  1448→                ].map(kpi => (
+  1449→                  <Card key={kpi.label} className="p-3">
+  1450→                    <div className="flex items-center gap-2 mb-1">
+  1451→                      {kpi.icon}
+  1452→                      <span className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">{kpi.label}</span>
+  1453→                    </div>
+  1454→                    <p className="text-sm font-bold font-mono text-foreground">{kpi.value}</p>
+  1455→                  </Card>
+  1456→                ))}
+  1457→              </div>
+  1458→
+  1459→              {/* Key Ratios */}
+  1460→              {ratios && (
+  1461→                <Card className="p-4">
+  1462→                  <p className="text-xs font-semibold text-foreground mb-3">Key Financial Ratios</p>
+  1463→                  <div className="grid grid-cols-2 gap-2">
+  1464→                    {[
+  1465→                      { label: 'Surplus Ratio', value: `${ratios.surplusRatio?.toFixed(1)}%` },
+  1466→                      { label: 'Expense Ratio', value: `${ratios.expenseRatio?.toFixed(1)}%` },
+  1467→                      { label: 'Current Ratio', value: `${ratios.currentRatio?.toFixed(2)}x` },
+  1468→                      { label: 'Cash Ratio', value: `${ratios.cashRatio?.toFixed(2)}x` },
+  1469→                      { label: 'Receivables Days', value: `${ratios.receivablesDays?.toFixed(0)}d` },
+  1470→                      { label: 'Payables Days', value: `${ratios.payablesDays?.toFixed(0)}d` },
+  1471→                      { label: 'Dependency Ratio', value: `${ratios.dependencyRatio?.toFixed(1)}%` },
+  1472→                      { label: 'Personnel Ratio', value: `${ratios.personnelRatio?.toFixed(1)}%` },
+  1473→                    ].map(r => (
+  1474→                      <div key={r.label} className="flex justify-between text-xs p-1.5 rounded bg-muted/50">
+  1475→                        <span className="text-muted-foreground">{r.label}</span>
+  1476→                        <span className="font-mono font-medium text-foreground">{r.value}</span>
+  1477→                      </div>
+  1478→                    ))}
+  1479→                  </div>
+  1480→                </Card>
+  1481→              )}
+  1482→
+  1483→              {/* Bar Chart: Revenue vs Expense */}
+  1484→              {barData.length > 0 && (
+  1485→                <Card className="p-4">
+  1486→                  <p className="text-xs font-semibold text-foreground mb-3">Revenue vs Expenses (Current / Prior)</p>
+  1487→                  <ResponsiveContainer width="100%" height={180}>
+  1488→                    <BarChart data={barData}>
+  1489→                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+  1490→                      <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" />
+  1491→                      <YAxis tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" />
+  1492→                      <Bar dataKey="current" fill="var(--primary)" radius={[4, 4, 0, 0]} name="Current" />
+  1493→                      <Bar dataKey="prior" fill="var(--muted-foreground)" radius={[4, 4, 0, 0]} name="Prior" />
+  1494→                    </BarChart>
+  1495→                  </ResponsiveContainer>
+  1496→                </Card>
+  1497→              )}
+  1498→
+  1499→              {/* Trend Indicators */}
+  1500→              {analyticsData.trends && (
+  1501→                <Card className="p-4">
+  1502→                  <p className="text-xs font-semibold text-foreground mb-3">Year-over-Year Trends</p>
+  1503→                  <div className="space-y-2">
+  1504→                    {Object.entries(analyticsData.trends).map(([key, value]) => (
+  1505→                      <div key={key} className="flex items-center justify-between text-xs">
+  1506→                        <span className="text-muted-foreground capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
+  1507→                        <span className={`flex items-center gap-1 font-mono font-medium ${value >= 0 ? 'text-primary' : 'text-destructive'}`}>
+  1508→                          {value >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+  1509→                          {value >= 0 ? '+' : ''}{value.toFixed(1)}%
+  1510→                        </span>
+  1511→                      </div>
+  1512→                    ))}
+  1513→                  </div>
+  1514→                </Card>
+  1515→              )}
+  1516→
+  1517→              {/* Anomaly Alerts */}
+  1518→              {analyticsData.anomalies.length > 0 && (
+  1519→                <Card className="p-4">
+  1520→                  <p className="text-xs font-semibold text-foreground mb-3">Anomaly Alerts</p>
+  1521→                  <div className="space-y-2">
+  1522→                    {analyticsData.anomalies.map((a, i) => (
+  1523→                      <Alert key={i} variant={a.severity === 'critical' ? 'destructive' : 'default'} className="py-2">
+  1524→                        <AlertCircle className="h-4 w-4" />
+  1525→                        <AlertTitle className="text-xs">{a.description}</AlertTitle>
+  1526→                        <AlertDescription className="text-xs text-muted-foreground">{a.detail}</AlertDescription>
+  1527→                      </Alert>
+  1528→                    ))}
+  1529→                  </div>
+  1530→                </Card>
+  1531→              )}
+  1532→
+  1533→              <Button variant="outline" size="sm" className="w-full gap-1.5" onClick={load}>
+  1534→                <RefreshCw className="h-4 w-4" /> Refresh Analytics
+  1535→              </Button>
+  1536→            </>
+  1537→          )}
+  1538→        </div>
+  1539→      </SheetContent>
+  1540→    </Sheet>
+  1541→  )
+  1542→}
+  1543→
+  1544→// ═══════════════════════════════════════════════════════════════════
+  1545→// DASHBOARD
+  1546→// ═══════════════════════════════════════════════════════════════════
+  1547→
+  1548→function DashboardView() {
+  1549→  const { reports, loadReport, deleteReport, isLoading, createReport } = useFinancialStore()
+  1550→
+  1551→  const handleLoad = async (id: string) => {
+  1552→    try { await loadReport(id); toast.success('Report loaded') } catch { toast.error('Failed to load report') }
+  1553→  }
+  1554→  const handleDelete = async (id: string, e: React.MouseEvent) => {
+  1555→    e.stopPropagation()
+  1556→    try { await deleteReport(id); toast.success('Report deleted') } catch { toast.error('Failed to delete report') }
+  1557→  }
+  1558→  const handleNew = async () => {
+  1559→    try { await createReport(); toast.success('Report created successfully') } catch { toast.error('Failed to create report') }
+  1560→  }
+  1561→
+  1562→  const totalReports = reports.length
+  1563→  const generatedReports = reports.filter(r => r.status === 'generated' || r.status === 'approved').length
+  1564→  const draftReports = reports.filter(r => r.status === 'draft').length
+  1565→
+  1566→  const recentActivity = reports.slice(0, 5).map(r => ({
+  1567→    id: r.id,
+  1568→    action: `Report ${r.entityName} — ${r.status}`,
+  1569→    date: r.updatedAt || r.createdAt,
+  1570→  }))
+  1571→
+  1572→  if (reports.length === 0) {
+  1573→    return (
+  1574→      <motion.div {...pageVariants} className="flex flex-col items-center justify-center py-24 text-center">
+  1575→        <div className="rounded-full bg-primary/10 p-6 mb-6">
+  1576→          <FolderOpen className="h-12 w-12 text-primary/60" />
+  1577→        </div>
+  1578→        <h2 className="text-xl font-semibold text-foreground mb-2">No Reports Yet</h2>
+  1579→        <p className="text-muted-foreground mb-6 max-w-md">Create your first financial report to get started. Set up entity details, enter trial balance data, and generate IPSAS-compliant statements.</p>
+  1580→        <Button onClick={handleNew} className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2" size="lg">
+  1581→          <Plus className="h-4 w-4" /> Create Your First Report
+  1582→        </Button>
+  1583→      </motion.div>
+  1584→    )
+  1585→  }
+  1586→
+  1587→  return (
+  1588→    <motion.div {...pageVariants} className="py-6 space-y-6">
+  1589→      <div className="flex items-center justify-between">
+  1590→        <div>
+  1591→          <h2 className="text-xl font-bold text-foreground">Dashboard</h2>
+  1592→          <p className="text-sm text-muted-foreground mt-1">Welcome to FinStatements Pro. Manage your financial reports here.</p>
+  1593→        </div>
+  1594→        <Button onClick={handleNew} className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2">
+  1595→          <Plus className="h-4 w-4" /> New Report
+  1596→        </Button>
+  1597→      </div>
+  1598→
+  1599→      {/* KPI Cards */}
+  1600→      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+  1601→        <Card className="p-4 hover:shadow-md transition-shadow">
+  1602→          <div className="flex items-center gap-3">
+  1603→            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+  1604→              <FileText className="h-5 w-5 text-primary" />
+  1605→            </div>
+  1606→            <div>
+  1607→              <p className="text-2xl font-bold text-foreground">{totalReports}</p>
+  1608→              <p className="text-xs text-muted-foreground">Total Reports</p>
+  1609→            </div>
+  1610→          </div>
+  1611→        </Card>
+  1612→        <Card className="p-4 hover:shadow-md transition-shadow">
+  1613→          <div className="flex items-center gap-3">
+  1614→            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+  1615→              <CheckCircle2 className="h-5 w-5 text-primary" />
+  1616→            </div>
+  1617→            <div>
+  1618→              <p className="text-2xl font-bold text-foreground">{generatedReports}</p>
+  1619→              <p className="text-xs text-muted-foreground">Generated</p>
+  1620→            </div>
+  1621→          </div>
+  1622→        </Card>
+  1623→        <Card className="p-4 hover:shadow-md transition-shadow">
+  1624→          <div className="flex items-center gap-3">
+  1625→            <div className="h-10 w-10 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
+  1626→              <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+  1627→            </div>
+  1628→            <div>
+  1629→              <p className="text-2xl font-bold text-foreground">{draftReports}</p>
+  1630→              <p className="text-xs text-muted-foreground">Draft</p>
+  1631→            </div>
+  1632→          </div>
+  1633→        </Card>
+  1634→      </div>
+  1635→
+  1636→      <div className="grid gap-4 lg:grid-cols-3">
+  1637→        {/* Report Cards */}
+  1638→        <div className="lg:col-span-2 space-y-4">
+  1639→          <h3 className="text-sm font-semibold text-foreground">Financial Reports</h3>
+  1640→          <div className="grid gap-3 sm:grid-cols-2">
+  1641→            {reports.map((report: Report) => (
+  1642→              <Card key={report.id} className="cursor-pointer hover:border-primary/50 hover:shadow-md transition-all group" onClick={() => handleLoad(report.id)}>
+  1643→                <CardHeader className="pb-2">
+  1644→                  <div className="flex items-start justify-between">
+  1645→                    <CardTitle className="text-sm font-semibold text-foreground leading-snug">{report.entityName}</CardTitle>
+  1646→                    <Badge variant="secondary" className={`text-[10px] ${statusColor(report.status)}`}>{report.status}</Badge>
+  1647→                  </div>
+  1648→                </CardHeader>
+  1649→                <CardContent className="pt-0">
+  1650→                  <div className="space-y-1.5 text-xs text-muted-foreground">
+  1651→                    <div className="flex items-center gap-2"><Calendar className="h-3.5 w-3.5" />{report.periodLabel}</div>
+  1652→                    <div className="flex items-center gap-2"><Table className="h-3.5 w-3.5" />{report.entries?.length || 0} entries</div>
+  1653→                    <div className="flex items-center justify-between pt-1">
+  1654→                      <span>{new Date(report.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+  1655→                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => handleDelete(report.id, e)}>
+  1656→                        <Trash2 className="h-3 w-3" />
+  1657→                      </Button>
+  1658→                    </div>
+  1659→                  </div>
+  1660→                </CardContent>
+  1661→              </Card>
+  1662→            ))}
+  1663→          </div>
+  1664→        </div>
+  1665→
+  1666→        {/* Recent Activity */}
+  1667→        <div className="space-y-4">
+  1668→          <h3 className="text-sm font-semibold text-foreground">Recent Activity</h3>
+  1669→          <Card>
+  1670→            <CardContent className="pt-4">
+  1671→              <div className="space-y-3">
+  1672→                {recentActivity.map((item) => (
+  1673→                  <div key={item.id} className="flex items-start gap-2 text-xs">
+  1674→                    <Clock className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+  1675→                    <div>
+  1676→                      <p className="text-foreground">{item.action}</p>
+  1677→                      <p className="text-muted-foreground">{new Date(item.date).toLocaleString()}</p>
+  1678→                    </div>
+  1679→                  </div>
+  1680→                ))}
+  1681→              </div>
+  1682→            </CardContent>
+  1683→          </Card>
+  1684→        </div>
+  1685→      </div>
+  1686→    </motion.div>
+  1687→  )
+  1688→}
+  1689→
+  1690→// ═══════════════════════════════════════════════════════════════════
+  1691→// STATEMENT SUB-SECTIONS (reused from original)
+  1692→// ═══════════════════════════════════════════════════════════════════
+  1693→
+  1694→function toStatementRow(line: SFPLine | BSLine): StatementRow {
+  1695→  return { label: line.label, noteRef: line.noteRef, current: line.current, prior: line.prior, indent: line.indent, isBold: line.isBold, isSubtotal: line.isSubtotal, isTotal: line.isTotal, isSection: line.isSection }
+  1696→}
+  1697→
+  1698→function SFPSection({ data, currency }: { data: GeneratedStatements['sfp']; currency: string }) {
+  1699→  const allRows: StatementRow[] = [
+  1700→    ...data.revenueLines.map(toStatementRow),
+  1701→    { label: '', noteRef: '', current: 0, prior: 0 },
+  1702→    ...data.expenseLines.map(toStatementRow),
+  1703→    { label: '', noteRef: '', current: 0, prior: 0, isSection: true },
+  1704→    { label: 'SURPLUS / (DEFICIT)', noteRef: '', current: data.surplusCurrent, prior: data.surplusPrior, isBold: true, isTotal: true },
+  1705→  ]
+  1706→  return <StatementTable title="Statement of Financial Performance" rows={allRows} currency={currency} />
+  1707→}
+  1708→
+  1709→function BalanceSheetSection({ data, currency }: { data: GeneratedStatements['balanceSheet']; currency: string }) {
+  1710→  const allRows: StatementRow[] = [...data.assetLines.map(toStatementRow), { label: '', noteRef: '', current: 0, prior: 0 }, ...data.liabilityLines.map(toStatementRow)]
+  1711→  return <StatementTable title="Statement of Financial Position" rows={allRows} currency={currency} />
+  1712→}
+  1713→
+  1714→function ChangesNASection({ data, currency }: { data: GeneratedStatements['changesInNA']; currency: string }) {
+  1715→  const rows: StatementRow[] = [
+  1716→    { label: 'NET ASSETS', noteRef: '', current: 0, prior: 0, isBold: true, isSection: true },
+  1717→    { label: 'Brought forward', noteRef: '', current: data.bfCurrent, prior: data.bfPrior, indent: 1 },
+  1718→    { label: 'Adjustments', noteRef: '', current: data.adjustmentsCurrent, prior: data.adjustmentsPrior, indent: 1 },
+  1719→    { label: 'Surplus/(Deficit) for the year', noteRef: '', current: data.surplusCurrent, prior: data.surplusPrior, indent: 1, isBold: true },
+  1720→    { label: 'Closing Net Assets', noteRef: '', current: data.closingCurrent, prior: data.closingPrior, indent: 1, isBold: true, isTotal: true },
+  1721→  ]
+  1722→  return <StatementTable title="Statement of Changes in Net Assets" rows={rows} currency={currency} />
+  1723→}
+  1724→
+  1725→function CashFlowSection({ data, currency }: { data: CashFlowData; currency: string }) {
+  1726→  const rows: StatementRow[] = [
+  1727→    { label: 'CASH FLOWS FROM OPERATING ACTIVITIES', noteRef: '', current: 0, prior: 0, isBold: true, isSection: true },
+  1728→    { label: 'Operating revenue received', noteRef: '', current: data.operatingRevenueCurrent, prior: data.operatingRevenuePrior, indent: 1 },
+  1729→    ...data.payments.map((p): StatementRow => ({ label: `Payments - ${p.label}`, noteRef: p.noteRef, current: -Math.abs(p.current), prior: -Math.abs(p.prior), indent: 1 })),
+  1730→    { label: 'Net cash from operating activities', noteRef: '', current: data.netOperatingCurrent, prior: data.netOperatingPrior, isBold: true, isTotal: true },
+  1731→    { label: '', noteRef: '', current: 0, prior: 0 },
+  1732→    { label: 'CASH FLOWS FROM INVESTING ACTIVITIES', noteRef: '', current: 0, prior: 0, isBold: true, isSection: true },
+  1733→    ...data.investing.map((inv): StatementRow => ({ label: inv.label, noteRef: '', current: inv.current, prior: inv.prior, indent: 1 })),
+  1734→    { label: 'Net cash from investing activities', noteRef: '', current: data.netInvestingCurrent, prior: data.netInvestingPrior, isBold: true, isTotal: true },
+  1735→    { label: '', noteRef: '', current: 0, prior: 0 },
+  1736→    { label: 'CASH FLOWS FROM FINANCING ACTIVITIES', noteRef: '', current: 0, prior: 0, isBold: true, isSection: true },
+  1737→    ...(data.financing.length > 0 ? data.financing.map((f): StatementRow => ({ label: f.label, noteRef: '', current: f.current, prior: f.prior, indent: 1 })) : [{ label: '(None)', noteRef: '', current: 0, prior: 0, indent: 1 } as StatementRow]),
+  1738→    { label: 'Net cash from financing activities', noteRef: '', current: data.netFinancingCurrent, prior: data.netFinancingPrior, isBold: true, isTotal: true },
+  1739→    { label: '', noteRef: '', current: 0, prior: 0 },
+  1740→    { label: 'Net increase/(decrease) in cash', noteRef: '', current: data.netChangeCurrent, prior: data.netChangePrior, isBold: true, isTotal: true },
+  1741→  ]
+  1742→  return <StatementTable title="Cash Flow Statement" rows={rows} currency={currency} />
+  1743→}
+  1744→
+  1745→function RevenueReconSection({ data, currency }: { data: RevenueReconciliationData; currency: string }) {
+  1746→  const rows: StatementRow[] = [
+  1747→    { label: 'REVENUE RECONCILIATION', noteRef: '', current: 0, prior: 0, isBold: true, isSection: true },
+  1748→    { label: 'Revenue per SFP', noteRef: '', current: data.sfpRevenueCurrent, prior: data.sfpRevenuePrior, indent: 1 },
+  1749→    { label: 'Advances recovered', noteRef: '', current: data.advancesRecoveredCurrent, prior: data.advancesRecoveredPrior, indent: 1 },
+  1750→    { label: 'Revenue receivable collected during the period', noteRef: '', current: data.revenueReceivableCollectedCurrent, prior: data.revenueReceivableCollectedPrior, indent: 1 },
+  1751→    { label: 'Deposits received', noteRef: '', current: data.depositsReceivedCurrent, prior: data.depositsReceivedPrior, indent: 1 },
+  1752→    { label: 'Total Revenue for CF purposes', noteRef: '', current: data.totalRevenueCFCurrent, prior: data.totalRevenueCFPrior, isBold: true, indent: 1 },
+  1753→    { label: 'Less: Grants in kind', noteRef: '', current: -data.grantsInKindCurrent, prior: -data.grantsInKindPrior, indent: 1 },
+  1754→    { label: 'Less: Transfers to Treasury', noteRef: '', current: -data.transfersToTreasuryCurrent, prior: -data.transfersToTreasuryPrior, indent: 1 },
+  1755→    { label: 'Less: Revenue receivable at period end', noteRef: '', current: -data.revenueReceivablePeriodCurrent, prior: -data.revenueReceivablePeriodPrior, indent: 1 },
+  1756→    { label: 'Total Revenue in Cash Flow Statement', noteRef: '', current: data.totalRevenueCashFlowCurrent, prior: data.totalRevenueCashFlowPrior, isBold: true, isTotal: true },
+  1757→  ]
+  1758→  return <StatementTable title="Revenue Reconciliation to Cash Flow Statement" rows={rows} currency={currency} />
+  1759→}
+  1760→
+  1761→function CashReconSection({ data, currency }: { data: CashReconciliationData; currency: string }) {
+  1762→  const rows: StatementRow[] = [
+  1763→    { label: 'CASH RECONCILIATION', noteRef: '', current: 0, prior: 0, isBold: true, isSection: true },
+  1764→    { label: 'Cash at beginning of period', noteRef: '', current: data.openingCashCurrent, prior: data.openingCashPrior, indent: 1 },
+  1765→    { label: 'Net increase/(decrease) in cash', noteRef: '', current: data.netChangeCurrent, prior: data.netChangePrior, indent: 1 },
+  1766→    { label: 'Cash at end of period', noteRef: '', current: data.closingCashCurrent, prior: data.closingCashPrior, isBold: true, isTotal: true },
+  1767→  ]
+  1768→  return <StatementTable title="Cash and Cash Equivalents Reconciliation" rows={rows} currency={currency} />
+  1769→}
+  1770→
+  1771→function BudgetVarianceSection({ data, currency }: { data: BudgetVarianceData[]; currency: string }) {
+  1772→  if (data.length === 0) return <div className="text-center py-12 text-muted-foreground text-sm">No budget data available. Enter budget amounts in the trial balance to see variance analysis.</div>
+  1773→  return (
+  1774→    <div className="space-y-3">
+  1775→      <h3 className="text-sm font-semibold text-foreground">Budget Variance Analysis</h3>
+  1776→      <div className="overflow-x-auto rounded-lg border border-border">
+  1777→        <table className="w-full text-sm">
+  1778→          <thead><tr className="bg-foreground text-background">
+  1779→            <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide">Line Item</th>
+  1780→            <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide">Initial</th>
+  1781→            <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide">Adjusted</th>
+  1782→            <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide">Revised</th>
+  1783→            <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide">Actual</th>
+  1784→            <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide">Variance</th>
+  1785→            <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide">Var %</th>
+  1786→          </tr></thead>
+  1787→          <tbody>{data.map((row, i) => {
+  1788→            const vp = row.variance >= 0
+  1789→            return (<tr key={i} className="border-b border-border hover:bg-muted/30">
+  1790→              <td className="px-4 py-2 text-foreground">{row.label}</td>
+  1791→              <td className="px-4 py-2 text-right font-mono text-foreground">{formatNum(row.initialBudget)}</td>
+  1792→              <td className="px-4 py-2 text-right font-mono text-foreground">{formatNum(row.adjustments)}</td>
+  1793→              <td className="px-4 py-2 text-right font-mono font-semibold text-foreground">{formatNum(row.revisedBudget)}</td>
+  1794→              <td className="px-4 py-2 text-right font-mono text-foreground">{formatNum(row.actual)}</td>
+  1795→              <td className={`px-4 py-2 text-right font-mono font-semibold ${vp ? 'text-primary' : 'text-destructive'}`}>{formatNum(row.variance)}</td>
+  1796→              <td className={`px-4 py-2 text-right font-mono text-xs ${vp ? 'text-primary' : 'text-destructive'}`}>{row.variancePercent.toFixed(1)}%</td>
+  1797→            </tr>)
+  1798→          })}</tbody>
+  1799→        </table>
+  1800→      </div>
+  1801→    </div>
+  1802→  )
+  1803→}
+  1804→
+  1805→// ═══════════════════════════════════════════════════════════════════
+  1806→// MAIN PAGE
+  1807→// ═══════════════════════════════════════════════════════════════════
+  1808→
+  1809→export default function Home() {
+  1810→  const { activeReportId, wizardStep, fetchReports, showAnalytics } = useFinancialStore()
+  1811→
+  1812→  const stableFetch = useCallback(() => { fetchReports() }, [fetchReports])
+  1813→  useEffect(() => { stableFetch() }, [stableFetch])
+  1814→
+  1815→  return (
+  1816→    <TooltipProvider>
+  1817→      <div className="min-h-screen flex flex-col bg-background">
+  1818→        <Header />
+  1819→        {activeReportId && <WizardProgressBar />}
+  1820→        {activeReportId && <StatusBar />}
+  1821→        <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6">
+  1822→          <AnimatePresence mode="wait">
+  1823→            {!activeReportId ? (
+  1824→              <DashboardView key="dashboard" />
+  1825→            ) : (
+  1826→              <>
+  1827→                {wizardStep === 1 && <Step1EntitySetup key="step1" />}
+  1828→                {wizardStep === 2 && <Step2TrialBalance key="step2" />}
+  1829→                {wizardStep === 3 && <Step3Budget key="step3" />}
+  1830→                {wizardStep === 4 && <Step3Supplementary key="step4" />}
+  1831→                {wizardStep === 5 && <Step4Review key="step5" />}
+  1832→                {wizardStep === 6 && <Step5Generate key="step6" />}
+  1833→              </>
+  1834→            )}
+  1835→          </AnimatePresence>
+  1836→        </main>
+  1837→        <footer className="border-t border-border mt-auto">
+  1838→          <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
+  1839→            <span>FinStatements Pro — Government Financial Statements Generator</span>
+  1840→            <span>IPSAS Compliant</span>
+  1841→          </div>
+  1842→        </footer>
+  1843→        {showAnalytics && activeReportId && <AnalyticsPanel />}
+  1844→      </div>
+  1845→    </TooltipProvider>
+  1846→  )
+  1847→}
+  1848→

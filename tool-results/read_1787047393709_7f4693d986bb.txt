@@ -1,0 +1,1221 @@
+     1→'use client'
+     2→
+     3→import { useEffect, useCallback } from 'react'
+     4→import { toast } from 'sonner'
+     5→import {
+     6→  Scale,
+     7→  Plus,
+     8→  LayoutDashboard,
+     9→  Table,
+    10→  FileText,
+    11→  Download,
+    12→  Trash2,
+    13→  FileSpreadsheet,
+    14→  CheckCircle2,
+    15→  AlertTriangle,
+    16→  ArrowRight,
+    17→  FolderOpen,
+    18→  Loader2,
+    19→  Calendar,
+    20→  Banknote,
+    21→} from 'lucide-react'
+    22→import { Button } from '@/components/ui/button'
+    23→import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+    24→import { Input } from '@/components/ui/input'
+    25→import { Label } from '@/components/ui/label'
+    26→import { Badge } from '@/components/ui/badge'
+    27→import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+    28→import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+    29→import { Separator } from '@/components/ui/separator'
+    30→import { useFinancialStore, type TabType, type StatementSubTab } from '@/components/financials/store'
+    31→import { TBEntryRow } from '@/components/financials/tb-entry-row'
+    32→import { StatementTable, type StatementRow } from '@/components/financials/statement-table'
+    33→import type {
+    34→  GeneratedStatements,
+    35→  SFPLine,
+    36→  BSLine,
+    37→  CashFlowData,
+    38→  RevenueReconciliationData,
+    39→  CashReconciliationData,
+    40→  BudgetVarianceData,
+    41→} from '@/lib/financial-engine'
+    42→
+    43→function formatNum(n: number): string {
+    44→  return Math.abs(n).toLocaleString('en-US', {
+    45→    minimumFractionDigits: 0,
+    46→    maximumFractionDigits: 0,
+    47→  })
+    48→}
+    49→
+    50→function statusColor(status: string) {
+    51→  switch (status) {
+    52→    case 'draft':
+    53→      return 'bg-yellow-100 text-yellow-800'
+    54→    case 'complete':
+    55→      return 'bg-sky-100 text-sky-800'
+    56→    case 'generated':
+    57→      return 'bg-emerald-100 text-emerald-800'
+    58→    default:
+    59→      return 'bg-slate-100 text-slate-800'
+    60→  }
+    61→}
+    62→
+    63→// ─── HEADER ────────────────────────────────────────────────────────
+    64→function Header() {
+    65→  const { entityConfig, activeReportId, isLoading, createReport } =
+    66→    useFinancialStore()
+    67→
+    68→  const handleNew = async () => {
+    69→    try {
+    70→      await createReport()
+    71→      toast.success('Report created successfully')
+    72→    } catch {
+    73→      toast.error('Failed to create report')
+    74→    }
+    75→  }
+    76→
+    77→  return (
+    78→    <header className="sticky top-0 z-50 bg-slate-900 text-white shadow-lg">
+    79→      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+    80→        <div className="flex items-center gap-3">
+    81→          <div className="flex items-center gap-2">
+    82→            <Scale className="h-5 w-5 text-emerald-400" />
+    83→            <span className="font-bold text-base tracking-tight">
+    84→              FinStatements Pro
+    85→            </span>
+    86→          </div>
+    87→          {activeReportId && (
+    88→            <>
+    89→              <Separator
+    90→                orientation="vertical"
+    91→                className="h-6 bg-slate-600"
+    92→              />
+    93→              <div className="hidden sm:flex items-center gap-3 text-sm text-slate-300">
+    94→                <span className="font-medium text-white">
+    95→                  {entityConfig.name}
+    96→                </span>
+    97→                <span className="flex items-center gap-1">
+    98→                  <Calendar className="h-3.5 w-3.5" />
+    99→                  {entityConfig.periodLabel}
+   100→                </span>
+   101→                <span className="flex items-center gap-1">
+   102→                  <Banknote className="h-3.5 w-3.5" />
+   103→                  {entityConfig.currency}
+   104→                </span>
+   105→              </div>
+   106→            </>
+   107→          )}
+   108→        </div>
+   109→        <Button
+   110→          size="sm"
+   111→          onClick={handleNew}
+   112→          disabled={isLoading}
+   113→          className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
+   114→        >
+   115→          {isLoading ? (
+   116→            <Loader2 className="h-4 w-4 animate-spin" />
+   117→          ) : (
+   118→            <Plus className="h-4 w-4" />
+   119→          )}
+   120→          <span className="hidden sm:inline">New Report</span>
+   121→        </Button>
+   122→      </div>
+   123→    </header>
+   124→  )
+   125→}
+   126→
+   127→// ─── TAB BAR ───────────────────────────────────────────────────────
+   128→function TabBar() {
+   129→  const { activeTab, setActiveTab, activeReportId, entries } =
+   130→    useFinancialStore()
+   131→
+   132→  const tabs: { value: TabType; label: string; icon: React.ReactNode }[] = [
+   133→    { value: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="h-4 w-4" /> },
+   134→    { value: 'trial-balance', label: 'Trial Balance', icon: <Table className="h-4 w-4" /> },
+   135→    { value: 'statements', label: 'Financial Statements', icon: <FileText className="h-4 w-4" /> },
+   136→    { value: 'export', label: 'Export PDF', icon: <Download className="h-4 w-4" /> },
+   137→  ]
+   138→
+   139→  return (
+   140→    <div className="bg-white border-b border-slate-200 sticky top-14 z-40">
+   141→      <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
+   142→        <Tabs
+   143→          value={activeTab}
+   144→          onValueChange={(v) => setActiveTab(v as TabType)}
+   145→        >
+   146→          <TabsList className="bg-transparent h-11 p-0 gap-0 border-b-0 rounded-none">
+   147→            {tabs.map((tab) => {
+   148→              const disabled =
+   149→                (tab.value === 'trial-balance' ||
+   150→                  tab.value === 'statements' ||
+   151→                  tab.value === 'export') &&
+   152→                !activeReportId
+   153→              return (
+   154→                <TabsTrigger
+   155→                  key={tab.value}
+   156→                  value={tab.value}
+   157→                  disabled={disabled}
+   158→                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-emerald-700 text-slate-500 h-11 px-4 gap-2 transition-colors"
+   159→                >
+   160→                  {tab.icon}
+   161→                  <span className="hidden sm:inline text-sm">
+   162→                    {tab.label}
+   163→                  </span>
+   164→                  {tab.value === 'trial-balance' && entries.length > 0 && (
+   165→                    <Badge
+   166→                      variant="secondary"
+   167→                      className="ml-1 h-5 px-1.5 text-xs bg-emerald-50 text-emerald-700"
+   168→                    >
+   169→                      {entries.length}
+   170→                    </Badge>
+   171→                  )}
+   172→                </TabsTrigger>
+   173→              )
+   174→            })}
+   175→          </TabsList>
+   176→        </Tabs>
+   177→      </div>
+   178→    </div>
+   179→  )
+   180→}
+   181→
+   182→// ─── DASHBOARD TAB ─────────────────────────────────────────────────
+   183→function DashboardTab() {
+   184→  const { reports, loadReport, deleteReport, isLoading } = useFinancialStore()
+   185→
+   186→  const handleLoad = async (id: string) => {
+   187→    try {
+   188→      await loadReport(id)
+   189→      toast.success('Report loaded')
+   190→    } catch {
+   191→      toast.error('Failed to load report')
+   192→    }
+   193→  }
+   194→
+   195→  const handleDelete = async (id: string, e: React.MouseEvent) => {
+   196→    e.stopPropagation()
+   197→    try {
+   198→      await deleteReport(id)
+   199→      toast.success('Report deleted')
+   200→    } catch {
+   201→      toast.error('Failed to delete report')
+   202→    }
+   203→  }
+   204→
+   205→  if (reports.length === 0) {
+   206→    return (
+   207→      <div className="flex flex-col items-center justify-center py-24 text-center">
+   208→        <div className="rounded-full bg-slate-100 p-6 mb-6">
+   209→          <FolderOpen className="h-12 w-12 text-slate-400" />
+   210→        </div>
+   211→        <h2 className="text-xl font-semibold text-slate-800 mb-2">
+   212→          No Reports Yet
+   213→        </h2>
+   214→        <p className="text-slate-500 mb-6 max-w-md">
+   215→          Create your first financial report to get started. You can set up
+   216→          entity details, enter trial balance data, and generate IPSAS-compliant
+   217→          statements.
+   218→        </p>
+   219→        <Button
+   220→          onClick={async () => {
+   221→            try {
+   222→              await useFinancialStore.getState().createReport()
+   223→              toast.success('Report created successfully')
+   224→            } catch {
+   225→              toast.error('Failed to create report')
+   226→            }
+   227→          }}
+   228→          className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+   229→        >
+   230→          <Plus className="h-4 w-4" />
+   231→          Create Your First Report
+   232→        </Button>
+   233→      </div>
+   234→    )
+   235→  }
+   236→
+   237→  return (
+   238→    <div className="py-6">
+   239→      <div className="mb-6">
+   240→        <h2 className="text-lg font-semibold text-slate-800">
+   241→          Financial Reports
+   242→        </h2>
+   243→        <p className="text-sm text-slate-500 mt-1">
+   244→          {reports.length} report{reports.length !== 1 ? 's' : ''} in your
+   245→          workspace
+   246→        </p>
+   247→      </div>
+   248→      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+   249→        {reports.map((report) => (
+   250→          <Card
+   251→            key={report.id}
+   252→            className="cursor-pointer hover:border-emerald-300 hover:shadow-md transition-all group"
+   253→            onClick={() => handleLoad(report.id)}
+   254→          >
+   255→            <CardHeader className="pb-3">
+   256→              <div className="flex items-start justify-between">
+   257→                <CardTitle className="text-sm font-semibold text-slate-800 leading-snug">
+   258→                  {report.entityName}
+   259→                </CardTitle>
+   260→                <Badge
+   261→                  variant="secondary"
+   262→                  className={`text-xs ${statusColor(report.status)}`}
+   263→                >
+   264→                  {report.status}
+   265→                </Badge>
+   266→              </div>
+   267→            </CardHeader>
+   268→            <CardContent className="pt-0">
+   269→              <div className="space-y-2 text-xs text-slate-500">
+   270→                <div className="flex items-center gap-2">
+   271→                  <Calendar className="h-3.5 w-3.5" />
+   272→                  {report.periodLabel}
+   273→                </div>
+   274→                <div className="flex items-center gap-2">
+   275→                  <FileSpreadsheet className="h-3.5 w-3.5" />
+   276→                  {report.entries.length} trial balance entries
+   277→                </div>
+   278→                <div className="flex items-center justify-between pt-2">
+   279→                  <span>
+   280→                    {new Date(report.createdAt).toLocaleDateString('en-US', {
+   281→                      month: 'short',
+   282→                      day: 'numeric',
+   283→                      year: 'numeric',
+   284→                    })}
+   285→                  </span>
+   286→                  <Button
+   287→                    variant="ghost"
+   288→                    size="sm"
+   289→                    className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+   290→                    onClick={(e) => handleDelete(report.id, e)}
+   291→                  >
+   292→                    <Trash2 className="h-3.5 w-3.5" />
+   293→                  </Button>
+   294→                </div>
+   295→              </div>
+   296→            </CardContent>
+   297→          </Card>
+   298→        ))}
+   299→      </div>
+   300→    </div>
+   301→  )
+   302→}
+   303→
+   304→// ─── TRIAL BALANCE TAB ─────────────────────────────────────────────
+   305→function TrialBalanceTab() {
+   306→  const {
+   307→    entries,
+   308→    entityConfig,
+   309→    setEntityConfig,
+   310→    updateEntry,
+   311→    deleteEntry,
+   312→    addEntry,
+   313→    loadTemplate,
+   314→    saveTrialBalance,
+   315→    isLoading,
+   316→  } = useFinancialStore()
+   317→
+   318→  const totalDebitCurrent = entries.reduce(
+   319→    (s, e) => s + (e.debitCurrent || 0),
+   320→    0
+   321→  )
+   322→  const totalCreditCurrent = entries.reduce(
+   323→    (s, e) => s + (e.creditCurrent || 0),
+   324→    0
+   325→  )
+   326→  const difference = totalDebitCurrent - totalCreditCurrent
+   327→  const isBalanced = Math.abs(difference) < 0.01
+   328→
+   329→  const handleSave = async () => {
+   330→    try {
+   331→      await saveTrialBalance()
+   332→      toast.success('Trial balance saved and validated')
+   333→    } catch {
+   334→      toast.error('Failed to save trial balance')
+   335→    }
+   336→  }
+   337→
+   338→  const handleLoadTemplate = () => {
+   339→    loadTemplate()
+   340→    toast.success('Template loaded')
+   341→  }
+   342→
+   343→  return (
+   344→    <div className="py-4 space-y-4">
+   345→      {/* Entity Config */}
+   346→      <Card>
+   347→        <CardHeader className="pb-3">
+   348→          <CardTitle className="text-sm font-semibold text-slate-800">
+   349→            Entity Configuration
+   350→          </CardTitle>
+   351→        </CardHeader>
+   352→        <CardContent className="pt-0">
+   353→          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+   354→            <div className="space-y-1.5">
+   355→              <Label className="text-xs text-slate-500">Entity Name</Label>
+   356→              <Input
+   357→                className="h-9 text-sm"
+   358→                value={entityConfig.name}
+   359→                onChange={(e) =>
+   360→                  setEntityConfig({ name: e.target.value })
+   361→                }
+   362→              />
+   363→            </div>
+   364→            <div className="space-y-1.5">
+   365→              <Label className="text-xs text-slate-500">
+   366→                Period End Date
+   367→              </Label>
+   368→              <Input
+   369→                type="date"
+   370→                className="h-9 text-sm"
+   371→                value={entityConfig.periodEnd}
+   372→                onChange={(e) =>
+   373→                  setEntityConfig({ periodEnd: e.target.value })
+   374→                }
+   375→              />
+   376→            </div>
+   377→            <div className="space-y-1.5">
+   378→              <Label className="text-xs text-slate-500">Period Label</Label>
+   379→              <Input
+   380→                className="h-9 text-sm"
+   381→                value={entityConfig.periodLabel}
+   382→                onChange={(e) =>
+   383→                  setEntityConfig({ periodLabel: e.target.value })
+   384→                }
+   385→              />
+   386→            </div>
+   387→            <div className="space-y-1.5">
+   388→              <Label className="text-xs text-slate-500">Currency</Label>
+   389→              <Input
+   390→                className="h-9 text-sm"
+   391→                value={entityConfig.currency}
+   392→                onChange={(e) =>
+   393→                  setEntityConfig({ currency: e.target.value })
+   394→                }
+   395→              />
+   396→            </div>
+   397→          </div>
+   398→        </CardContent>
+   399→      </Card>
+   400→
+   401→      {/* Toolbar */}
+   402→      <div className="flex flex-wrap items-center gap-2">
+   403→        <Button
+   404→          variant="outline"
+   405→          size="sm"
+   406→          className="gap-1.5"
+   407→          onClick={handleLoadTemplate}
+   408→        >
+   409→          <FileSpreadsheet className="h-4 w-4" />
+   410→          Load Template
+   411→        </Button>
+   412→        <Button
+   413→          variant="outline"
+   414→          size="sm"
+   415→          className="gap-1.5"
+   416→          onClick={addEntry}
+   417→        >
+   418→          <Plus className="h-4 w-4" />
+   419→          Add Row
+   420→        </Button>
+   421→        <span className="text-xs text-slate-400 ml-2">
+   422→          {entries.length} entries
+   423→        </span>
+   424→      </div>
+   425→
+   426→      {/* Trial Balance Table */}
+   427→      <div className="overflow-x-auto rounded-lg border border-slate-200">
+   428→        <table className="w-full text-sm min-w-[1200px]">
+   429→          <thead>
+   430→            <tr className="bg-slate-800 text-white">
+   431→              <th className="px-1 py-2.5 text-center text-xs font-medium uppercase tracking-wide w-8">
+   432→                #
+   433→              </th>
+   434→              <th className="px-1 py-2.5 text-left text-xs font-medium uppercase tracking-wide w-24">
+   435→                Code
+   436→              </th>
+   437→              <th className="px-1 py-2.5 text-left text-xs font-medium uppercase tracking-wide">
+   438→                Account Name
+   439→              </th>
+   440→              <th className="px-1 py-2.5 text-left text-xs font-medium uppercase tracking-wide w-[160px]">
+   441→                Classification
+   442→              </th>
+   443→              <th className="px-1 py-2.5 text-left text-xs font-medium uppercase tracking-wide w-[200px]">
+   444→                Category
+   445→              </th>
+   446→              <th className="px-1 py-2.5 text-center text-xs font-medium uppercase tracking-wide w-16">
+   447→                Note
+   448→              </th>
+   449→              <th className="px-1 py-2.5 text-right text-xs font-medium uppercase tracking-wide w-32">
+   450→                Dr. Current
+   451→              </th>
+   452→              <th className="px-1 py-2.5 text-right text-xs font-medium uppercase tracking-wide w-32">
+   453→                Cr. Current
+   454→              </th>
+   455→              <th className="px-1 py-2.5 text-right text-xs font-medium uppercase tracking-wide w-32">
+   456→                Dr. Prior
+   457→              </th>
+   458→              <th className="px-1 py-2.5 text-right text-xs font-medium uppercase tracking-wide w-32">
+   459→                Cr. Prior
+   460→              </th>
+   461→              <th className="px-1 py-2.5 w-10" />
+   462→            </tr>
+   463→          </thead>
+   464→          <tbody>
+   465→            {entries.map((entry, index) => (
+   466→              <TBEntryRow
+   467→                key={(entry._id || entry._dbId) ?? index}
+   468→                entry={entry}
+   469→                index={index}
+   470→                onEntryChange={updateEntry}
+   471→                onDelete={deleteEntry}
+   472→              />
+   473→            ))}
+   474→            {entries.length === 0 && (
+   475→              <tr>
+   476→                <td
+   477→                  colSpan={11}
+   478→                  className="py-12 text-center text-slate-400 text-sm"
+   479→                >
+   480→                  No entries. Click "Load Template" or "Add Row" to begin.
+   481→                </td>
+   482→              </tr>
+   483→            )}
+   484→          </tbody>
+   485→        </table>
+   486→      </div>
+   487→
+   488→      {/* Footer Bar */}
+   489→      <Card className="bg-slate-50">
+   490→        <CardContent className="py-3">
+   491→          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+   492→            <div className="flex flex-wrap items-center gap-4 text-sm">
+   493→              <div className="flex items-center gap-2">
+   494→                <span className="text-slate-500">Total Dr:</span>
+   495→                <span className="font-mono font-semibold text-slate-800">
+   496→                  {formatNum(totalDebitCurrent)}
+   497→                </span>
+   498→              </div>
+   499→              <div className="flex items-center gap-2">
+   500→                <span className="text-slate-500">Total Cr:</span>
+   501→                <span className="font-mono font-semibold text-slate-800">
+   502→                  {formatNum(totalCreditCurrent)}
+   503→                </span>
+   504→              </div>
+   505→              <div className="flex items-center gap-2">
+   506→                <span className="text-slate-500">Difference:</span>
+   507→                <Badge
+   508→                  variant="secondary"
+   509→                  className={`font-mono ${
+   510→                    isBalanced
+   511→                      ? 'bg-emerald-100 text-emerald-800'
+   512→                      : 'bg-red-100 text-red-800'
+   513→                  }`}
+   514→                >
+   515→                  {isBalanced
+   516→                    ? 'Balanced'
+   517→                    : formatNum(difference)}
+   518→                </Badge>
+   519→              </div>
+   520→            </div>
+   521→            <Button
+   522→              onClick={handleSave}
+   523→              disabled={isLoading || entries.length === 0}
+   524→              className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+   525→            >
+   526→              {isLoading ? (
+   527→                <Loader2 className="h-4 w-4 animate-spin" />
+   528→              ) : (
+   529→                <CheckCircle2 className="h-4 w-4" />
+   530→              )}
+   531→              Save & Validate
+   532→            </Button>
+   533→          </div>
+   534→        </CardContent>
+   535→      </Card>
+   536→    </div>
+   537→  )
+   538→}
+   539→
+   540→// ─── STATEMENTS TAB ────────────────────────────────────────────────
+   541→function StatementsTab() {
+   542→  const {
+   543→    generatedStatements,
+   544→    entityConfig,
+   545→    statementSubTab,
+   546→    setStatementSubTab,
+   547→    generateStatements,
+   548→    isLoading,
+   549→  } = useFinancialStore()
+   550→
+   551→  const handleGenerate = async () => {
+   552→    try {
+   553→      await generateStatements()
+   554→      toast.success('Statements generated successfully')
+   555→    } catch {
+   556→      toast.error('Failed to generate statements')
+   557→    }
+   558→  }
+   559→
+   560→  const subTabs: { value: StatementSubTab; label: string }[] = [
+   561→    { value: 'sfp', label: 'Fin. Performance' },
+   562→    { value: 'balance-sheet', label: 'Fin. Position' },
+   563→    { value: 'changes-na', label: 'Changes in NA' },
+   564→    { value: 'cash-flow', label: 'Cash Flow' },
+   565→    { value: 'revenue-recon', label: 'Revenue Reconciliation' },
+   566→    { value: 'cash-recon', label: 'Cash Reconciliation' },
+   567→    { value: 'budget-variance', label: 'Budget Variance' },
+   568→  ]
+   569→
+   570→  if (!generatedStatements) {
+   571→    return (
+   572→      <div className="flex flex-col items-center justify-center py-24 text-center">
+   573→        <div className="rounded-full bg-slate-100 p-6 mb-6">
+   574→          <FileText className="h-12 w-12 text-slate-400" />
+   575→        </div>
+   576→        <h2 className="text-xl font-semibold text-slate-800 mb-2">
+   577→          Generate Financial Statements
+   578→        </h2>
+   579→        <p className="text-slate-500 mb-6 max-w-md">
+   580→          Save your trial balance first, then generate IPSAS-compliant
+   581→          financial statements including the Statement of Financial Performance,
+   582→          Balance Sheet, and supporting schedules.
+   583→        </p>
+   584→        <Button
+   585→          onClick={handleGenerate}
+   586→          disabled={isLoading}
+   587→          className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+   588→        >
+   589→          {isLoading ? (
+   590→            <Loader2 className="h-4 w-4 animate-spin" />
+   591→          ) : (
+   592→            <ArrowRight className="h-4 w-4" />
+   593→          )}
+   594→          Generate Statements
+   595→        </Button>
+   596→      </div>
+   597→    )
+   598→  }
+   599→
+   600→  const hasErrors =
+   601→    generatedStatements.validationErrors &&
+   602→    generatedStatements.validationErrors.length > 0
+   603→
+   604→  return (
+   605→    <div className="py-4 space-y-4">
+   606→      {/* Validation alerts */}
+   607→      {hasErrors ? (
+   608→        <Alert variant="destructive">
+   609→          <AlertTriangle className="h-4 w-4" />
+   610→          <AlertTitle>
+   611→            {generatedStatements.validationErrors.length} Validation
+   612→            Issue(s)
+   613→          </AlertTitle>
+   614→          <AlertDescription>
+   615→            <ul className="mt-2 space-y-1 list-disc list-inside text-sm">
+   616→              {generatedStatements.validationErrors.map((err, i) => (
+   617→                <li key={i}>{err}</li>
+   618→              ))}
+   619→            </ul>
+   620→          </AlertDescription>
+   621→        </Alert>
+   622→      ) : (
+   623→        <Alert className="border-emerald-200 bg-emerald-50">
+   624→          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+   625→          <AlertTitle className="text-emerald-800">
+   626→            All checks passed
+   627→          </AlertTitle>
+   628→          <AlertDescription className="text-emerald-700">
+   629→            The generated statements have passed all validation checks.
+   630→          </AlertDescription>
+   631→        </Alert>
+   632→      )}
+   633→
+   634→      {/* Re-generate button */}
+   635→      <div className="flex justify-end">
+   636→        <Button
+   637→          variant="outline"
+   638→          size="sm"
+   639→          onClick={handleGenerate}
+   640→          disabled={isLoading}
+   641→          className="gap-1.5"
+   642→        >
+   643→          {isLoading ? (
+   644→            <Loader2 className="h-4 w-4 animate-spin" />
+   645→          ) : (
+   646→            <ArrowRight className="h-4 w-4" />
+   647→          )}
+   648→          Re-generate
+   649→        </Button>
+   650→      </div>
+   651→
+   652→      {/* Sub-tabs */}
+   653→      <div className="overflow-x-auto">
+   654→        <div className="flex gap-1 min-w-max">
+   655→          {subTabs.map((tab) => (
+   656→            <button
+   657→              key={tab.value}
+   658→              onClick={() => setStatementSubTab(tab.value)}
+   659→              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
+   660→                statementSubTab === tab.value
+   661→                  ? 'bg-emerald-600 text-white'
+   662→                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+   663→              }`}
+   664→            >
+   665→              {tab.label}
+   666→            </button>
+   667→          ))}
+   668→        </div>
+   669→      </div>
+   670→
+   671→      {/* Statement content */}
+   672→      {statementSubTab === 'sfp' && (
+   673→        <SFPSection
+   674→          data={generatedStatements.sfp}
+   675→          currency={entityConfig.currency}
+   676→        />
+   677→      )}
+   678→      {statementSubTab === 'balance-sheet' && (
+   679→        <BalanceSheetSection
+   680→          data={generatedStatements.balanceSheet}
+   681→          currency={entityConfig.currency}
+   682→        />
+   683→      )}
+   684→      {statementSubTab === 'changes-na' && (
+   685→        <ChangesNASection
+   686→          data={generatedStatements.changesInNA}
+   687→          currency={entityConfig.currency}
+   688→        />
+   689→      )}
+   690→      {statementSubTab === 'cash-flow' && (
+   691→        <CashFlowSection
+   692→          data={generatedStatements.cashFlow}
+   693→          currency={entityConfig.currency}
+   694→        />
+   695→      )}
+   696→      {statementSubTab === 'revenue-recon' && (
+   697→        <RevenueReconSection
+   698→          data={generatedStatements.revenueReconciliation}
+   699→          currency={entityConfig.currency}
+   700→        />
+   701→      )}
+   702→      {statementSubTab === 'cash-recon' && (
+   703→        <CashReconSection
+   704→          data={generatedStatements.cashReconciliation}
+   705→          currency={entityConfig.currency}
+   706→        />
+   707→      )}
+   708→      {statementSubTab === 'budget-variance' && (
+   709→        <BudgetVarianceSection
+   710→          data={generatedStatements.budgetVariance}
+   711→          currency={entityConfig.currency}
+   712→        />
+   713→      )}
+   714→    </div>
+   715→  )
+   716→}
+   717→
+   718→// ─── STATEMENT SUB-SECTIONS ────────────────────────────────────────
+   719→
+   720→function toStatementRow(line: SFPLine | BSLine): StatementRow {
+   721→  return {
+   722→    label: line.label,
+   723→    noteRef: line.noteRef,
+   724→    current: line.current,
+   725→    prior: line.prior,
+   726→    indent: line.indent,
+   727→    isBold: line.isBold,
+   728→    isSubtotal: line.isSubtotal,
+   729→    isTotal: line.isTotal,
+   730→    isSection: line.isSection,
+   731→  }
+   732→}
+   733→
+   734→function SFPSection({
+   735→  data,
+   736→  currency,
+   737→}: {
+   738→  data: GeneratedStatements['sfp']
+   739→  currency: string
+   740→}) {
+   741→  const allRows: StatementRow[] = [
+   742→    ...data.revenueLines.map(toStatementRow),
+   743→    { label: '', noteRef: '', current: 0, prior: 0 },
+   744→    ...data.expenseLines.map(toStatementRow),
+   745→    { label: '', noteRef: '', current: 0, prior: 0, isSection: true },
+   746→    {
+   747→      label: 'SURPLUS / (DEFICIT)',
+   748→      noteRef: '',
+   749→      current: data.surplusCurrent,
+   750→      prior: data.surplusPrior,
+   751→      isBold: true,
+   752→      isTotal: true,
+   753→    },
+   754→  ]
+   755→  return (
+   756→    <StatementTable
+   757→      title="Statement of Financial Performance"
+   758→      rows={allRows}
+   759→      currency={currency}
+   760→    />
+   761→  )
+   762→}
+   763→
+   764→function BalanceSheetSection({
+   765→  data,
+   766→  currency,
+   767→}: {
+   768→  data: GeneratedStatements['balanceSheet']
+   769→  currency: string
+   770→}) {
+   771→  const allRows: StatementRow[] = [
+   772→    ...data.assetLines.map(toStatementRow),
+   773→    { label: '', noteRef: '', current: 0, prior: 0 },
+   774→    ...data.liabilityLines.map(toStatementRow),
+   775→  ]
+   776→  return (
+   777→    <StatementTable
+   778→      title="Statement of Financial Position"
+   779→      rows={allRows}
+   780→      currency={currency}
+   781→    />
+   782→  )
+   783→}
+   784→
+   785→function ChangesNASection({
+   786→  data,
+   787→  currency,
+   788→}: {
+   789→  data: GeneratedStatements['changesInNA']
+   790→  currency: string
+   791→}) {
+   792→  const rows: StatementRow[] = [
+   793→    {
+   794→      label: 'NET ASSETS',
+   795→      noteRef: '',
+   796→      current: 0,
+   797→      prior: 0,
+   798→      isBold: true,
+   799→      isSection: true,
+   800→    },
+   801→    { label: 'Brought forward', noteRef: '', current: data.bfCurrent, prior: data.bfPrior, indent: 1 },
+   802→    { label: 'Adjustments', noteRef: '', current: data.adjustmentsCurrent, prior: data.adjustmentsPrior, indent: 1 },
+   803→    { label: 'Surplus/(Deficit) for the year', noteRef: '', current: data.surplusCurrent, prior: data.surplusPrior, indent: 1, isBold: true },
+   804→    { label: 'Closing Net Assets', noteRef: '', current: data.closingCurrent, prior: data.closingPrior, indent: 1, isBold: true, isTotal: true },
+   805→  ]
+   806→  return (
+   807→    <StatementTable
+   808→      title="Statement of Changes in Net Assets"
+   809→      rows={rows}
+   810→      currency={currency}
+   811→    />
+   812→  )
+   813→}
+   814→
+   815→function CashFlowSection({
+   816→  data,
+   817→  currency,
+   818→}: {
+   819→  data: CashFlowData
+   820→  currency: string
+   821→}) {
+   822→  const rows: StatementRow[] = [
+   823→    { label: 'CASH FLOWS FROM OPERATING ACTIVITIES', noteRef: '', current: 0, prior: 0, isBold: true, isSection: true },
+   824→    { label: 'Operating revenue received', noteRef: '', current: data.operatingRevenueCurrent, prior: data.operatingRevenuePrior, indent: 1 },
+   825→    ...data.payments.map(
+   826→      (p): StatementRow => ({
+   827→        label: `Payments - ${p.label}`,
+   828→        noteRef: p.noteRef,
+   829→        current: -Math.abs(p.current),
+   830→        prior: -Math.abs(p.prior),
+   831→        indent: 1,
+   832→      })
+   833→    ),
+   834→    { label: 'Net cash from operating activities', noteRef: '', current: data.netOperatingCurrent, prior: data.netOperatingPrior, isBold: true, isTotal: true },
+   835→    { label: '', noteRef: '', current: 0, prior: 0 },
+   836→    { label: 'CASH FLOWS FROM INVESTING ACTIVITIES', noteRef: '', current: 0, prior: 0, isBold: true, isSection: true },
+   837→    ...data.investing.map(
+   838→      (inv): StatementRow => ({
+   839→        label: inv.label,
+   840→        noteRef: '',
+   841→        current: inv.current,
+   842→        prior: inv.prior,
+   843→        indent: 1,
+   844→      })
+   845→    ),
+   846→    { label: 'Net cash from investing activities', noteRef: '', current: data.netInvestingCurrent, prior: data.netInvestingPrior, isBold: true, isTotal: true },
+   847→    { label: '', noteRef: '', current: 0, prior: 0 },
+   848→    { label: 'CASH FLOWS FROM FINANCING ACTIVITIES', noteRef: '', current: 0, prior: 0, isBold: true, isSection: true },
+   849→    ...(data.financing.length > 0
+   850→      ? data.financing.map(
+   851→          (f): StatementRow => ({
+   852→            label: f.label,
+   853→            noteRef: '',
+   854→            current: f.current,
+   855→            prior: f.prior,
+   856→            indent: 1,
+   857→          })
+   858→        )
+   859→      : [{ label: '(None)', noteRef: '', current: 0, prior: 0, indent: 1 } as StatementRow]),
+   860→    { label: 'Net cash from financing activities', noteRef: '', current: data.netFinancingCurrent, prior: data.netFinancingPrior, isBold: true, isTotal: true },
+   861→    { label: '', noteRef: '', current: 0, prior: 0 },
+   862→    { label: 'Net increase/(decrease) in cash', noteRef: '', current: data.netChangeCurrent, prior: data.netChangePrior, isBold: true, isTotal: true },
+   863→  ]
+   864→  return (
+   865→    <StatementTable
+   866→      title="Cash Flow Statement"
+   867→      rows={rows}
+   868→      currency={currency}
+   869→    />
+   870→  )
+   871→}
+   872→
+   873→function RevenueReconSection({
+   874→  data,
+   875→  currency,
+   876→}: {
+   877→  data: RevenueReconciliationData
+   878→  currency: string
+   879→}) {
+   880→  const rows: StatementRow[] = [
+   881→    { label: 'REVENUE RECONCILIATION', noteRef: '', current: 0, prior: 0, isBold: true, isSection: true },
+   882→    { label: 'Revenue per SFP', noteRef: '', current: data.sfpRevenueCurrent, prior: data.sfpRevenuePrior, indent: 1 },
+   883→    { label: 'Advances recovered', noteRef: '', current: data.advancesRecoveredCurrent, prior: data.advancesRecoveredPrior, indent: 1 },
+   884→    { label: 'Revenue receivable collected during the period', noteRef: '', current: data.revenueReceivableCollectedCurrent, prior: data.revenueReceivableCollectedPrior, indent: 1 },
+   885→    { label: 'Deposits received', noteRef: '', current: data.depositsReceivedCurrent, prior: data.depositsReceivedPrior, indent: 1 },
+   886→    { label: 'Total Revenue for CF purposes', noteRef: '', current: data.totalRevenueCFCurrent, prior: data.totalRevenueCFPrior, isBold: true, indent: 1 },
+   887→    { label: 'Less: Grants in kind', noteRef: '', current: -data.grantsInKindCurrent, prior: -data.grantsInKindPrior, indent: 1 },
+   888→    { label: 'Less: Transfers to Treasury', noteRef: '', current: -data.transfersToTreasuryCurrent, prior: -data.transfersToTreasuryPrior, indent: 1 },
+   889→    { label: 'Less: Revenue receivable at period end', noteRef: '', current: -data.revenueReceivablePeriodCurrent, prior: -data.revenueReceivablePeriodPrior, indent: 1 },
+   890→    { label: 'Total Revenue in Cash Flow Statement', noteRef: '', current: data.totalRevenueCashFlowCurrent, prior: data.totalRevenueCashFlowPrior, isBold: true, isTotal: true },
+   891→  ]
+   892→  return (
+   893→    <StatementTable
+   894→      title="Revenue Reconciliation to Cash Flow Statement"
+   895→      rows={rows}
+   896→      currency={currency}
+   897→    />
+   898→  )
+   899→}
+   900→
+   901→function CashReconSection({
+   902→  data,
+   903→  currency,
+   904→}: {
+   905→  data: CashReconciliationData
+   906→  currency: string
+   907→}) {
+   908→  const rows: StatementRow[] = [
+   909→    { label: 'CASH RECONCILIATION', noteRef: '', current: 0, prior: 0, isBold: true, isSection: true },
+   910→    { label: 'Cash at beginning of period', noteRef: '', current: data.openingCashCurrent, prior: data.openingCashPrior, indent: 1 },
+   911→    { label: 'Net increase/(decrease) in cash', noteRef: '', current: data.netChangeCurrent, prior: data.netChangePrior, indent: 1 },
+   912→    { label: 'Cash at end of period', noteRef: '', current: data.closingCashCurrent, prior: data.closingCashPrior, isBold: true, isTotal: true },
+   913→  ]
+   914→  return (
+   915→    <StatementTable
+   916→      title="Cash and Cash Equivalents Reconciliation"
+   917→      rows={rows}
+   918→      currency={currency}
+   919→    />
+   920→  )
+   921→}
+   922→
+   923→function BudgetVarianceSection({
+   924→  data,
+   925→  currency,
+   926→}: {
+   927→  data: BudgetVarianceData[]
+   928→  currency: string
+   929→}) {
+   930→  if (data.length === 0) {
+   931→    return (
+   932→      <div className="text-center py-12 text-slate-400 text-sm">
+   933→        No budget data available. Enter budget amounts in the trial balance to
+   934→        see variance analysis.
+   935→      </div>
+   936→    )
+   937→  }
+   938→
+   939→  return (
+   940→    <div className="space-y-3">
+   941→      <h3 className="text-sm font-semibold text-slate-700">
+   942→        Budget Variance Analysis
+   943→      </h3>
+   944→      <div className="overflow-x-auto rounded-lg border border-slate-200">
+   945→        <table className="w-full text-sm">
+   946→          <thead>
+   947→            <tr className="bg-slate-800 text-white">
+   948→              <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide">
+   949→                Line Item
+   950→              </th>
+   951→              <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide">
+   952→                Initial Budget
+   953→              </th>
+   954→              <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide">
+   955→                Adjustments
+   956→              </th>
+   957→              <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide">
+   958→                Revised Budget
+   959→              </th>
+   960→              <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide">
+   961→                Actual
+   962→              </th>
+   963→              <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide">
+   964→                Variance
+   965→              </th>
+   966→              <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide">
+   967→                Var %
+   968→              </th>
+   969→            </tr>
+   970→          </thead>
+   971→          <tbody>
+   972→            {data.map((row, i) => {
+   973→              const varPositive = row.variance >= 0
+   974→              return (
+   975→                <tr
+   976→                  key={i}
+   977→                  className="border-b border-slate-100 hover:bg-slate-50/50"
+   978→                >
+   979→                  <td className="px-4 py-2 text-slate-700">{row.label}</td>
+   980→                  <td className="px-4 py-2 text-right font-mono text-slate-700">
+   981→                    {formatNum(row.initialBudget)}
+   982→                  </td>
+   983→                  <td className="px-4 py-2 text-right font-mono text-slate-700">
+   984→                    {formatNum(row.adjustments)}
+   985→                  </td>
+   986→                  <td className="px-4 py-2 text-right font-mono font-semibold text-slate-800">
+   987→                    {formatNum(row.revisedBudget)}
+   988→                  </td>
+   989→                  <td className="px-4 py-2 text-right font-mono text-slate-700">
+   990→                    {formatNum(row.actual)}
+   991→                  </td>
+   992→                  <td
+   993→                    className={`px-4 py-2 text-right font-mono font-semibold ${
+   994→                      varPositive
+   995→                        ? 'text-emerald-700'
+   996→                        : 'text-red-700'
+   997→                    }`}
+   998→                  >
+   999→                    {formatNum(row.variance)}
+  1000→                  </td>
+  1001→                  <td
+  1002→                    className={`px-4 py-2 text-right font-mono text-xs ${
+  1003→                      varPositive
+  1004→                        ? 'text-emerald-700'
+  1005→                        : 'text-red-700'
+  1006→                    }`}
+  1007→                  >
+  1008→                    {row.variancePercent.toFixed(1)}%
+  1009→                  </td>
+  1010→                </tr>
+  1011→              )
+  1012→            })}
+  1013→          </tbody>
+  1014→        </table>
+  1015→      </div>
+  1016→    </div>
+  1017→  )
+  1018→}
+  1019→
+  1020→// ─── EXPORT TAB ─────────────────────────────────────────────────────
+  1021→function ExportTab() {
+  1022→  const { generatedStatements, entityConfig, activeReportId } =
+  1023→    useFinancialStore()
+  1024→
+  1025→  return (
+  1026→    <div className="py-6 space-y-6">
+  1027→      {!activeReportId ? (
+  1028→        <div className="text-center py-12 text-slate-400 text-sm">
+  1029→          Select a report first to access export options.
+  1030→        </div>
+  1031→      ) : !generatedStatements ? (
+  1032→        <div className="text-center py-12 text-slate-400 text-sm">
+  1033→          Generate statements first before exporting.
+  1034→        </div>
+  1035→      ) : (
+  1036→        <>
+  1037→          <div>
+  1038→            <h2 className="text-lg font-semibold text-slate-800 mb-1">
+  1039→              Export to PDF
+  1040→            </h2>
+  1041→            <p className="text-sm text-slate-500">
+  1042→              Preview and export your financial statements for{' '}
+  1043→              <span className="font-medium text-slate-700">
+  1044→                {entityConfig.name}
+  1045→              </span>{' '}
+  1046→              — {entityConfig.periodLabel}
+  1047→            </p>
+  1048→          </div>
+  1049→
+  1050→          {/* Summary Cards */}
+  1051→          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  1052→            <Card>
+  1053→              <CardHeader className="pb-2">
+  1054→                <CardTitle className="text-xs text-slate-500 font-medium uppercase tracking-wide">
+  1055→                  Total Revenue
+  1056→                </CardTitle>
+  1057→              </CardHeader>
+  1058→              <CardContent className="pt-0">
+  1059→                <p className="text-2xl font-bold font-mono text-slate-800">
+  1060→                  {entityConfig.currency}{' '}
+  1061→                  {formatNum(generatedStatements.sfp.totalRevenueCurrent)}
+  1062→                </p>
+  1063→                <p className="text-xs text-slate-400 mt-1">
+  1064→                  Prior: {entityConfig.currency}{' '}
+  1065→                  {formatNum(generatedStatements.sfp.totalRevenuePrior)}
+  1066→                </p>
+  1067→              </CardContent>
+  1068→            </Card>
+  1069→            <Card>
+  1070→              <CardHeader className="pb-2">
+  1071→                <CardTitle className="text-xs text-slate-500 font-medium uppercase tracking-wide">
+  1072→                  Total Expenses
+  1073→                </CardTitle>
+  1074→              </CardHeader>
+  1075→              <CardContent className="pt-0">
+  1076→                <p className="text-2xl font-bold font-mono text-slate-800">
+  1077→                  {entityConfig.currency}{' '}
+  1078→                  {formatNum(generatedStatements.sfp.totalExpensesCurrent)}
+  1079→                </p>
+  1080→                <p className="text-xs text-slate-400 mt-1">
+  1081→                  Prior: {entityConfig.currency}{' '}
+  1082→                  {formatNum(generatedStatements.sfp.totalExpensesPrior)}
+  1083→                </p>
+  1084→              </CardContent>
+  1085→            </Card>
+  1086→            <Card>
+  1087→              <CardHeader className="pb-2">
+  1088→                <CardTitle className="text-xs text-slate-500 font-medium uppercase tracking-wide">
+  1089→                  Surplus / (Deficit)
+  1090→                </CardTitle>
+  1091→              </CardHeader>
+  1092→              <CardContent className="pt-0">
+  1093→                <p
+  1094→                  className={`text-2xl font-bold font-mono ${
+  1095→                    generatedStatements.sfp.surplusCurrent >= 0
+  1096→                      ? 'text-emerald-700'
+  1097→                      : 'text-red-700'
+  1098→                  }`}
+  1099→                >
+  1100→                  {entityConfig.currency}{' '}
+  1101→                  {formatNum(generatedStatements.sfp.surplusCurrent)}
+  1102→                </p>
+  1103→                <p className="text-xs text-slate-400 mt-1">
+  1104→                  Prior: {entityConfig.currency}{' '}
+  1105→                  {formatNum(generatedStatements.sfp.surplusPrior)}
+  1106→                </p>
+  1107→              </CardContent>
+  1108→            </Card>
+  1109→            <Card>
+  1110→              <CardHeader className="pb-2">
+  1111→                <CardTitle className="text-xs text-slate-500 font-medium uppercase tracking-wide">
+  1112→                  Total Assets
+  1113→                </CardTitle>
+  1114→              </CardHeader>
+  1115→              <CardContent className="pt-0">
+  1116→                <p className="text-2xl font-bold font-mono text-slate-800">
+  1117→                  {entityConfig.currency}{' '}
+  1118→                  {formatNum(generatedStatements.balanceSheet.totalAssetsCurrent)}
+  1119→                </p>
+  1120→                <p className="text-xs text-slate-400 mt-1">
+  1121→                  Prior: {entityConfig.currency}{' '}
+  1122→                  {formatNum(generatedStatements.balanceSheet.totalAssetsPrior)}
+  1123→                </p>
+  1124→              </CardContent>
+  1125→            </Card>
+  1126→            <Card>
+  1127→              <CardHeader className="pb-2">
+  1128→                <CardTitle className="text-xs text-slate-500 font-medium uppercase tracking-wide">
+  1129→                  Total Liabilities
+  1130→                </CardTitle>
+  1131→              </CardHeader>
+  1132→              <CardContent className="pt-0">
+  1133→                <p className="text-2xl font-bold font-mono text-slate-800">
+  1134→                  {entityConfig.currency}{' '}
+  1135→                  {formatNum(generatedStatements.balanceSheet.totalLiabilitiesCurrent)}
+  1136→                </p>
+  1137→                <p className="text-xs text-slate-400 mt-1">
+  1138→                  Prior: {entityConfig.currency}{' '}
+  1139→                  {formatNum(generatedStatements.balanceSheet.totalLiabilitiesPrior)}
+  1140→                </p>
+  1141→              </CardContent>
+  1142→            </Card>
+  1143→            <Card>
+  1144→              <CardHeader className="pb-2">
+  1145→                <CardTitle className="text-xs text-slate-500 font-medium uppercase tracking-wide">
+  1146→                  Net Assets
+  1147→                </CardTitle>
+  1148→              </CardHeader>
+  1149→              <CardContent className="pt-0">
+  1150→                <p className="text-2xl font-bold font-mono text-slate-800">
+  1151→                  {entityConfig.currency}{' '}
+  1152→                  {formatNum(generatedStatements.balanceSheet.netAssetsCurrent)}
+  1153→                </p>
+  1154→                <p className="text-xs text-slate-400 mt-1">
+  1155→                  Prior: {entityConfig.currency}{' '}
+  1156→                  {formatNum(generatedStatements.balanceSheet.netAssetsPrior)}
+  1157→                </p>
+  1158→              </CardContent>
+  1159→            </Card>
+  1160→          </div>
+  1161→
+  1162→          {/* Download Button */}
+  1163→          <Card className="border-dashed">
+  1164→            <CardContent className="py-8 flex flex-col items-center text-center">
+  1165→              <Download className="h-10 w-10 text-slate-300 mb-4" />
+  1166→              <h3 className="text-sm font-semibold text-slate-800 mb-1">
+  1167→                PDF Export Coming Soon
+  1168→              </h3>
+  1169→              <p className="text-xs text-slate-400 max-w-sm">
+  1170→                The PDF generation feature is under development. You will be able
+  1171→                to download a professionally formatted PDF of all financial
+  1172→                statements.
+  1173→              </p>
+  1174→              <Button
+  1175→                disabled
+  1176→                className="mt-4 gap-2"
+  1177→                variant="outline"
+  1178→              >
+  1179→                <Download className="h-4 w-4" />
+  1180→                Download PDF
+  1181→              </Button>
+  1182→            </CardContent>
+  1183→          </Card>
+  1184→        </>
+  1185→      )}
+  1186→    </div>
+  1187→  )
+  1188→}
+  1189→
+  1190→// ─── MAIN PAGE ─────────────────────────────────────────────────────
+  1191→export default function Home() {
+  1192→  const { activeTab, fetchReports } = useFinancialStore()
+  1193→
+  1194→  const stableFetch = useCallback(() => {
+  1195→    fetchReports()
+  1196→  }, [fetchReports])
+  1197→
+  1198→  useEffect(() => {
+  1199→    stableFetch()
+  1200→  }, [stableFetch])
+  1201→
+  1202→  return (
+  1203→    <div className="min-h-screen flex flex-col bg-white">
+  1204→      <Header />
+  1205→      <TabBar />
+  1206→      <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6">
+  1207→        {activeTab === 'dashboard' && <DashboardTab />}
+  1208→        {activeTab === 'trial-balance' && <TrialBalanceTab />}
+  1209→        {activeTab === 'statements' && <StatementsTab />}
+  1210→        {activeTab === 'export' && <ExportTab />}
+  1211→      </main>
+  1212→      <footer className="border-t border-slate-100 mt-auto">
+  1213→        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400">
+  1214→          <span>FinStatements Pro — Government Financial Statements Generator</span>
+  1215→          <span>IPSAS Compliant</span>
+  1216→        </div>
+  1217→      </footer>
+  1218→    </div>
+  1219→  )
+  1220→}
+  1221→

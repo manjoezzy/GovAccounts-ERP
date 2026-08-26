@@ -1,0 +1,502 @@
+  1000→  1000→  1000→                      <Clock className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+  1001→  1001→  1001→                      <div className="flex-1 min-w-0">
+  1002→  1002→  1002→                        <p className="text-foreground font-medium truncate">{entry.action.replace(/_/g, ' ')}</p>
+  1003→  1003→  1003→                        <p className="text-muted-foreground">{entry.field} {entry.oldValue && `— ${entry.oldValue} → ${entry.newValue}`}</p>
+  1004→  1004→  1004→                        <p className="text-muted-foreground/60">{new Date(entry.timestamp).toLocaleString()}</p>
+  1005→  1005→  1005→                      </div>
+  1006→  1006→  1006→                    </div>
+  1007→  1007→  1007→                  ))}
+  1008→  1008→  1008→                </div>
+  1009→  1009→  1009→              </ScrollArea>
+  1010→  1010→  1010→            ) : (
+  1011→  1011→  1011→              <div className="flex flex-col items-center py-8 text-center text-muted-foreground">
+  1012→  1012→  1012→                <History className="h-10 w-10 mb-2 opacity-30" />
+  1013→  1013→  1013→                <p className="text-sm">No audit entries yet.</p>
+  1014→  1014→  1014→              </div>
+  1015→  1015→  1015→            )}
+  1016→  1016→  1016→          </CardContent>
+  1017→  1017→  1017→        </Card>
+  1018→  1018→  1018→      </div>
+  1019→  1019→  1019→
+  1020→  1020→  1020→      <Card className="bg-muted/30">
+  1021→  1021→  1021→        <CardContent className="py-3">
+  1022→  1022→  1022→          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+  1023→  1023→  1023→            <Button variant="outline" size="sm" onClick={() => setWizardStep(4)} className="gap-1.5">
+  1024→  1024→  1024→              <ArrowLeft className="h-4 w-4" /> Back
+  1025→  1025→  1025→            </Button>
+  1026→  1026→  1026→            <Button onClick={() => setWizardStep(6)} className="bg-primary text-primary-foreground gap-2">
+  1027→  1027→  1027→              Continue to Generate <ArrowRight className="h-4 w-4" />
+  1028→  1028→  1028→            </Button>
+  1029→  1029→  1029→          </div>
+  1030→  1030→  1030→        </CardContent>
+  1031→  1031→  1031→      </Card>
+  1032→  1032→  1032→    </motion.div>
+  1033→  1033→  1033→  )
+  1034→  1034→  1034→}
+  1035→  1035→  1035→
+  1036→  1036→  1036→// ═══════════════════════════════════════════════════════════════════
+  1037→  1037→  1037→// STEP 5: GENERATE & EXPORT
+  1038→  1038→  1038→// ═══════════════════════════════════════════════════════════════════
+  1039→  1039→  1039→
+  1040→  1040→  1040→function Step5Generate() {
+  1041→  1041→  1041→  const {
+  1042→  1042→  1042→    generatedStatements, entityConfig, activeReportId, generateStatements,
+  1043→  1043→  1043→    statementSubTab, setStatementSubTab, isLoading, wizardStep, setWizardStep,
+  1044→  1044→  1044→    approvalWorkflow, fetchApprovalWorkflow, advanceApproval,
+  1045→  1045→  1045→    versions, fetchVersions, createVersion,
+  1046→  1046→  1046→  } = useFinancialStore()
+  1047→  1047→  1047→  const [isExporting, setIsExporting] = useState(false)
+  1048→  1048→  1048→  const [approverName, setApproverName] = useState('')
+  1049→  1049→  1049→  const [versionLabel, setVersionLabel] = useState('')
+  1050→  1050→  1050→  const [showVersionDialog, setShowVersionDialog] = useState(false)
+  1051→  1051→  1051→  const [showPdfPreview, setShowPdfPreview] = useState(false)
+  1052→  1052→  1052→
+  1053→  1053→  1053→  useEffect(() => {
+  1054→  1054→  1054→    if (activeReportId) {
+  1055→  1055→  1055→      fetchApprovalWorkflow()
+  1056→  1056→  1056→      fetchVersions()
+  1057→  1057→  1057→    }
+  1058→  1058→  1058→  }, [activeReportId, fetchApprovalWorkflow, fetchVersions])
+  1059→  1059→  1059→
+  1060→  1060→  1060→  const handleGenerate = async () => {
+  1061→  1061→  1061→    try {
+  1062→  1062→  1062→      await generateStatements()
+  1063→  1063→  1063→      toast.success('Statements generated successfully')
+  1064→  1064→  1064→    } catch {
+  1065→  1065→  1065→      toast.error('Failed to generate statements')
+  1066→  1066→  1066→    }
+  1067→  1067→  1067→  }
+  1068→  1068→  1068→
+  1069→  1069→  1069→  const handleDownloadPdf = async () => {
+  1070→  1070→  1070→    if (!activeReportId) return
+  1071→  1071→  1071→    setIsExporting(true)
+  1072→  1072→  1072→    try {
+  1073→  1073→  1073→      const res = await fetch(`/api/reports/${activeReportId}/pdf`)
+  1074→  1074→  1074→      if (!res.ok) throw new Error('PDF generation failed')
+  1075→  1075→  1075→      const blob = await res.blob()
+  1076→  1076→  1076→      const url = URL.createObjectURL(blob)
+  1077→  1077→  1077→      const a = document.createElement('a')
+  1078→  1078→  1078→      a.href = url
+  1079→  1079→  1079→      a.download = `${entityConfig.name.replace(/\s+/g, '_')}_Financial_Statements.pdf`
+  1080→  1080→  1080→      document.body.appendChild(a)
+  1081→  1081→  1081→      a.click()
+  1082→  1082→  1082→      document.body.removeChild(a)
+  1083→  1083→  1083→      URL.revokeObjectURL(url)
+  1084→  1084→  1084→      toast.success('PDF downloaded successfully')
+  1085→  1085→  1085→    } catch {
+  1086→  1086→  1086→      toast.error('Failed to generate PDF')
+  1087→  1087→  1087→    } finally {
+  1088→  1088→  1088→      setIsExporting(false)
+  1089→  1089→  1089→    }
+  1090→  1090→  1090→  }
+  1091→  1091→  1091→
+  1092→  1092→  1092→  const handleDownloadExcel = async () => {
+  1093→  1093→  1093→    if (!activeReportId) return
+  1094→  1094→  1094→    setIsExporting(true)
+  1095→  1095→  1095→    try {
+  1096→  1096→  1096→      const res = await fetch(`/api/reports/${activeReportId}/export/excel`)
+  1097→  1097→  1097→      if (!res.ok) throw new Error('Excel generation failed')
+  1098→  1098→  1098→      const blob = await res.blob()
+  1099→  1099→  1099→      const url = URL.createObjectURL(blob)
+  1100→  1100→  1100→      const a = document.createElement('a')
+  1101→  1101→  1101→      a.href = url
+  1102→  1102→  1102→      a.download = `${entityConfig.name.replace(/\s+/g, '_')}_Financial_Statements.xlsx`
+  1103→  1103→  1103→      document.body.appendChild(a)
+  1104→  1104→  1104→      a.click()
+  1105→  1105→  1105→      document.body.removeChild(a)
+  1106→  1106→  1106→      URL.revokeObjectURL(url)
+  1107→  1107→  1107→      toast.success('Excel downloaded successfully')
+  1108→  1108→  1108→    } catch {
+  1109→  1109→  1109→      toast.error('Failed to generate Excel')
+  1110→  1110→  1110→    } finally {
+  1111→  1111→  1111→      setIsExporting(false)
+  1112→  1112→  1112→    }
+  1113→  1113→  1113→  }
+  1114→  1114→  1114→
+  1115→  1115→  1115→  const handleAdvanceApproval = async () => {
+  1116→  1116→  1116→    try {
+  1117→  1117→  1117→      await advanceApproval(approverName || 'system')
+  1118→  1118→  1118→      setApproverName('')
+  1119→  1119→  1119→      toast.success('Approval advanced')
+  1120→  1120→  1120→    } catch {
+  1121→  1121→  1121→      toast.error('Failed to advance approval')
+  1122→  1122→  1122→    }
+  1123→  1123→  1123→  }
+  1124→  1124→  1124→
+  1125→  1125→  1125→  const handleCreateVersion = async () => {
+  1126→  1126→  1126→    try {
+  1127→  1127→  1127→      await createVersion(versionLabel)
+  1128→  1128→  1128→      setShowVersionDialog(false)
+  1129→  1129→  1129→      setVersionLabel('')
+  1130→  1130→  1130→      toast.success('Version created successfully')
+  1131→  1131→  1131→    } catch {
+  1132→  1132→  1132→      toast.error('Failed to create version')
+  1133→  1133→  1133→    }
+  1134→  1134→  1134→  }
+  1135→  1135→  1135→
+  1136→  1136→  1136→  const subTabs: { value: StatementSubTab; label: string }[] = [
+  1137→  1137→  1137→    { value: 'sfp', label: 'Fin. Performance' },
+  1138→  1138→  1138→    { value: 'balance-sheet', label: 'Fin. Position' },
+  1139→  1139→  1139→    { value: 'changes-na', label: 'Changes in NA' },
+  1140→  1140→  1140→    { value: 'cash-flow', label: 'Cash Flow' },
+  1141→  1141→  1141→    { value: 'revenue-recon', label: 'Revenue Recon' },
+  1142→  1142→  1142→    { value: 'cash-recon', label: 'Cash Recon' },
+  1143→  1143→  1143→    { value: 'budget-variance', label: 'Budget Variance' },
+  1144→  1144→  1144→  ]
+  1145→  1145→  1145→
+  1146→  1146→  1146→  const approvalSteps = ['draft', 'preparer_review', 'management_review', 'cfo_approval', 'final']
+  1147→  1147→  1147→  const currentStepIdx = approvalSteps.indexOf(approvalWorkflow?.currentStep || 'draft')
+  1148→  1148→  1148→
+  1149→  1149→  1149→  if (!generatedStatements) {
+  1150→  1150→  1150→    return (
+  1151→  1151→  1151→      <motion.div {...pageVariants} className="py-6 space-y-6">
+  1152→  1152→  1152→        <div className="flex items-center justify-between">
+  1153→  1153→  1153→          <div>
+  1154→  1154→  1154→            <h2 className="text-xl font-bold text-foreground">Generate & Export</h2>
+  1155→  1155→  1155→            <p className="text-sm text-muted-foreground mt-1">Generate financial statements and export to PDF or Excel.</p>
+  1156→  1156→  1156→          </div>
+  1157→  1157→  1157→          <Button variant="outline" size="sm" onClick={() => setWizardStep(5)} className="gap-1.5">
+  1158→  1158→  1158→            <ArrowLeft className="h-4 w-4" /> Back
+  1159→  1159→  1159→          </Button>
+  1160→  1160→  1160→        </div>
+  1161→  1161→  1161→
+  1162→  1162→  1162→        <div className="flex flex-col items-center justify-center py-16 text-center">
+  1163→  1163→  1163→          <div className="rounded-full bg-primary/10 p-6 mb-6">
+  1164→  1164→  1164→            <Sparkles className="h-12 w-12 text-primary" />
+  1165→  1165→  1165→          </div>
+  1166→  1166→  1166→          <h2 className="text-xl font-semibold text-foreground mb-2">Generate Financial Statements</h2>
+  1167→  1167→  1167→          <p className="text-muted-foreground mb-6 max-w-md">Generate IPSAS-compliant financial statements including the SFP, Balance Sheet, Cash Flow, and supporting schedules.</p>
+  1168→  1168→  1168→          <Button onClick={handleGenerate} disabled={isLoading} className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2" size="lg">
+  1169→  1169→  1169→            {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Play className="h-5 w-5" />}
+  1170→  1170→  1170→            Generate Financial Statements
+  1171→  1171→  1171→          </Button>
+  1172→  1172→  1172→        </div>
+  1173→  1173→  1173→
+  1174→  1174→  1174→        {/* Version History */}
+  1175→  1175→  1175→        {versions.length > 1 && (
+  1176→  1176→  1176→          <Card>
+  1177→  1177→  1177→            <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">Version History</CardTitle></CardHeader>
+  1178→  1178→  1178→            <CardContent className="pt-0">
+  1179→  1179→  1179→              <div className="space-y-2">
+  1180→  1180→  1180→                {versions.map((v: VersionEntry) => (
+  1181→  1181→  1181→                  <div key={v.id} className={`flex items-center justify-between p-2 rounded-lg text-sm ${v.id === activeReportId ? 'bg-primary/10 border border-primary/20' : 'bg-muted/50'}`}>
+  1182→  1182→  1182→                    <div className="flex items-center gap-3">
+  1183→  1183→  1183→                      <GitBranch className="h-4 w-4 text-muted-foreground" />
+  1184→  1184→  1184→                      <div>
+  1185→  1185→  1185→                        <p className="font-medium text-foreground">{v.versionLabel || `Version ${v.version}`}</p>
+  1186→  1186→  1186→                        <p className="text-xs text-muted-foreground">{new Date(v.createdAt).toLocaleString()} · {v._count.entries} entries</p>
+  1187→  1187→  1187→                      </div>
+  1188→  1188→  1188→                    </div>
+  1189→  1189→  1189→                    <Badge variant="outline" className={statusColor(v.status)}>{v.status}</Badge>
+  1190→  1190→  1190→                  </div>
+  1191→  1191→  1191→                ))}
+  1192→  1192→  1192→              </div>
+  1193→  1193→  1193→            </CardContent>
+  1194→  1194→  1194→          </Card>
+  1195→  1195→  1195→        )}
+  1196→  1196→  1196→      </motion.div>
+  1197→  1197→  1197→    )
+  1198→  1198→  1198→  }
+  1199→  1199→  1199→
+  1200→  1200→  1200→  const hasErrors = generatedStatements.validationErrors && generatedStatements.validationErrors.length > 0
+  1201→  1201→  1201→
+  1202→  1202→  1202→  return (
+  1203→  1203→  1203→    <motion.div {...pageVariants} className="py-4 space-y-4">
+  1204→  1204→  1204→      <div className="flex items-center justify-between">
+  1205→  1205→  1205→        <div>
+  1206→  1206→  1206→          <h2 className="text-xl font-bold text-foreground">Generate & Export</h2>
+  1207→  1207→  1207→          <p className="text-sm text-muted-foreground mt-1">Review generated statements and export.</p>
+  1208→  1208→  1208→        </div>
+  1209→  1209→  1209→        <div className="flex gap-2">
+  1210→  1210→  1210→          <Dialog open={showVersionDialog} onOpenChange={setShowVersionDialog}>
+  1211→  1211→  1211→            <DialogTrigger asChild>
+  1212→  1212→  1212→              <Button variant="outline" size="sm" className="gap-1.5">
+  1213→  1213→  1213→                <GitBranch className="h-4 w-4" /> Save Version
+  1214→  1214→  1214→              </Button>
+  1215→  1215→  1215→            </DialogTrigger>
+  1216→  1216→  1216→            <DialogContent>
+  1217→  1217→  1217→              <DialogHeader>
+  1218→  1218→  1218→                <DialogTitle>Create New Version</DialogTitle>
+  1219→  1219→  1219→                <DialogDescription>Save a snapshot of the current report as a new version.</DialogDescription>
+  1220→  1220→  1220→              </DialogHeader>
+  1221→  1221→  1221→              <div className="space-y-3">
+  1222→  1222→  1222→                <div className="space-y-1.5">
+  1223→  1223→  1223→                  <Label className="text-xs text-muted-foreground">Version Label</Label>
+  1224→  1224→  1224→                  <Input value={versionLabel} onChange={e => setVersionLabel(e.target.value)} placeholder="e.g., v2 - Draft revisions" />
+  1225→  1225→  1225→                </div>
+  1226→  1226→  1226→              </div>
+  1227→  1227→  1227→              <DialogFooter>
+  1228→  1228→  1228→                <Button variant="outline" onClick={() => setShowVersionDialog(false)}>Cancel</Button>
+  1229→  1229→  1229→                <Button onClick={handleCreateVersion} disabled={isLoading} className="bg-primary text-primary-foreground">Create Version</Button>
+  1230→  1230→  1230→              </DialogFooter>
+  1231→  1231→  1231→            </DialogContent>
+  1232→  1232→  1232→          </Dialog>
+  1233→  1233→  1233→          <Button variant="outline" size="sm" onClick={handleGenerate} disabled={isLoading} className="gap-1.5">
+  1234→  1234→  1234→            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Re-generate
+  1235→  1235→  1235→          </Button>
+  1236→  1236→  1236→        </div>
+  1237→  1237→  1237→      </div>
+  1238→  1238→  1238→
+  1239→  1239→  1239→      {/* Validation alerts */}
+  1240→  1240→  1240→      {hasErrors ? (
+  1241→  1241→  1241→        <Alert variant="destructive">
+  1242→  1242→  1242→          <AlertTriangle className="h-4 w-4" />
+  1243→  1243→  1243→          <AlertTitle>{generatedStatements.validationErrors.length} Validation Issue(s)</AlertTitle>
+  1244→  1244→  1244→          <AlertDescription><ul className="mt-2 space-y-1 list-disc list-inside text-sm">{generatedStatements.validationErrors.map((err, i) => <li key={i}>{err}</li>)}</ul></AlertDescription>
+  1245→  1245→  1245→        </Alert>
+  1246→  1246→  1246→      ) : (
+  1247→  1247→  1247→        <Alert className="border-primary/30 bg-primary/5">
+  1248→  1248→  1248→          <CheckCircle2 className="h-4 w-4 text-primary" />
+  1249→  1249→  1249→          <AlertTitle className="text-primary">All checks passed</AlertTitle>
+  1250→  1250→  1250→          <AlertDescription className="text-muted-foreground">The generated statements have passed all validation checks.</AlertDescription>
+  1251→  1251→  1251→        </Alert>
+  1252→  1252→  1252→      )}
+  1253→  1253→  1253→
+  1254→  1254→  1254→      {/* Summary Cards */}
+  1255→  1255→  1255→      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+  1256→  1256→  1256→        {[
+  1257→  1257→  1257→          { label: 'Revenue', value: generatedStatements.sfp.totalRevenueCurrent, prior: generatedStatements.sfp.totalRevenuePrior },
+  1258→  1258→  1258→          { label: 'Expenses', value: generatedStatements.sfp.totalExpensesCurrent, prior: generatedStatements.sfp.totalExpensesPrior },
+  1259→  1259→  1259→          { label: 'Surplus', value: generatedStatements.sfp.surplusCurrent, prior: generatedStatements.sfp.surplusPrior, color: generatedStatements.sfp.surplusCurrent >= 0 ? 'text-primary' : 'text-destructive' },
+  1260→  1260→  1260→          { label: 'Assets', value: generatedStatements.balanceSheet.totalAssetsCurrent, prior: generatedStatements.balanceSheet.totalAssetsPrior },
+  1261→  1261→  1261→          { label: 'Liabilities', value: generatedStatements.balanceSheet.totalLiabilitiesCurrent, prior: generatedStatements.balanceSheet.totalLiabilitiesPrior },
+  1262→  1262→  1262→          { label: 'Net Assets', value: generatedStatements.balanceSheet.netAssetsCurrent, prior: generatedStatements.balanceSheet.netAssetsPrior },
+  1263→  1263→  1263→        ].map((item) => (
+  1264→  1264→  1264→          <Card key={item.label} className="p-3">
+  1265→  1265→  1265→            <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">{item.label}</p>
+  1266→  1266→  1266→            <p className={`text-lg font-bold font-mono ${item.color || 'text-foreground'}`}>{entityConfig.currency} {formatNum(item.value)}</p>
+  1267→  1267→  1267→            <p className="text-[10px] text-muted-foreground">Prior: {formatNum(item.prior)}</p>
+  1268→  1268→  1268→          </Card>
+  1269→  1269→  1269→        ))}
+  1270→  1270→  1270→      </div>
+  1271→  1271→  1271→
+  1272→  1272→  1272→      {/* Sub-tabs */}
+  1273→  1273→  1273→      <div className="overflow-x-auto">
+  1274→  1274→  1274→        <div className="flex gap-1 min-w-max">
+  1275→  1275→  1275→          {subTabs.map((tab) => (
+  1276→  1276→  1276→            <button key={tab.value} onClick={() => setStatementSubTab(tab.value)}
+  1277→  1277→  1277→              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${statementSubTab === tab.value ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>
+  1278→  1278→  1278→              {tab.label}
+  1279→  1279→  1279→            </button>
+  1280→  1280→  1280→          ))}
+  1281→  1281→  1281→        </div>
+  1282→  1282→  1282→      </div>
+  1283→  1283→  1283→
+  1284→  1284→  1284→      {/* Statement content */}
+  1285→  1285→  1285→      {statementSubTab === 'sfp' && <SFPSection data={generatedStatements.sfp} currency={entityConfig.currency} />}
+  1286→  1286→  1286→      {statementSubTab === 'balance-sheet' && <BalanceSheetSection data={generatedStatements.balanceSheet} currency={entityConfig.currency} />}
+  1287→  1287→  1287→      {statementSubTab === 'changes-na' && <ChangesNASection data={generatedStatements.changesInNA} currency={entityConfig.currency} />}
+  1288→  1288→  1288→      {statementSubTab === 'cash-flow' && <CashFlowSection data={generatedStatements.cashFlow} currency={entityConfig.currency} />}
+  1289→  1289→  1289→      {statementSubTab === 'revenue-recon' && <RevenueReconSection data={generatedStatements.revenueReconciliation} currency={entityConfig.currency} />}
+  1290→  1290→  1290→      {statementSubTab === 'cash-recon' && <CashReconSection data={generatedStatements.cashReconciliation} currency={entityConfig.currency} />}
+  1291→  1291→  1291→      {statementSubTab === 'budget-variance' && <BudgetVarianceSection data={generatedStatements.budgetVariance} currency={entityConfig.currency} />}
+  1292→  1292→  1292→
+  1293→  1293→  1293→      {/* Export & Approval Row */}
+  1294→  1294→  1294→      <div className="grid gap-4 lg:grid-cols-2">
+  1295→  1295→  1295→        {/* Export Card */}
+  1296→  1296→  1296→        <Card>
+  1297→  1297→  1297→          <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">Export</CardTitle></CardHeader>
+  1298→  1298→  1298→          <CardContent className="pt-0 space-y-3">
+  1299→  1299→  1299→            <div className="flex gap-2">
+  1300→  1300→  1300→              <Button onClick={handleDownloadPdf} disabled={isExporting} className="flex-1 bg-primary text-primary-foreground gap-2">
+  1301→  1301→  1301→                {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} PDF
+  1302→  1302→  1302→              </Button>
+  1303→  1303→  1303→              <Button onClick={handleDownloadExcel} disabled={isExporting} variant="outline" className="flex-1 gap-2">
+  1304→  1304→  1304→                {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />} Excel
+  1305→  1305→  1305→              </Button>
+  1306→  1306→  1306→            </div>
+  1307→  1307→  1307→            <Button variant="ghost" size="sm" className="w-full gap-1.5" onClick={() => setShowPdfPreview(!showPdfPreview)}>
+  1308→  1308→  1308→              <Eye className="h-4 w-4" /> {showPdfPreview ? 'Hide' : 'Show'} PDF Preview
+  1309→  1309→  1309→            </Button>
+  1310→  1310→  1310→            {showPdfPreview && activeReportId && (
+  1311→  1311→  1311→              <div className="border border-border rounded-lg overflow-hidden">
+  1312→  1312→  1312→                <iframe src={`/api/reports/${activeReportId}/pdf`} className="w-full h-[600px]" title="PDF Preview" />
+  1313→  1313→  1313→              </div>
+  1314→  1314→  1314→            )}
+  1315→  1315→  1315→          </CardContent>
+  1316→  1316→  1316→        </Card>
+  1317→  1317→  1317→
+  1318→  1318→  1318→        {/* Approval Workflow Card */}
+  1319→  1319→  1319→        <Card>
+  1320→  1320→  1320→          <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">Approval Workflow</CardTitle></CardHeader>
+  1321→  1321→  1321→          <CardContent className="pt-0 space-y-3">
+  1322→  1322→  1322→            <div className="flex items-center gap-1">
+  1323→  1323→  1323→              {approvalSteps.map((step, i) => (
+  1324→  1324→  1324→                <React.Fragment key={step}>
+  1325→  1325→  1325→                  <div className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium ${i <= currentStepIdx ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+  1326→  1326→  1326→                    {i < currentStepIdx ? <CheckCircle2 className="h-3 w-3" /> : <CircleDot className="h-3 w-3" />}
+  1327→  1327→  1327→                    {step.replace(/_/g, ' ')}
+  1328→  1328→  1328→                  </div>
+  1329→  1329→  1329→                  {i < approvalSteps.length - 1 && <ChevronRight className="h-3 w-3 text-muted-foreground" />}
+  1330→  1330→  1330→                </React.Fragment>
+  1331→  1331→  1331→              ))}
+  1332→  1332→  1332→            </div>
+  1333→  1333→  1333→            {approvalWorkflow && (
+  1334→  1334→  1334→              <div className="text-xs text-muted-foreground space-y-1">
+  1335→  1335→  1335→                {approvalWorkflow.preparerName && <p>Preparer: {approvalWorkflow.preparerName} {approvalWorkflow.preparerApprovedAt && `· ${new Date(approvalWorkflow.preparerApprovedAt).toLocaleDateString()}`}</p>}
+  1336→  1336→  1336→                {approvalWorkflow.reviewerName && <p>Reviewer: {approvalWorkflow.reviewerName} {approvalWorkflow.reviewerApprovedAt && `· ${new Date(approvalWorkflow.reviewerApprovedAt).toLocaleDateString()}`}</p>}
+  1337→  1337→  1337→                {approvalWorkflow.cfoName && <p>CFO: {approvalWorkflow.cfoName} {approvalWorkflow.cfoApprovedAt && `· ${new Date(approvalWorkflow.cfoApprovedAt).toLocaleDateString()}`}</p>}
+  1338→  1338→  1338→              </div>
+  1339→  1339→  1339→            )}
+  1340→  1340→  1340→            <div className="flex gap-2">
+  1341→  1341→  1341→              <Input placeholder="Approver name" value={approverName} onChange={e => setApproverName(e.target.value)} className="h-8 text-sm flex-1" />
+  1342→  1342→  1342→              <Button onClick={handleAdvanceApproval} disabled={currentStepIdx >= approvalSteps.length - 1 || isLoading} size="sm" className="bg-primary text-primary-foreground gap-1">
+  1343→  1343→  1343→                <ArrowRight className="h-3.5 w-3.5" /> Advance
+  1344→  1344→  1344→              </Button>
+  1345→  1345→  1345→            </div>
+  1346→  1346→  1346→          </CardContent>
+  1347→  1347→  1347→        </Card>
+  1348→  1348→  1348→      </div>
+  1349→  1349→  1349→
+  1350→  1350→  1350→      {/* Version History */}
+  1351→  1351→  1351→      {versions.length > 1 && (
+  1352→  1352→  1352→        <Card>
+  1353→  1353→  1353→          <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">Version History</CardTitle></CardHeader>
+  1354→  1354→  1354→          <CardContent className="pt-0">
+  1355→  1355→  1355→            <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+  1356→  1356→  1356→              {versions.map((v: VersionEntry) => (
+  1357→  1357→  1357→                <div key={v.id} className={`flex items-center justify-between p-2 rounded-lg text-sm ${v.id === activeReportId ? 'bg-primary/10 border border-primary/20' : 'hover:bg-muted/50'}`}>
+  1358→  1358→  1358→                  <div className="flex items-center gap-3">
+  1359→  1359→  1359→                    <GitBranch className="h-4 w-4 text-muted-foreground" />
+  1360→  1360→  1360→                    <div>
+  1361→  1361→  1361→                      <p className="font-medium text-foreground">{v.versionLabel || `Version ${v.version}`}</p>
+  1362→  1362→  1362→                      <p className="text-xs text-muted-foreground">{new Date(v.createdAt).toLocaleString()} · {v._count.entries} entries</p>
+  1363→  1363→  1363→                    </div>
+  1364→  1364→  1364→                  </div>
+  1365→  1365→  1365→                  <div className="flex items-center gap-2">
+  1366→  1366→  1366→                    <Badge variant="outline" className={statusColor(v.status)}>{v.status}</Badge>
+  1367→  1367→  1367→                    {v.id !== activeReportId && (
+  1368→  1368→  1368→                      <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={async () => {
+  1369→  1369→  1369→                        const { loadReport } = useFinancialStore.getState()
+  1370→  1370→  1370→                        try { await loadReport(v.id); toast.success('Version loaded') } catch { toast.error('Failed to load version') }
+  1371→  1371→  1371→                      }}>Load</Button>
+  1372→  1372→  1372→                    )}
+  1373→  1373→  1373→                  </div>
+  1374→  1374→  1374→                </div>
+  1375→  1375→  1375→              ))}
+  1376→  1376→  1376→            </div>
+  1377→  1377→  1377→          </CardContent>
+  1378→  1378→  1378→        </Card>
+  1379→  1379→  1379→      )}
+  1380→  1380→  1380→
+  1381→  1381→  1381→      <Card className="bg-muted/30">
+  1382→  1382→  1382→        <CardContent className="py-3">
+  1383→  1383→  1383→          <Button variant="outline" size="sm" onClick={() => setWizardStep(5)} className="gap-1.5">
+  1384→  1384→  1384→            <ArrowLeft className="h-4 w-4" /> Back to Review
+  1385→  1385→  1385→          </Button>
+  1386→  1386→  1386→        </CardContent>
+  1387→  1387→  1387→      </Card>
+  1388→  1388→  1388→    </motion.div>
+  1389→  1389→  1389→  )
+  1390→  1390→  1390→}
+  1391→  1391→  1391→
+  1392→  1392→  1392→// ═══════════════════════════════════════════════════════════════════
+  1393→  1393→  1393→// ANALYTICS PANEL (Sheet)
+  1394→  1394→  1394→// ═══════════════════════════════════════════════════════════════════
+  1395→  1395→  1395→
+  1396→  1396→  1396→function AnalyticsPanel() {
+  1397→  1397→  1397→  const { analyticsData, fetchAnalytics, entries, activeReportId, generatedStatements, entityConfig } = useFinancialStore()
+  1398→  1398→  1398→  const [loading, setLoading] = useState(false)
+  1399→  1399→  1399→
+  1400→  1400→  1400→  const load = async () => {
+  1401→  1401→  1401→    setLoading(true)
+  1402→  1402→  1402→    try { await fetchAnalytics() } catch { /* silent */ } finally { setLoading(false) }
+  1403→  1403→  1403→  }
+  1404→  1404→  1404→
+  1405→  1405→  1405→  useEffect(() => {
+  1406→  1406→  1406→    if (activeReportId && !analyticsData) load()
+  1407→  1407→  1407→  }, [activeReportId])
+  1408→  1408→  1408→
+  1409→  1409→  1409→  const gs = generatedStatements
+  1410→  1410→  1410→  const totalRevenue = gs?.sfp.totalRevenueCurrent ?? 0
+  1411→  1411→  1411→  const totalExpenses = gs?.sfp.totalExpensesCurrent ?? 0
+  1412→  1412→  1412→  const surplus = gs?.sfp.surplusCurrent ?? 0
+  1413→  1413→  1413→  const cashBalance = entries.reduce((s, e) => e.category === 'cash' ? s + e.debitCurrent - e.creditCurrent : s, 0)
+  1414→  1414→  1414→
+  1415→  1415→  1415→  // Build bar chart data
+  1416→  1416→  1416→  const barData = analyticsData?.trends ? [
+  1417→  1417→  1417→    { name: 'Revenue', current: totalRevenue, prior: gs?.sfp.totalRevenuePrior ?? 0, change: analyticsData.trends.revenueChange },
+  1418→  1418→  1418→    { name: 'Expenses', current: totalExpenses, prior: gs?.sfp.totalExpensesPrior ?? 0, change: analyticsData.trends.expenseChange },
+  1419→  1419→  1419→  ] : []
+  1420→  1420→  1420→
+  1421→  1421→  1421→  const ratios = analyticsData?.ratios
+  1422→  1422→  1422→
+  1423→  1423→  1423→  return (
+  1424→  1424→  1424→    <Sheet open={true} onOpenChange={(open) => useFinancialStore.getState().setShowAnalytics(open)}>
+  1425→  1425→  1425→      <SheetContent side="right" className="w-[400px] sm:w-[480px] overflow-y-auto custom-scrollbar">
+  1426→  1426→  1426→        <SheetHeader>
+  1427→  1427→  1427→          <SheetTitle className="flex items-center gap-2">
+  1428→  1428→  1428→            <BarChart3 className="h-5 w-5 text-primary" /> Analytics Dashboard
+  1429→  1429→  1429→          </SheetTitle>
+  1430→  1430→  1430→        </SheetHeader>
+  1431→  1431→  1431→        <div className="mt-4 space-y-4">
+  1432→  1432→  1432→          {loading ? (
+  1433→  1433→  1433→            <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+  1434→  1434→  1434→          ) : !analyticsData ? (
+  1435→  1435→  1435→            <div className="text-center py-12 text-muted-foreground">
+  1436→  1436→  1436→              <BarChart3 className="h-10 w-10 mx-auto mb-2 opacity-30" />
+  1437→  1437→  1437→              <p className="text-sm">Generate statements first to see analytics.</p>
+  1438→  1438→  1438→            </div>
+  1439→  1439→  1439→          ) : (
+  1440→  1440→  1440→            <>
+  1441→  1441→  1441→              {/* KPI Cards */}
+  1442→  1442→  1442→              <div className="grid grid-cols-2 gap-3">
+  1443→  1443→  1443→                {[
+  1444→  1444→  1444→                  { label: 'Total Revenue', value: `${entityConfig.currency} ${formatNum(totalRevenue)}`, icon: <TrendingUp className="h-4 w-4 text-primary" /> },
+  1445→  1445→  1445→                  { label: 'Total Expenses', value: `${entityConfig.currency} ${formatNum(totalExpenses)}`, icon: <TrendingDown className="h-4 w-4 text-destructive" /> },
+  1446→  1446→  1446→                  { label: 'Net Surplus', value: `${entityConfig.currency} ${formatNum(surplus)}`, icon: surplus >= 0 ? <TrendingUp className="h-4 w-4 text-primary" /> : <TrendingDown className="h-4 w-4 text-destructive" /> },
+  1447→  1447→  1447→                  { label: 'Cash Balance', value: `${entityConfig.currency} ${formatNum(cashBalance)}`, icon: <Banknote className="h-4 w-4 text-primary" /> },
+  1448→  1448→  1448→                ].map(kpi => (
+  1449→  1449→  1449→                  <Card key={kpi.label} className="p-3">
+  1450→  1450→  1450→                    <div className="flex items-center gap-2 mb-1">
+  1451→  1451→  1451→                      {kpi.icon}
+  1452→  1452→  1452→                      <span className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">{kpi.label}</span>
+  1453→  1453→  1453→                    </div>
+  1454→  1454→  1454→                    <p className="text-sm font-bold font-mono text-foreground">{kpi.value}</p>
+  1455→  1455→  1455→                  </Card>
+  1456→  1456→  1456→                ))}
+  1457→  1457→  1457→              </div>
+  1458→  1458→  1458→
+  1459→  1459→  1459→              {/* Key Ratios */}
+  1460→  1460→  1460→              {ratios && (
+  1461→  1461→  1461→                <Card className="p-4">
+  1462→  1462→  1462→                  <p className="text-xs font-semibold text-foreground mb-3">Key Financial Ratios</p>
+  1463→  1463→  1463→                  <div className="grid grid-cols-2 gap-2">
+  1464→  1464→  1464→                    {[
+  1465→  1465→  1465→                      { label: 'Surplus Ratio', value: `${ratios.surplusRatio?.toFixed(1)}%` },
+  1466→  1466→  1466→                      { label: 'Expense Ratio', value: `${ratios.expenseRatio?.toFixed(1)}%` },
+  1467→  1467→  1467→                      { label: 'Current Ratio', value: `${ratios.currentRatio?.toFixed(2)}x` },
+  1468→  1468→  1468→                      { label: 'Cash Ratio', value: `${ratios.cashRatio?.toFixed(2)}x` },
+  1469→  1469→  1469→                      { label: 'Receivables Days', value: `${ratios.receivablesDays?.toFixed(0)}d` },
+  1470→  1470→  1470→                      { label: 'Payables Days', value: `${ratios.payablesDays?.toFixed(0)}d` },
+  1471→  1471→  1471→                      { label: 'Dependency Ratio', value: `${ratios.dependencyRatio?.toFixed(1)}%` },
+  1472→  1472→  1472→                      { label: 'Personnel Ratio', value: `${ratios.personnelRatio?.toFixed(1)}%` },
+  1473→  1473→  1473→                    ].map(r => (
+  1474→  1474→  1474→                      <div key={r.label} className="flex justify-between text-xs p-1.5 rounded bg-muted/50">
+  1475→  1475→  1475→                        <span className="text-muted-foreground">{r.label}</span>
+  1476→  1476→  1476→                        <span className="font-mono font-medium text-foreground">{r.value}</span>
+  1477→  1477→  1477→                      </div>
+  1478→  1478→  1478→                    ))}
+  1479→  1479→  1479→                  </div>
+  1480→  1480→  1480→                </Card>
+  1481→  1481→  1481→              )}
+  1482→  1482→  1482→
+  1483→  1483→  1483→              {/* Bar Chart: Revenue vs Expense */}
+  1484→  1484→  1484→              {barData.length > 0 && (
+  1485→  1485→  1485→                <Card className="p-4">
+  1486→  1486→  1486→                  <p className="text-xs font-semibold text-foreground mb-3">Revenue vs Expenses (Current / Prior)</p>
+  1487→  1487→  1487→                  <ResponsiveContainer width="100%" height={180}>
+  1488→  1488→  1488→                    <BarChart data={barData}>
+  1489→  1489→  1489→                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+  1490→  1490→  1490→                      <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" />
+  1491→  1491→  1491→                      <YAxis tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" />
+  1492→  1492→  1492→                      <Bar dataKey="current" fill="var(--primary)" radius={[4, 4, 0, 0]} name="Current" />
+  1493→  1493→  1493→                      <Bar dataKey="prior" fill="var(--muted-foreground)" radius={[4, 4, 0, 0]} name="Prior" />
+  1494→  1494→  1494→                    </BarChart>
+  1495→  1495→  1495→                  </ResponsiveContainer>
+  1496→  1496→  1496→                </Card>
+  1497→  1497→  1497→              )}
+  1498→  1498→  1498→
+  1499→  1499→  1499→              {/* Trend Indicators */}
+
+[showing lines 1000-1499 of 1848; use offset=1500 with limit to continue reading]

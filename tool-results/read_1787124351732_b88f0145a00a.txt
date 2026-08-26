@@ -1,0 +1,502 @@
+   551→
+   552→  useEffect(() => {
+   553→    if (supplementaryData) {
+   554→      setLocalData({ ...supplementaryData })
+   555→    }
+   556→  }, [supplementaryData])
+   557→
+   558→  const update = (key: string, value: string | number) => {
+   559→    setLocalData(prev => ({ ...prev, [key]: value }))
+   560→  }
+   561→
+   562→  const handleSave = async () => {
+   563→    setSaving(true)
+   564→    try {
+   565→      await saveSupplementary(localData)
+   566→      toast.success('Supplementary data saved')
+   567→    } catch {
+   568→      toast.error('Failed to save supplementary data')
+   569→    } finally {
+   570→      setSaving(false)
+   571→    }
+   572→  }
+   573→
+   574→  const d = localData
+   575→
+   576→  const FieldGroup = ({ title, children }: { title: string; children: React.ReactNode }) => (
+   577→    <Card>
+   578→      <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">{title}</CardTitle></CardHeader>
+   579→      <CardContent className="pt-0">{children}</CardContent>
+   580→    </Card>
+   581→  )
+   582→
+   583→  const YearInput = ({ label, currentKey, priorKey, tooltip }: { label: string; currentKey: string; priorKey: string; tooltip: string }) => (
+   584→    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   585→      <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   586→        <div className="space-y-1.5">
+   587→          <Label className="text-xs text-muted-foreground flex items-center gap-1">{label} (Current) <Info className="h-3 w-3" /></Label>
+   588→          <Input type="number" className="h-8 text-sm font-mono" value={d[currentKey] ?? 0} onChange={e => update(currentKey, parseFloat(e.target.value) || 0)} />
+   589→        </div>
+   590→      </TooltipTrigger><TooltipContent><p>{tooltip}</p></TooltipContent></Tooltip></TooltipProvider>
+   591→      <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   592→        <div className="space-y-1.5">
+   593→          <Label className="text-xs text-muted-foreground">{label} (Prior)</Label>
+   594→          <Input type="number" className="h-8 text-sm font-mono" value={d[priorKey] ?? 0} onChange={e => update(priorKey, parseFloat(e.target.value) || 0)} />
+   595→        </div>
+   596→      </TooltipTrigger><TooltipContent><p>{tooltip}</p></TooltipContent></Tooltip></TooltipProvider>
+   597→    </div>
+   598→  )
+   599→
+   600→  return (
+   601→    <motion.div {...pageVariants} className="py-4 space-y-4">
+   602→      <div className="flex items-center justify-between">
+   603→        <div>
+   604→          <h2 className="text-xl font-bold text-foreground">Supplementary Data</h2>
+   605→          <p className="text-sm text-muted-foreground mt-1">Additional data for cash flow reconciliation, PPE schedules, and disclosures.</p>
+   606→        </div>
+   607→        <Button onClick={handleSave} disabled={saving || isLoading} className="bg-primary text-primary-foreground gap-2">
+   608→          {saving || isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+   609→          Save
+   610→        </Button>
+   611→      </div>
+   612→
+   613→      <div className="grid gap-4">
+   614→        <FieldGroup title="Cash Flow Adjustments">
+   615→          <div className="grid gap-3">
+   616→            <YearInput label="Advances Recovered" currentKey="advancesRecovered" priorKey="advancesRecoveredPrior" tooltip="Amount recovered from advances made in prior periods, added back to revenue for cash flow" />
+   617→            <YearInput label="Deposits Received" currentKey="depositsReceived" priorKey="depositsReceivedPrior" tooltip="Refundable deposits received during the period - not revenue" />
+   618→            <YearInput label="Transfers to Treasury" currentKey="transfersToTreasury" priorKey="transfersToTreasuryPrior" tooltip="Amounts transferred to the Consolidated Fund - deducted from cash flow revenue" />
+   619→            <YearInput label="Revenue in Kind / Tax Waivers" currentKey="revenueInKindTaxWaivers" priorKey="revenueInKindTaxWaiversPrior" tooltip="Non-cash revenue such as tax waivers and in-kind grants - deducted from cash flow revenue" />
+   620→          </div>
+   621→        </FieldGroup>
+   622→
+   623→        <FieldGroup title="PPE Movement Schedule">
+   624→          <div className="grid gap-3">
+   625→            <YearInput label="Opening Balance (PPE)" currentKey="ppeOpeningCurrent" priorKey="ppeOpeningPrior" tooltip="Opening balance of property, plant and equipment" />
+   626→            <YearInput label="Additions (PPE)" currentKey="ppeAdditionsCurrent" priorKey="ppeAdditionsPrior" tooltip="New PPE acquired during the period" />
+   627→            <YearInput label="Disposals (PPE)" currentKey="ppeDisposalsCurrent" priorKey="ppeDisposalsPrior" tooltip="PPE disposed of during the period at cost" />
+   628→            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   629→              <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   630→                <div className="space-y-1.5">
+   631→                  <Label className="text-xs text-muted-foreground flex items-center gap-1">Depreciation Rate (%) <Info className="h-3 w-3" /></Label>
+   632→                  <Input type="number" className="h-8 text-sm font-mono" value={d.depreciationRate ?? 0} onChange={e => update('depreciationRate', parseFloat(e.target.value) || 0)} />
+   633→                </div>
+   634→              </TooltipTrigger><TooltipContent><p>Annual depreciation rate as a percentage</p></TooltipContent></Tooltip></TooltipProvider>
+   635→              <div className="space-y-1.5">
+   636→                <Label className="text-xs text-muted-foreground">Depreciation Method</Label>
+   637→                <Select value={d.depreciationMethod as string || 'straight-line'} onValueChange={v => update('depreciationMethod', v)}>
+   638→                  <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+   639→                  <SelectContent>
+   640→                    <SelectItem value="straight-line">Straight-Line</SelectItem>
+   641→                    <SelectItem value="reducing-balance">Reducing Balance</SelectItem>
+   642→                  </SelectContent>
+   643→                </Select>
+   644→              </div>
+   645→            </div>
+   646→          </div>
+   647→        </FieldGroup>
+   648→
+   649→        <FieldGroup title="Employee Costs (Note 9)">
+   650→          <div className="grid gap-3">
+   651→            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   652→              <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   653→                <div className="space-y-1.5">
+   654→                  <Label className="text-xs text-muted-foreground flex items-center gap-1">Employee Headcount <Info className="h-3 w-3" /></Label>
+   655→                  <Input type="number" className="h-8 text-sm font-mono" value={d.employeeCount ?? 0} onChange={e => update('employeeCount', parseInt(e.target.value) || 0)} />
+   656→                </div>
+   657→              </TooltipTrigger><TooltipContent><p>Total number of employees at period end</p></TooltipContent></Tooltip></TooltipProvider>
+   658→              <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   659→                <div className="space-y-1.5">
+   660→                  <Label className="text-xs text-muted-foreground">Salaries & Wages</Label>
+   661→                  <Input type="number" className="h-8 text-sm font-mono" value={d.salariesWages ?? 0} onChange={e => update('salariesWages', parseFloat(e.target.value) || 0)} />
+   662→                </div>
+   663→              </TooltipTrigger><TooltipContent><p>Total gross salaries and wages for the period</p></TooltipContent></Tooltip></TooltipProvider>
+   664→            </div>
+   665→            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+   666→              <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   667→                <div className="space-y-1.5">
+   668→                  <Label className="text-xs text-muted-foreground">Pension Contributions</Label>
+   669→                  <Input type="number" className="h-8 text-sm font-mono" value={d.pensionContributions ?? 0} onChange={e => update('pensionContributions', parseFloat(e.target.value) || 0)} />
+   670→                </div>
+   671→              </TooltipTrigger><TooltipContent><p>Employer pension contributions for the period</p></TooltipContent></Tooltip></TooltipProvider>
+   672→              <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   673→                <div className="space-y-1.5">
+   674→                  <Label className="text-xs text-muted-foreground">Payroll Taxes</Label>
+   675→                  <Input type="number" className="h-8 text-sm font-mono" value={d.payrollTaxes ?? 0} onChange={e => update('payrollTaxes', parseFloat(e.target.value) || 0)} />
+   676→                </div>
+   677→              </TooltipTrigger><TooltipContent><p>PAYE and other payroll taxes paid</p></TooltipContent></Tooltip></TooltipProvider>
+   678→              <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   679→                <div className="space-y-1.5">
+   680→                  <Label className="text-xs text-muted-foreground">Other Benefits</Label>
+   681→                  <Input type="number" className="h-8 text-sm font-mono" value={d.otherEmployeeBenefits ?? 0} onChange={e => update('otherEmployeeBenefits', parseFloat(e.target.value) || 0)} />
+   682→                </div>
+   683→              </TooltipTrigger><TooltipContent><p>Medical, housing, transport, and other employee benefits</p></TooltipContent></Tooltip></TooltipProvider>
+   684→            </div>
+   685→          </div>
+   686→        </FieldGroup>
+   687→
+   688→        <FieldGroup title="Prior Year Adjustments & Reserves">
+   689→          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+   690→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   691→              <div className="space-y-1.5">
+   692→                <Label className="text-xs text-muted-foreground flex items-center gap-1">Adjustments <Info className="h-3 w-3" /></Label>
+   693→                <Input type="number" className="h-8 text-sm font-mono" value={d.priorYearAdjustments ?? 0} onChange={e => update('priorYearAdjustments', parseFloat(e.target.value) || 0)} />
+   694→              </div>
+   695→            </TooltipTrigger><TooltipContent><p>Prior year error corrections and adjustments</p></TooltipContent></Tooltip></TooltipProvider>
+   696→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   697→              <div className="space-y-1.5">
+   698→                <Label className="text-xs text-muted-foreground">Revaluation Reserves</Label>
+   699→                <Input type="number" className="h-8 text-sm font-mono" value={d.revaluationReserves ?? 0} onChange={e => update('revaluationReserves', parseFloat(e.target.value) || 0)} />
+   700→              </div>
+   701→            </TooltipTrigger><TooltipContent><p>Asset revaluation surplus/deficit for the period</p></TooltipContent></Tooltip></TooltipProvider>
+   702→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   703→              <div className="space-y-1.5">
+   704→                <Label className="text-xs text-muted-foreground">Transfers to UCF</Label>
+   705→                <Input type="number" className="h-8 text-sm font-mono" value={d.transfersToUCF ?? 0} onChange={e => update('transfersToUCF', parseFloat(e.target.value) || 0)} />
+   706→              </div>
+   707→            </TooltipTrigger><TooltipContent><p>Transfers to the Uniform Clearing Fund</p></TooltipContent></Tooltip></TooltipProvider>
+   708→          </div>
+   709→        </FieldGroup>
+   710→
+   711→        <FieldGroup title="Signatory Details">
+   712→          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   713→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   714→              <div className="space-y-1.5">
+   715→                <Label className="text-xs text-muted-foreground flex items-center gap-1">Accounting Officer <Info className="h-3 w-3" /></Label>
+   716→                <Input className="h-8 text-sm" value={d.accountingOfficer ?? ''} onChange={e => update('accountingOfficer', e.target.value)} />
+   717→              </div>
+   718→            </TooltipTrigger><TooltipContent><p>Name of the Accounting Officer who signs off the statements</p></TooltipContent></Tooltip></TooltipProvider>
+   719→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   720→              <div className="space-y-1.5">
+   721→                <Label className="text-xs text-muted-foreground">Chief Finance Officer</Label>
+   722→                <Input className="h-8 text-sm" value={d.chiefFinanceOfficer ?? ''} onChange={e => update('chiefFinanceOfficer', e.target.value)} />
+   723→              </div>
+   724→            </TooltipTrigger><TooltipContent><p>Name of the CFO</p></TooltipContent></Tooltip></TooltipProvider>
+   725→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   726→              <div className="space-y-1.5">
+   727→                <Label className="text-xs text-muted-foreground">Internal Audit Head</Label>
+   728→                <Input className="h-8 text-sm" value={d.internalAuditHead ?? ''} onChange={e => update('internalAuditHead', e.target.value)} />
+   729→              </div>
+   730→            </TooltipTrigger><TooltipContent><p>Name of the Head of Internal Audit</p></TooltipContent></Tooltip></TooltipProvider>
+   731→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   732→              <div className="space-y-1.5">
+   733→                <Label className="text-xs text-muted-foreground">Signatory Date</Label>
+   734→                <Input type="date" className="h-8 text-sm" value={d.signatoryDate ?? ''} onChange={e => update('signatoryDate', e.target.value)} />
+   735→              </div>
+   736→            </TooltipTrigger><TooltipContent><p>Date the statements are signed</p></TooltipContent></Tooltip></TooltipProvider>
+   737→          </div>
+   738→        </FieldGroup>
+   739→
+   740→        <FieldGroup title="Accounting Policies & Exchange Rates">
+   741→          <div className="grid gap-3">
+   742→            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   743→              <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   744→                <div className="space-y-1.5">
+   745→                  <Label className="text-xs text-muted-foreground flex items-center gap-1">IPSAS Basis <Info className="h-3 w-3" /></Label>
+   746→                  <Select value={d.ipsasBasis as string || 'IPSAS Accrual Basis'} onValueChange={v => update('ipsasBasis', v)}>
+   747→                    <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+   748→                    <SelectContent>
+   749→                      <SelectItem value="IPSAS Accrual Basis">IPSAS Accrual Basis</SelectItem>
+   750→                      <SelectItem value="IPSAS Cash Basis">IPSAS Cash Basis</SelectItem>
+   751→                    </SelectContent>
+   752→                  </Select>
+   753→                </div>
+   754→              </TooltipTrigger><TooltipContent><p>The basis of accounting used</p></TooltipContent></Tooltip></TooltipProvider>
+   755→              <div className="space-y-1.5">
+   756→                <Label className="text-xs text-muted-foreground">USD Exchange Rate</Label>
+   757→                <Input type="number" className="h-8 text-sm font-mono" step="0.0001" value={d.exchangeRateUSD ?? 1} onChange={e => update('exchangeRateUSD', parseFloat(e.target.value) || 1)} />
+   758→              </div>
+   759→            </div>
+   760→            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   761→              <div className="space-y-1.5">
+   762→                <Label className="text-xs text-muted-foreground">EUR Exchange Rate</Label>
+   763→                <Input type="number" className="h-8 text-sm font-mono" step="0.0001" value={d.exchangeRateEUR ?? 1} onChange={e => update('exchangeRateEUR', parseFloat(e.target.value) || 1)} />
+   764→              </div>
+   765→            </div>
+   766→            <TooltipProvider><Tooltip><TooltipTrigger asChild>
+   767→              <div className="space-y-1.5">
+   768→                <Label className="text-xs text-muted-foreground flex items-center gap-1">Accounting Policies (free text) <Info className="h-3 w-3" /></Label>
+   769→                <Textarea className="min-h-[80px] text-sm" value={d.accountingPolicies ?? ''} onChange={e => update('accountingPolicies', e.target.value)} placeholder="Describe the entity's significant accounting policies..." />
+   770→              </div>
+   771→            </TooltipTrigger><TooltipContent><p>Disclosure of significant accounting policies per IPSAS 1</p></TooltipContent></Tooltip></TooltipProvider>
+   772→          </div>
+   773→        </FieldGroup>
+   774→      </div>
+   775→
+   776→      <Card className="bg-muted/30">
+   777→        <CardContent className="py-3">
+   778→          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+   779→            <Button variant="outline" size="sm" onClick={() => setWizardStep(2)} className="gap-1.5">
+   780→              <ArrowLeft className="h-4 w-4" /> Back
+   781→            </Button>
+   782→            <Button onClick={async () => { await handleSave(); setWizardStep(4); }} className="bg-primary text-primary-foreground gap-2">
+   783→              Continue to Review <ArrowRight className="h-4 w-4" />
+   784→            </Button>
+   785→          </div>
+   786→        </CardContent>
+   787→      </Card>
+   788→    </motion.div>
+   789→  )
+   790→}
+   791→
+   792→// ═══════════════════════════════════════════════════════════════════
+   793→// STEP 4: REVIEW & VALIDATE
+   794→// ═══════════════════════════════════════════════════════════════════
+   795→
+   796→function Step4Review() {
+   797→  const { entries, complianceData, fetchCompliance, auditLog, fetchAuditLog, activeReportId, autoBalance, isLoading, wizardStep, setWizardStep, saveTrialBalance } = useFinancialStore()
+   798→  const [loadingCompliance, setLoadingCompliance] = useState(false)
+   799→  const [loadingAudit, setLoadingAudit] = useState(false)
+   800→  const [autoBalancing, setAutoBalancing] = useState(false)
+   801→
+   802→  const totalDr = entries.reduce((s, e) => s + (e.debitCurrent || 0), 0)
+   803→  const totalCr = entries.reduce((s, e) => s + (e.creditCurrent || 0), 0)
+   804→  const tbBalanced = Math.abs(totalDr - totalCr) < 0.01
+   805→  const allMapped = entries.every(e => e.category && e.category.trim() !== '')
+   806→  const hasBudget = entries.some(e => e.budgetInitial > 0 || e.budgetAdjusted > 0)
+   807→  const hasPrior = entries.some(e => e.debitPrior !== 0 || e.creditPrior !== 0)
+   808→
+   809→  const handleRunCompliance = async () => {
+   810→    setLoadingCompliance(true)
+   811→    try {
+   812→      await saveTrialBalance()
+   813→      await fetchCompliance()
+   814→      toast.success('Compliance check completed')
+   815→    } catch {
+   816→      toast.error('Failed to run compliance check')
+   817→    } finally {
+   818→      setLoadingCompliance(false)
+   819→    }
+   820→  }
+   821→
+   822→  const handleLoadAudit = async () => {
+   823→    setLoadingAudit(true)
+   824→    try {
+   825→      await fetchAuditLog()
+   826→    } catch {
+   827→      // silent
+   828→    } finally {
+   829→      setLoadingAudit(false)
+   830→    }
+   831→  }
+   832→
+   833→  const handleAutoBalance = async () => {
+   834→    setAutoBalancing(true)
+   835→    try {
+   836→      await autoBalance()
+   837→      toast.success('Auto-balanced successfully')
+   838→    } catch {
+   839→      toast.error('Failed to auto-balance')
+   840→    } finally {
+   841→      setAutoBalancing(false)
+   842→    }
+   843→  }
+   844→
+   845→  useEffect(() => {
+   846→    if (activeReportId) handleLoadAudit()
+   847→  }, [activeReportId])
+   848→
+   849→  const validationItems = [
+   850→    { label: 'Trial Balance balanced', pass: tbBalanced },
+   851→    { label: 'All categories mapped', pass: allMapped },
+   852→    { label: 'Budget data provided', pass: hasBudget },
+   853→    { label: 'Prior year data present', pass: hasPrior },
+   854→    { label: `Entries count: ${entries.length}`, pass: entries.length > 0 },
+   855→  ]
+   856→
+   857→  const complianceScore = complianceData?.score ?? 0
+   858→
+   859→  return (
+   860→    <motion.div {...pageVariants} className="py-4 space-y-4">
+   861→      <div className="flex items-center justify-between">
+   862→        <div>
+   863→          <h2 className="text-xl font-bold text-foreground">Review & Validate</h2>
+   864→          <p className="text-sm text-muted-foreground mt-1">Validate your data and check IPSAS compliance before generating statements.</p>
+   865→        </div>
+   866→        <div className="flex gap-2">
+   867→          <Button variant="outline" size="sm" onClick={handleLoadAudit} disabled={loadingAudit} className="gap-1.5">
+   868→            {loadingAudit ? <Loader2 className="h-4 w-4 animate-spin" /> : <History className="h-4 w-4" />}
+   869→            Refresh Audit Log
+   870→          </Button>
+   871→          <Button onClick={handleRunCompliance} disabled={loadingCompliance || isLoading} className="bg-primary text-primary-foreground gap-2">
+   872→            {loadingCompliance || isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Shield className="h-4 w-4" />}
+   873→            Run Compliance Check
+   874→          </Button>
+   875→        </div>
+   876→      </div>
+   877→
+   878→      <div className="grid gap-4 lg:grid-cols-3">
+   879→        {/* Validation Panel */}
+   880→        <Card className="lg:col-span-1">
+   881→          <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">Validation Status</CardTitle></CardHeader>
+   882→          <CardContent className="pt-0 space-y-2">
+   883→            {validationItems.map((item, i) => (
+   884→              <div key={i} className="flex items-center gap-2 text-sm">
+   885→                {item.pass
+   886→                  ? <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+   887→                  : <X className="h-4 w-4 text-destructive flex-shrink-0" />}
+   888→                <span className={item.pass ? 'text-foreground' : 'text-destructive'}>{item.label}</span>
+   889→              </div>
+   890→            ))}
+   891→            {!tbBalanced && (
+   892→              <Button variant="outline" size="sm" className="w-full mt-3 gap-1.5" onClick={handleAutoBalance} disabled={autoBalancing}>
+   893→                {autoBalancing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+   894→                Auto-Balance
+   895→              </Button>
+   896→            )}
+   897→          </CardContent>
+   898→        </Card>
+   899→
+   900→        {/* Compliance Score + Checklist */}
+   901→        <Card className="lg:col-span-1">
+   902→          <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">IPSAS Compliance</CardTitle></CardHeader>
+   903→          <CardContent className="pt-0">
+   904→            {complianceData ? (
+   905→              <div className="space-y-4">
+   906→                <div className="flex flex-col items-center">
+   907→                  <div className="relative h-24 w-24">
+   908→                    <svg className="h-24 w-24 -rotate-90" viewBox="0 0 100 100">
+   909→                      <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="8" className="text-muted" />
+   910→                      <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="8" className={complianceScore >= 80 ? 'text-primary' : complianceScore >= 50 ? 'text-yellow-500' : 'text-destructive'}
+   911→                        strokeDasharray={`${complianceScore * 2.64} 264`} strokeLinecap="round" />
+   912→                    </svg>
+   913→                    <div className="absolute inset-0 flex items-center justify-center">
+   914→                      <span className="text-2xl font-bold text-foreground">{complianceScore}%</span>
+   915→                    </div>
+   916→                  </div>
+   917→                  <p className="text-xs text-muted-foreground mt-2">{complianceData.metCount}/{complianceData.totalCount} requirements met</p>
+   918→                </div>
+   919→                <ScrollArea className="h-48 custom-scrollbar">
+   920→                  <div className="space-y-1.5 pr-2">
+   921→                    {complianceData.checklist.map((item: ComplianceItem) => (
+   922→                      <div key={item.id} className="flex items-start gap-2 text-xs">
+   923→                        {item.status === 'met'
+   924→                          ? <CheckCircle2 className="h-3.5 w-3.5 text-primary mt-0.5 flex-shrink-0" />
+   925→                          : item.status === 'partial'
+   926→                            ? <AlertTriangle className="h-3.5 w-3.5 text-yellow-500 mt-0.5 flex-shrink-0" />
+   927→                            : <X className="h-3.5 w-3.5 text-destructive mt-0.5 flex-shrink-0" />}
+   928→                        <div>
+   929→                          <p className="text-foreground font-medium">{item.requirement}</p>
+   930→                          <p className="text-muted-foreground">{item.ipsasReference}</p>
+   931→                        </div>
+   932→                      </div>
+   933→                    ))}
+   934→                  </div>
+   935→                </ScrollArea>
+   936→              </div>
+   937→            ) : (
+   938→              <div className="flex flex-col items-center py-8 text-center text-muted-foreground">
+   939→                <Shield className="h-10 w-10 mb-2 opacity-30" />
+   940→                <p className="text-sm">Click &quot;Run Compliance Check&quot; to validate IPSAS requirements.</p>
+   941→              </div>
+   942→            )}
+   943→          </CardContent>
+   944→        </Card>
+   945→
+   946→        {/* Audit Trail */}
+   947→        <Card className="lg:col-span-1">
+   948→          <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold">Audit Trail</CardTitle></CardHeader>
+   949→          <CardContent className="pt-0">
+   950→            {auditLog.length > 0 ? (
+   951→              <ScrollArea className="h-64 custom-scrollbar">
+   952→                <div className="space-y-3 pr-2">
+   953→                  {auditLog.slice(0, 15).map((entry: AuditLogEntry) => (
+   954→                    <div key={entry.id} className="flex items-start gap-2 text-xs">
+   955→                      <Clock className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+   956→                      <div className="flex-1 min-w-0">
+   957→                        <p className="text-foreground font-medium truncate">{entry.action.replace(/_/g, ' ')}</p>
+   958→                        <p className="text-muted-foreground">{entry.field} {entry.oldValue && `— ${entry.oldValue} → ${entry.newValue}`}</p>
+   959→                        <p className="text-muted-foreground/60">{new Date(entry.timestamp).toLocaleString()}</p>
+   960→                      </div>
+   961→                    </div>
+   962→                  ))}
+   963→                </div>
+   964→              </ScrollArea>
+   965→            ) : (
+   966→              <div className="flex flex-col items-center py-8 text-center text-muted-foreground">
+   967→                <History className="h-10 w-10 mb-2 opacity-30" />
+   968→                <p className="text-sm">No audit entries yet.</p>
+   969→              </div>
+   970→            )}
+   971→          </CardContent>
+   972→        </Card>
+   973→      </div>
+   974→
+   975→      <Card className="bg-muted/30">
+   976→        <CardContent className="py-3">
+   977→          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+   978→            <Button variant="outline" size="sm" onClick={() => setWizardStep(3)} className="gap-1.5">
+   979→              <ArrowLeft className="h-4 w-4" /> Back
+   980→            </Button>
+   981→            <Button onClick={() => setWizardStep(5)} className="bg-primary text-primary-foreground gap-2">
+   982→              Continue to Generate <ArrowRight className="h-4 w-4" />
+   983→            </Button>
+   984→          </div>
+   985→        </CardContent>
+   986→      </Card>
+   987→    </motion.div>
+   988→  )
+   989→}
+   990→
+   991→// ═══════════════════════════════════════════════════════════════════
+   992→// STEP 5: GENERATE & EXPORT
+   993→// ═══════════════════════════════════════════════════════════════════
+   994→
+   995→function Step5Generate() {
+   996→  const {
+   997→    generatedStatements, entityConfig, activeReportId, generateStatements,
+   998→    statementSubTab, setStatementSubTab, isLoading, wizardStep, setWizardStep,
+   999→    approvalWorkflow, fetchApprovalWorkflow, advanceApproval,
+  1000→    versions, fetchVersions, createVersion,
+  1001→  } = useFinancialStore()
+  1002→  const [isExporting, setIsExporting] = useState(false)
+  1003→  const [approverName, setApproverName] = useState('')
+  1004→  const [versionLabel, setVersionLabel] = useState('')
+  1005→  const [showVersionDialog, setShowVersionDialog] = useState(false)
+  1006→  const [showPdfPreview, setShowPdfPreview] = useState(false)
+  1007→
+  1008→  useEffect(() => {
+  1009→    if (activeReportId) {
+  1010→      fetchApprovalWorkflow()
+  1011→      fetchVersions()
+  1012→    }
+  1013→  }, [activeReportId, fetchApprovalWorkflow, fetchVersions])
+  1014→
+  1015→  const handleGenerate = async () => {
+  1016→    try {
+  1017→      await generateStatements()
+  1018→      toast.success('Statements generated successfully')
+  1019→    } catch {
+  1020→      toast.error('Failed to generate statements')
+  1021→    }
+  1022→  }
+  1023→
+  1024→  const handleDownloadPdf = async () => {
+  1025→    if (!activeReportId) return
+  1026→    setIsExporting(true)
+  1027→    try {
+  1028→      const res = await fetch(`/api/reports/${activeReportId}/pdf`)
+  1029→      if (!res.ok) throw new Error('PDF generation failed')
+  1030→      const blob = await res.blob()
+  1031→      const url = URL.createObjectURL(blob)
+  1032→      const a = document.createElement('a')
+  1033→      a.href = url
+  1034→      a.download = `${entityConfig.name.replace(/\s+/g, '_')}_Financial_Statements.pdf`
+  1035→      document.body.appendChild(a)
+  1036→      a.click()
+  1037→      document.body.removeChild(a)
+  1038→      URL.revokeObjectURL(url)
+  1039→      toast.success('PDF downloaded successfully')
+  1040→    } catch {
+  1041→      toast.error('Failed to generate PDF')
+  1042→    } finally {
+  1043→      setIsExporting(false)
+  1044→    }
+  1045→  }
+  1046→
+  1047→  const handleDownloadExcel = async () => {
+  1048→    if (!activeReportId) return
+  1049→    setIsExporting(true)
+  1050→    try {
+
+[showing lines 551-1050 of 1802; use offset=1051 with limit to continue reading]

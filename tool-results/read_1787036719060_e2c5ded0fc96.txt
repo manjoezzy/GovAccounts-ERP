@@ -1,0 +1,1864 @@
+    90→   139→   139→Add   :  Advances recovered during the year |  |  | 0
+    91→   140→   140→:  Revenue receivable collected during the period |  | 57,950,625 | 23,505,250
+    92→   141→   141→:  Deposits received |  |  | 0
+    93→   142→   142→Total Revenue |  | 1,299,680,159 | 1,473,458,157
+    94→   143→   143→Less:       Grants received in Kind |  |  | 
+    95→   144→   144→Revenue in Kind (Tax waivers) |  | 31,100,000 | 19,800,000
+    96→   145→   145→Transfers to Treasury | 20 |  | 
+    97→   146→   146→Revenue Receivable for the reporting period |  | 113,770,664 | 87,656,524
+    98→   147→   147→Total revenue received for Cash flow statement purposes |  | 1,154,809,495 | 1,358,801,633
+    99→   148→   148→
+   100→   149→   149→=== Table 7 ===
+   101→   150→   150→ | Notes | 30 June 2025
+   102→   151→   151→(Shs) | 30 June 2024
+   103→   152→   152→(Shs)
+   104→   153→   153→Cash and cash equivalents at the beginning of the year |  | 105,668,594 | 107,339,042
+   105→   154→   154→Less: Transfers to the UCF account (Previous Year Balances) | 32 |  | 
+   106→   155→   155→Add/ (Less): Adjustments in cash and cash equivalents | 32 |  | 
+   107→   156→   156→Net increase (decrease) of cash from the Cash flow Statement |  | (3,219,988) | -1,670,448
+   108→   157→   157→Cash and cash equivalents at the end of the year |  | 102,448,606 | 105,668,594
+   109→   158→   158→
+   110→   159→   159→=== Table 8 ===
+   111→   160→   160→ | Notes | 30 June 2025
+   112→   161→   161→(Shs) | 30 June 2024
+   113→   162→   162→(Shs)
+   114→   163→   163→Cash and cash equivalents | 21 | 102,448,606 | 105,668,500
+   115→   164→   164→Cash and bank balances |  | 102,448,606 | 105,668,500
+   116→   165→   165→
+   117→   166→   166→=== Table 9 ===
+   118→   167→   167→ | Initial Budget (Shs)
+   119→   168→   168→(a) | Adjustments (Shs)
+   120→   169→   169→(b) | Revised Budget 
+   121→   170→   170→(Shs)
+   122→   171→   171→(c)=(a)+(b) | Actual Performance
+   123→   172→   172→(Shs)
+   124→   173→   173→(d) | Variance:
+   125→   174→   174→(e)=(c)-(d) | Variance Percentage
+   126→   175→   175→[(e)/(c)]
+   127→   176→   176→Revenue |  |  |  |  |  | 
+   128→   177→   177→Taxes |  |  |  |  |  | 
+   129→   178→   178→External Assistance |  |  |  |  |  | 
+   130→   179→   179→Transfers received from Treasury- UCF | 156,316,860 |  | 156,316,860 | 167,921,378 | 0 | 0%
+   131→   180→   180→Transfers received from the Contingencies Fund | 0 |  | 0 | 0 | - | 0%
+   132→   181→   181→Transfers received from other Government Units | 0 |  | 0 | 12,200,000 | - | 0%
+   133→   182→   182→Non-Tax Revenue from exchange transactions | 0 |  | 0 | 0 |  | 
+   134→   183→   183→Students’ fees Income | 1,068,070,000 |  | 1,068,070,000 | 931,713,866 |  | 00
+   135→   184→   184→Graduation | 7,500,000 |  | 7,500,000 | 1,300,000 |  | 
+   136→   185→   185→Revenue in kind |  |  |  | 31,100,000 |  | 0
+   137→   186→   186→Total Revenue | 1,231,886,860 |  | 1,231,886,860 | 1,144,235,244 |  | 0
+   138→   187→   187→ |  |  |  |  |  | -8%
+   139→   188→   188→Expenditure by Nature |  |  |  |  |  | 
+   140→   189→   189→Compensation of employees | 108,320,000 |  | 108,320,000 | 110,484,800 | -2,164,800 | -2%
+   141→   190→   190→Goods and services consumed | 680,350,000 |  | 680,350,000 | 680,350,000 | -17,037,932 | -3%
+   142→   191→   191→Grants and other transfers |  |  |  |  |  | 
+   143→   192→   192→Social benefits |  |  |  |  |  | 
+   144→   193→   193→Finance costs |  |  |  |  |  | 
+   145→   194→   194→Other expenses | 276,550,000 |  | 276,550,000 | 275,629,176 | 920,824 | 0%
+   146→   195→   195→Purchase of Property Plant and Equipment |  |  |  |  |  | 
+   147→   196→   196→Purchase of Non-Produced Assets |  |  |  |  |  | 
+   148→   197→   197→Domestic arrears paid |  |  |  |  |  | 
+   149→   198→   198→Pensions arrears paid |  |  |  |  |  | 
+   150→   199→   199→Total expenditure | 1,065,220,000 |  | 1,065,220,000 | 1,066,463,976 | -18,281,908 | -2%
+   151→   200→   200→Foreign exchange (gain)/loss |  |  |  |  |  | 
+   152→   201→   201→Transfers to Treasury |  |  |  |  |  | 
+   153→   202→   202→Net Expenditure |  |  |  | 77,771,268 |  | 
+   154→   203→   203→
+   155→   204→   204→=== Table 10 ===
+   156→   205→   205→Note | Expenditure Item/ Programme | Variance Percentage | Explanation
+   157→   206→   206→a) | Students Fees Income |  | Failure by parents to clear fees due to not prioritizing Technical Education
+   158→   207→   207→ |  |  | 
+   159→   208→   208→ |  |  | 
+   160→   209→   209→ |  |  | 
+   161→   210→   210→
+   162→   211→   211→=== Table 11 ===
+   163→   212→   212→ | Actual
+   164→   213→   213→30 June 2025
+   165→   214→   214→(Shs) | Actual
+   166→   215→   215→30 June 2024
+   167→   216→   216→(Shs)
+   168→   217→   217→Total expenditure per Appropriation Account | 1,083,501,908 | 1,367,672,081
+   169→   218→   218→Add: |  | 
+   170→   219→   219→Letters of credit receivable prior year but delivered during the year |  | 
+   171→   220→   220→Accrued expenditure | 59,215,130 | 
+   172→   221→   221→Prepayments performed |  | 
+   173→   222→   222→Income In-kind | 31,100,000 | 
+   174→   223→   223→ | 1,173,817,038 | 
+   175→   224→   224→Gains/loss on Disposal of assets |  | 
+   176→   225→   225→Less: |  | 
+   177→   226→   226→Letters of credit receivable at year-end |  | 
+   178→   227→   227→Domestic arrears paid | 58,411,375 | 
+   179→   228→   228→Pension arrears paid |  | 
+   180→   229→   229→Non-produced assets for the period |  | 
+   181→   230→   230→Purchase of PPE |  | 
+   182→   231→   231→Prepayments for the period |  | 
+   183→   232→   232→ |  | 
+   184→   233→   233→Total Expenditure per Statement of Financial Performance | 1,115,405,663 | 1,367,672,081
+   185→   234→   234→
+   186→   235→   235→=== Table 12 ===
+   187→   236→   236→ | 30 June 2025 | 30 June 2024
+   188→   237→   237→United States Dollar |  | 
+   189→   238→   238→British Pound |  | 
+   190→   239→   239→Euro |  | 
+   191→   240→   240→
+   192→   241→   241→=== Table 13 ===
+   193→   242→   242→ | 30 June 2025 | 30 June 2024
+   194→   243→   243→ | (Shs) | (Shs)
+   195→   244→   244→Local Services Tax |  | 
+   196→   245→   245→Land fees |  | 
+   197→   246→   246→Business Licenses |  | 
+   198→   247→   247→Other tax revenues |  | 
+   199→   248→   248→Total tax revenues |  | 
+   200→   249→   249→
+   201→   250→   250→=== Table 14 ===
+   202→   251→   251→ | 30 June 2025
+   203→   252→   252→(Shs) | 30 June 2024
+   204→   253→   253→(Shs)
+   205→   254→   254→Grants from foreign governments |  | 
+   206→   255→   255→Grants from International Organizations |  | 
+   207→   256→   256→Total Grants |  | 
+   208→   257→   257→
+   209→   258→   258→=== Table 15 ===
+   210→   259→   259→ | 30 June 2025
+   211→   260→   260→(Shs) | 30 June 2024
+   212→   261→   261→(Shs)
+   213→   262→   262→Transfers from the Treasury- | 167,921,378 | 156,316,906
+   214→   263→   263→Total Transfers | 167,921,378 | 156,316,906
+   215→   264→   264→
+   216→   265→   265→=== Table 16 ===
+   217→   266→   266→ | 30 June 2025
+   218→   267→   267→(Shs) | 30 June 2024
+   219→   268→   268→(Shs)
+   220→   269→   269→Transfers from the Contingencies Fund |  | 
+   221→   270→   270→Total Transfers |  | 
+   222→   271→   271→
+   223→   272→   272→=== Table 17 ===
+   224→   273→   273→ | 30 June 2025 | 30 June 2024
+   225→   274→   274→ | (Shs) | (Shs)
+   226→   275→   275→Transfers received from other Gov’t Units
+   227→   276→   276→ (Ministry of Education and sports-TVET DEPARTMENT) | 12,200,000 | 43,777,500
+   228→   277→   277→Total | 12,200,000 | 43,777,500
+   229→   278→   278→
+   230→   279→   279→=== Table 18 ===
+   231→   280→   280→ | 30 June 2025
+   232→   281→   281→(Shs) | 30 June 2024
+   233→   282→   282→(Shs)
+   234→   283→   283→ |  | 
+   235→   284→   284→Administrative fees and licenses |  | 
+   236→   285→   285→Court fines and Penalties |  | 
+   237→   286→   286→Other fines and Penalties |  | 
+   238→   287→   287→Other transfers- Donations |  | 
+   239→   288→   288→Miscellaneous Revenue |  | 
+   240→   289→   289→Total Non-Tax Revenue |  | 
+   241→   290→   290→
+   242→   291→   291→=== Table 19 ===
+   243→   292→   292→ | 30 June 2025
+   244→   293→   293→(Shs) | 30 June 2024
+   245→   294→   294→(Shs)
+   246→   295→   295→Investment income (interest) | 0 | 0
+   247→   296→   296→Dividends | 0 | 0
+   248→   297→   297→Rent | 0 | 0
+   249→   298→   298→Other property income | 0 | 0
+   250→   299→   299→Sale of goods and services | 0 | 0
+   251→   300→   300→Training material | 0 | 87,016,502
+   252→   301→   301→Students’ fees Income | 931,713,866 | 1,035,925,498
+   253→   302→   302→Graduation fee | 1,300,000 | 20,100,000
+   254→   303→   303→Other items inkind |  | 0
+   255→   304→   304→Total Non-Tax Revenue | 933,013,866 | 1,143,042,000
+   256→   305→   305→
+   257→   306→   306→=== Table 20 ===
+   258→   307→   307→Items | 30th June 2025
+   259→   308→   308→Shs | 30th June 2024
+   260→   309→   309→Shs
+   261→   310→   310→Items in Kind | 31,100,000 | 19,800,000
+   262→   311→   311→Total | 31,100,000 | 19,800,000
+   263→   312→   312→
+   264→   313→   313→=== Table 21 ===
+   265→   314→   314→ | 30 June 2025
+   266→   315→   315→(Shs) | 30 June 2024
+   267→   316→   316→(Shs)
+   268→   317→   317→Wages and salaries | 62,090,500 | 85,847,900
+   269→   318→   318→Staff welfare | 20,210,500 | 48,988,600
+   270→   319→   319→Bog Expenditure | 13,310,000 | 33,270,000
+   271→   320→   320→. Staff Break Tea and package | 7,516,800 | 8,106,000
+   272→   321→   321→Staff Uniform and protective wear | 415,000 | 428,000
+   273→   322→   322→Condolences, contributions and donations | 6,942,000 | 3,480,000
+   274→   323→   323→Total employee costs | 110,484,800 | 180,120,500
+   275→   324→   324→
+   276→   325→   325→=== Table 22 ===
+   277→   326→   326→ | 30 June 2025
+   278→   327→   327→(Shs) | 30 June 2024
+   279→   328→   328→(Shs)
+   280→   329→   329→Recreation and Entertainment expenses | 37,016,300 | 46,276,969
+   281→   330→   330→Utility and other property expenses | 79,104,588 | 32,289,000
+   282→   331→   331→Supplies and services (Teaching Goods and services) | 411,991,900 | 642,881,533
+   283→   332→   332→Professional services | 0 | 0
+   284→   333→   333→Insurance and Licenses | 0 | 0
+   285→   334→   334→Travel and transport | 128,880,525 | 100,826,370
+   286→   335→   335→Maintenance | 72,298,374 | 81985,198
+   287→   336→   336→Total cost of goods and services | 729,291,687 | 904,258,797
+   288→   337→   337→
+   289→   338→   338→=== Table 23 ===
+   290→   339→   339→ | 30 June 2025
+   291→   340→   340→(Shs) | 30 June 2024
+   292→   341→   341→(Shs)
+   293→   342→   342→Buildings and Structures |  | 0
+   294→   343→   343→Transport equipment |  | 0
+   295→   344→   344→ICT equipment | 3,203,934 | 0
+   296→   345→   345→Other machinery & equipment |  | 0
+   297→   346→   346→Another fixed assets-Borehole | 504,504 | 0
+   298→   347→   347→Sowing Machines |  | 0
+   299→   348→   348→Total | 3,708,438 | 0
+   300→   349→   349→
+   301→   350→   350→=== Table 24 ===
+   302→   351→   351→ | 30 June 2025
+   303→   352→   352→(Shs) | 30 June 2024
+   304→   353→   353→(Shs)
+   305→   354→   354→Buildings and Structures |  | 
+   306→   355→   355→Transport equipment |  | 
+   307→   356→   356→ICT equipment |  | 
+   308→   357→   357→Other machinery & equipment |  | 
+   309→   358→   358→Other fixed assets |  | 
+   310→   359→   359→Intangible Assets |  | 
+   311→   360→   360→Total |  | 
+   312→   361→   361→
+   313→   362→   362→=== Table 25 ===
+   314→   363→   363→ | Schedule | 30 June 2025
+   315→   364→   364→(Shs) | 30 June 2024
+   316→   365→   365→(Shs
+   317→   366→   366→To Public Corporations |  |  | 
+   318→   367→   367→To Private Corporations |  |  | 
+   319→   368→   368→To Private Individuals |  |  | 
+   320→   369→   369→Total |  |  | 
+   321→   370→   370→
+   322→   371→   371→=== Table 26 ===
+   323→   372→   372→ |  | 30 June 2025
+   324→   373→   373→(Shs) | 30 June 2024
+   325→   374→   374→(Shs)
+   326→   375→   375→Transfer to foreign Governments |  |  | 
+   327→   376→   376→Transfers to International Organisations |  |  | 
+   328→   377→   377→Transfers to other government units |  |  | 
+   329→   378→   378→To resident non-government units |  |  | 
+   330→   379→   379→Other Grants |  |  | 
+   331→   380→   380→Total transfers |  |  | 
+   332→   381→   381→
+   333→   382→   382→=== Table 27 ===
+   334→   383→   383→ | 30 June 2025
+   335→   384→   384→(Shs) | 30 June 2024
+   336→   385→   385→(Shs)
+   337→   386→   386→Pensions and Gratuity |  | 
+   338→   387→   387→Other Social benefits |  | 
+   339→   388→   388→Total social benefits |  | 
+   340→   389→   389→
+   341→   390→   390→=== Table 28 ===
+   342→   391→   391→ | Schedule | 30 June 2025
+   343→   392→   392→(Shs) | 30 June 2024
+   344→   393→   393→(Shs)
+   345→   394→   394→Interest on external debts (external borrowings) |  |  | 
+   346→   395→   395→Interest on other domestic borrowings |  |  | 
+   347→   396→   396→Other finance costs |  |  | 
+   348→   397→   397→Total finance cost |  |  | 
+   349→   398→   398→
+   350→   399→   399→=== Table 29 ===
+   351→   400→   400→ | 30 June 2025
+   352→   401→   401→Shs | 30 June 2024
+   353→   402→   402→Shs
+   354→   403→   403→Provision for the year |  | 
+   355→   404→   404→Total bad debts |  | 
+   356→   405→   405→
+   357→   406→   406→=== Table 30 ===
+   358→   407→   407→ | 30 June 2025
+   359→   408→   408→(Shs) | 30 June 2024
+   360→   409→   409→(Shs)
+   361→   410→   410→Gains/losses in disposal of PPE |  | 
+   362→   411→   411→Property expenses other than interest |  | 
+   363→   412→   412→Other students  expenses | 275,579,176 | 346,408,159
+   364→   413→   413→Total other operating expenses | 275,579,176 | 346,408,159
+   365→   414→   414→
+   366→   415→   415→=== Table 31 ===
+   367→   416→   416→ | 30 June 2025
+   368→   417→   417→(Shs) | 30 June 2024
+   369→   418→   418→(Shs)
+   370→   419→   419→Realized loss /gain (SFP) |  | 
+   371→   420→   420→Unrealized loss /gain (SCE) |  | 
+   372→   421→   421→Net foreign exchange  gains / losses |  | 
+   373→   422→   422→
+   374→   423→   423→=== Table 32 ===
+   375→   424→   424→ | 30 June 2025
+   376→   425→   425→(Shs) | 30 June 2024
+   377→   426→   426→(Shs)
+   378→   427→   427→Transfers to Treasury- NTR |  | 
+   379→   428→   428→Transfers to Treasury- Others |  | 
+   380→   429→   429→ |  | 
+   381→   430→   430→ |  | 
+   382→   431→   431→
+   383→   432→   432→=== Table 33 ===
+   384→   433→   433→ | 30 June 2025
+   385→   434→   434→(Shs) | 30 June 2024
+   386→   435→   435→(Shs)
+   387→   436→   436→DOMESTIC |  | 
+   388→   437→   437→Revenue accounts | 102,448,606 | 105,668,594
+   389→   438→   438→Expenditure accounts |  | 
+   390→   439→   439→Project accounts |  | 
+   391→   440→   440→Collection accounts |  | 
+   392→   441→   441→Cash in transit |  | 
+   393→   442→   442→Cash at hand- Imprest |  | 
+   394→   443→   443→Other holding Accounts |  | 
+   395→   444→   444→Total cash and bank balances | 102,448,606 | 105,668,594
+   396→   445→   445→
+   397→   446→   446→=== Table 34 ===
+   398→   447→   447→ | 30 June 2025
+   399→   448→   448→(Shs) | 30 June 2024
+   400→   449→   449→(Shs)
+   401→   450→   450→ |  | 
+   402→   451→   451→Outstanding letters of credit |  | 
+   403→   452→   452→Advances |  | 
+   404→   453→   453→Other Prepayments |  | 
+   405→   454→   454→Total receivables |  | 
+   406→   455→   455→
+   407→   456→   456→=== Table 35 ===
+   408→   457→   457→ | Current
+   409→   458→   458→Shs | Non-current
+   410→   459→   459→Shs | Total
+   411→   460→   460→(Shs)
+   412→   461→   461→ | 22(a) | 22(b) | 
+   413→   462→   462→Outstanding letters of credit |  |  | 
+   414→   463→   463→Advances |  |  | 
+   415→   464→   464→Other Prepayments |  |  | 
+   416→   465→   465→Total receivables |  |  | 
+   417→   466→   466→
+   418→   467→   467→=== Table 36 ===
+   419→   468→   468→ | 30 June 2025
+   420→   469→   469→(Shs) | 30 June 2024
+   421→   470→   470→(Shs)
+   422→   471→   471→DOMESTIC |  | 
+   423→   472→   472→Accrued Revenue | 143,476,563 | 87,656,524
+   424→   473→   473→Loans (short-term) |  | 
+   425→   474→   474→Other accounts receivable |  | 
+   426→   475→   475→Total receivables | 143,476,563 | 87,656,524
+   427→   476→   476→
+   428→   477→   477→=== Table 37 ===
+   429→   478→   478→ | 30 June 2025
+   430→   479→   479→Shs | 30 June 2024
+   431→   480→   480→Shs
+   432→   481→   481→Provision at the beginning of the year- at 1 July |  | 
+   433→   482→   482→Increase / (decrease) in provision for the year |  | 
+   434→   483→   483→Less: Provision approved for write off during the year |  | 
+   435→   484→   484→Provision at the end of the year |  | 
+   436→   485→   485→
+   437→   486→   486→=== Table 38 ===
+   438→   487→   487→ | Note | 30 June 2025
+   439→   488→   488→(Shs) | 30 June 2024
+   440→   489→   489→(Shs)
+   441→   490→   490→Total Receivables | 23(a) | 143,476,563 | 87,656,524
+   442→   491→   491→Less: Provision for doubtful debts | 23(b) |  | 
+   443→   492→   492→Net Receivables |  | 143,476,563 | 87,656,524
+   444→   493→   493→
+   445→   494→   494→=== Table 39 ===
+   446→   495→   495→ | Current 
+   447→   496→   496→Shs | Non-current
+   448→   497→   497→Shs | Total
+   449→   498→   498→Shs
+   450→   499→   499→ | 22(d) | 22(e) | 
+   451→   500→   500→Accrued revenue |  |  | 
+   452→   501→   501→Loans |  |  | 
+   453→   502→   502→Other receivables |  |  | 
+   454→   503→   503→Net receivables |  |  | 
+   455→   504→   504→
+   456→   505→   505→=== Table 40 ===
+   457→   506→   506→ | 30 June 2025
+   458→   507→   507→(Shs) | 30 June 2024
+   459→   508→   508→(Shs)
+   460→   509→   509→Materials and Supplies |  | -
+   461→   510→   510→Work in Progress |  | 
+   462→   511→   511→Finished goods |  | 
+   463→   512→   512→Goods for resale |  | 
+   464→   513→   513→Other Inventories |  | 
+   465→   514→   514→Total Inventories |  | 
+   466→   515→   515→
+   467→   516→   516→=== Table 41 ===
+   468→   517→   517→ | 30 June 2025
+   469→   518→   518→(Shs) | 30 June 2024
+   470→   519→   519→(Shs)
+   471→   520→   520→Securities other than shares (long-term) – domestic |  | -
+   472→   521→   521→Shares and other equity-domestic |  | 
+   473→   522→   522→Securities other than shares-foreign |  | 
+   474→   523→   523→Total Investments |  | 
+   475→   524→   524→
+   476→   525→   525→=== Table 42 ===
+   477→   526→   526→ | Cost
+   478→   527→   527→
+   479→   528→   528→Shs | 30 June 2025
+   480→   529→   529→Acc. Depreciation
+   481→   530→   530→Shs | 30 June 2025
+   482→   531→   531→Impairment
+   483→   532→   532→Shs | 30 June 2025
+   484→   533→   533→Net Book Value
+   485→   534→   534→Shs | 30 June 2024
+   486→   535→   535→Net Book Value 
+   487→   536→   536→Shs
+   488→   537→   537→Sowing Machines |  |  |  |  | 
+   489→   538→   538→Transport equipment-Motor vehicle |  |  |  |  | 
+   490→   539→   539→ICT equipment | 16,019,670 | 3,203,934 |  | 12,815,736 | 
+   491→   540→   540→Other machinery & equipment |  |  |  |  | 
+   492→   541→   541→other fixed assets-Bore hole | 16,800,000 | 504,504 |  | 16,295,496 | 
+   493→   542→   542→Work in Progress [26d] |  |  |  |  | 
+   494→   543→   543→Sub -Total Produced assets [26(a)] |  |  |  |  | 
+   495→   544→   544→Investment properties [26(b)] |  |  |  |  | 
+   496→   545→   545→Intangible Assets [26(c )] |  |  |  |  | 
+   497→   546→   546→Total pro | 32,819,670 | 3,708,438 |  | 29,111,232 | 
+   498→   547→   547→
+   499→   548→   548→=== Table 43 ===
+   500→   549→   549→ | Opening Cost as at 1st July, 2024
+   501→   550→   550→Shs | Additions during the year
+   502→   551→   551→Shs | Transfer to Assets during the year
+   503→   552→   552→Shs | 30 June 2025
+   504→   553→   553→Closing cost
+   505→   554→   554→Shs
+   506→   555→   555→Buildings and Structures |  |  |  | 
+   507→   556→   556→Transport equipment |  |  |  | 
+   508→   557→   557→ICT equipment |  |  |  | 
+   509→   558→   558→Other machinery & equipment |  |  |  | 
+   510→   559→   559→Other fixed assets |  |  |  | 
+   511→   560→   560→Heritage Assets |  |  |  | 
+   512→   561→   561→Sub -Total Produced assets [25(a)] |  |  |  | 
+   513→   562→   562→Investment properties [25(b)] |  |  |  | 
+   514→   563→   563→Intangible Assets [25(c )] |  |  |  | 
+   515→   564→   564→Total pro |  |  |  | 
+   516→   565→   565→
+   517→   566→   566→=== Table 44 ===
+   518→   567→   567→ | 30 June 2025
+   519→   568→   568→(Shs) | 30 June 2024
+   520→   569→   569→(Shs)
+   521→   570→   570→Land |  | 
+   522→   571→   571→Energy and Mineral resources |  | 
+   523→   572→   572→Other Naturally occurring Assets |  | 
+   524→   573→   573→Total Non-Produced Assets |  | 
+   525→   574→   574→
+   526→   575→   575→=== Table 45 ===
+   527→   576→   576→ | 30 June 2025
+   528→   577→   577→(Shs) | 30 June 2024
+   529→   578→   578→(Shs)
+   530→   579→   579→Trade Creditors | 59,215,130 | 58,411,375
+   531→   580→   580→Taxes payable |  | 
+   532→   581→   581→Other accounts payable |  | 
+   533→   582→   582→Total payables | 59,215,130 | 58,411,375
+   534→   583→   583→
+   535→   584→   584→=== Table 46 ===
+   536→   585→   585→ | Current 
+   537→   586→   586→Shs | Non-Current
+   538→   587→   587→Shs | Total
+   539→   588→   588→Shs
+   540→   589→   589→ | Note 28 (a) | Note 28 (b) | 
+   541→   590→   590→Utilities |  |  | 
+   542→   591→   591→Rent |  |  | 
+   543→   592→   592→Compensations to employees |  |  | 
+   544→   593→   593→Contributions to International Organizations |  |  | 
+   545→   594→   594→Court Awards & Compensations |  |  | 
+   546→   595→   595→Taxes and other deductions |  |  | 
+   547→   596→   596→Goods and services Consumed | 59,215,130 | 0 | 59,215,130
+   548→   597→   597→Land, Property Plant & Equipment |  |  | 
+   549→   598→   598→Others |  |  | 
+   550→   599→   599→Total Payables | 59,215,130 | 0 | 59,215,130
+   551→   600→   600→
+   552→   601→   601→=== Table 47 ===
+   553→   602→   602→ | 30 June 2025
+   554→   603→   603→(Shs) | 30 June 2024
+   555→   604→   604→(Shs)
+   556→   605→   605→Deposits received |  | 
+   557→   606→   606→Deferred income |  | 
+   558→   607→   607→Advances from other Government units |  | 
+   559→   608→   608→Total Deposits |  | 
+   560→   609→   609→
+   561→   610→   610→=== Table 48 ===
+   562→   611→   611→ | Current 
+   563→   612→   612→Shs | Non-current
+   564→   613→   613→Shs | Total Deposits
+   565→   614→   614→ | 29 (a) | 29(b) | 
+   566→   615→   615→Deposits received |  |  | 
+   567→   616→   616→Deferred income |  |  | 
+   568→   617→   617→Total Deposits |  |  | 
+   569→   618→   618→
+   570→   619→   619→=== Table 49 ===
+   571→   620→   620→ | 30 June 2025
+   572→   621→   621→(Shs) | 30 June 2024
+   573→   622→   622→(Shs)
+   574→   623→   623→Bank Overdrafts |  | 
+   575→   624→   624→Loans |  | 
+   576→   625→   625→Interest payable on borrowings |  | 
+   577→   626→   626→Other |  | 
+   578→   627→   627→Total borrowings |  | 
+   579→   628→   628→
+   580→   629→   629→=== Table 50 ===
+   581→   630→   630→ | Current
+   582→   631→   631→Shs | Non-current
+   583→   632→   632→Shs | Total Borrowings
+   584→   633→   633→Notes | 30(a) | 30(b) | 
+   585→   634→   634→Bank Overdrafts |  |  | 
+   586→   635→   635→Loans |  |  | 
+   587→   636→   636→Interest payable on borrowings |  |  | 
+   588→   637→   637→Other |  |  | 
+   589→   638→   638→Total borrowings |  |  | 
+   590→   639→   639→
+   591→   640→   640→=== Table 51 ===
+   592→   641→   641→ | 30 June 2025
+   593→   642→   642→(Shs) | 30 June 2024
+   594→   643→   643→(Shs).
+   595→   644→   644→Former employees in Public Service |  | 
+   596→   645→   645→Former employees in Military Service |  | 
+   597→   646→   646→Other pension liabilities |  | 
+   598→   647→   647→Total |  | 
+   599→   648→   648→
+   600→   649→   649→=== Table 52 ===
+   601→   650→   650→ | Current
+   602→   651→   651→Shs | Non-Current
+   603→   652→   652→Shs | Total
+   604→   653→   653→Shs
+   605→   654→   654→ | 31(a) | 31(b) | 
+   606→   655→   655→Former employees in Public Service |  |  | 
+   607→   656→   656→Former employees in Military Service |  |  | 
+   608→   657→   657→Other pension liabilities |  |  | 
+   609→   658→   658→ |  |  | 
+   610→   659→   659→Total |  |  | 
+   611→   660→   660→
+   612→   661→   661→=== Table 53 ===
+   613→   662→   662→ | Notes | Opening balance
+   614→   663→   663→1st July 2024
+   615→   664→   664→
+   616→   665→   665→Shs | Adjustments to the opening balance including asset disposals
+   617→   666→   666→Shs | Transfers to UCF (Prior year balance)
+   618→   667→   667→
+   619→   668→   668→Shs | Recovery or payments towards the opening balance
+   620→   669→   669→Shs | Asset Additions for the period
+   621→   670→   670→
+   622→   671→   671→
+   623→   672→   672→Shs | Depreciation, Net asset or liability acquired/ incurred during the year 
+   624→   673→   673→Shs | Closing balance
+   625→   674→   674→
+   626→   675→   675→30 June 2025
+   627→   676→   676→
+   628→   677→   677→Shs
+   629→   678→   678→ASSETS |  |  |  |  |  |  |  | 
+   630→   679→   679→Cash and Cash equivalents | 21 | 105,668,594 | (3,219,988) |  | 0 |  |  | 102,448,606
+   631→   680→   680→Prepayments and advances | 22 |  |  |  |  |  |  | 
+   632→   681→   681→Letters of Credit |  |  |  |  |  |  |  | 
+   633→   682→   682→Prepayments |  |  |  |  |  |  |  | 
+   634→   683→   683→Other advances |  |  |  |  |  |  |  | 
+   635→   684→   684→Receivables | 23 |  |  |  | 0 |  |  | 
+   636→   685→   685→Accrued Revenue |  | 87,,656,524 |  |  | 57,950,625 | 113,770,664 |  | 143,476,563
+   637→   686→   686→Loans |  |  |  |  |  |  |  | 
+   638→   687→   687→Other receivables |  |  |  |  |  |  |  | 
+   639→   688→   688→Investments | 25 |  |  |  |  |  |  | 
+   640→   689→   689→PPE | 26 (a) |  |  |  |  |  |  | 
+   641→   690→   690→Investment Properties | 26 (b) |  |  |  |  |  |  | 
+   642→   691→   691→Intangible Assets | 26 (c) |  |  |  |  |  |  | 
+   643→   692→   692→Non-Produced assets | 27 |  |  |  |  |  |  | 
+   644→   693→   693→LIABILITIES |  |  |  |  |  |  |  | 
+   645→   694→   694→Payables | 28 | 58,411,375 |  |  | 58,411,375 | 59,215,130 |  | 59,215,130
+   646→   695→   695→Deposits | 29 |  |  |  |  |  |  | 
+   647→   696→   696→Borrowings | 30 |  |  |  |  |  |  | 
+   648→   697→   697→Pensions | 31 |  |  |  |  |  |  | 
+   649→   698→   698→Total |  | 251,736,493 | (3,219,988) |  | 116,362,000 | 172,985,794 |  | 305,140,299
+   650→   699→   699→
+   651→   700→   700→=== Table 54 ===
+   652→   701→   701→Summary of Major Outputs for the Vote | Forecast Performance
+   653→   702→   702→For FY ended 30 June 2025 | Actual Performance for the year ended
+   654→   703→   703→30 June 2025 | Variance
+   655→   704→   704→30 June 2025 | Explanations for the performance variations
+   656→   705→   705→ |  |  |  | 
+   657→   706→   706→ |  |  |  | 
+   658→   707→   707→ |  |  |  | 
+   659→   708→   708→ |  |  |  | 
+   660→   709→   709→ |  |  |  | 
+   661→   710→   710→ |  |  |  | 
+   662→   711→   711→ |  |  |  | 
+   663→   712→   712→ |  |  |  | 
+   664→   713→   713→ |  |  |  | 
+   665→   714→   714→ |  |  |  | 
+   666→   715→   715→ |  |  |  | 
+   667→   716→   716→ |  |  |  | 
+   668→   717→   717→ |  |  |  | 
+   669→   718→   718→ |  |  |  | 
+   670→   719→   719→ |  |  |  | 
+   671→   720→   720→ |  |  |  | 
+   672→   721→   721→ |  |  |  | 
+   673→   722→   722→ |  |  |  | 
+   674→   723→   723→ |  |  |  | 
+   675→   724→   724→ |  |  |  | 
+   676→   725→   725→ |  |  |  | 
+   677→   726→   726→ |  |  |  | 
+   678→   727→   727→ |  |  |  | 
+   679→   728→   728→
+   680→   729→   729→=== Table 55 ===
+   681→   730→   730→Actual collected
+   682→   731→   731→30 June 2024
+   683→   732→   732→(Shs) |  | Actual collected
+   684→   733→   733→30 June 2025
+   685→   734→   734→(Shs) | Budget
+   686→   735→   735→30 June 2025
+   687→   736→   736→(Shs) | Variance
+   688→   737→   737→30 June 2025
+   689→   738→   738→(Shs)
+   690→   739→   739→Revenue from non-exchange transactions | Revenue from non-exchange transactions | Revenue from non-exchange transactions | Revenue from non-exchange transactions | Revenue from non-exchange transactions
+   691→   740→   740→ | Local Services Tax |  |  | 
+   692→   741→   741→167,921,378 | Transfers received from Treasury UCF | 167,921,378 | 167,921,378 | 0
+   693→   742→   742→12,200,000 | Transfers received from OTHER Government Units | 12,200,000 | 12,200,000 | 0
+   694→   743→   743→931,713,866 | Revenue from other exchange transactions | 931,713,866 | 931,713,866 | 0
+   695→   744→   744→31,100,000 | Others in kind | 31,100,000 | 31,100,000 | 0
+   696→   745→   745→1,300,000 | Graduation | 1,300,000 | 1,300,000 | 
+   697→   746→   746→ | Administrative fees and licenses | 0 | 0 | 
+   698→   747→   747→ | Court fines and Penalties | 0 | 0 | 
+   699→   748→   748→ | Other fines and Penalties | 0 | 0 | 
+   700→   749→   749→ | Other transfers- donations | 0 | 0 | 
+   701→   750→   750→ | Miscellaneous revenue | 0 | 0 | 
+   702→   751→   751→1,144,235,244\ | Sub-total | 1,144,235,244 | 1,144,235,244 | 
+   703→   752→   752→Revenue from exchange transactions | Revenue from exchange transactions | Revenue from exchange transactions | Revenue from exchange transactions | Revenue from exchange transactions
+   704→   753→   753→ | Investment income |  |  | 
+   705→   754→   754→ | Dividends |  |  | 
+   706→   755→   755→ | Rent |  |  | 
+   707→   756→   756→ | Other property income |  |  | 
+   708→   757→   757→ | Sale of goods and services |  |  | 
+   709→   758→   758→ | Sub-total |  |  | 
+   710→   759→   759→ | Total Revenue | 1,144,235,244 | 1,144,235,244 | 
+   711→   760→   760→
+   712→   761→   761→=== Table 56 ===
+   713→   762→   762→ |  | Opening balance
+   714→   763→   763→01 July 2025
+   715→   764→   764→
+   716→   765→   765→A
+   717→   766→   766→(Shs) | Adjustments to the opening balance
+   718→   767→   767→
+   719→   768→   768→B
+   720→   769→   769→Shs | Arrears in A collected during the year
+   721→   770→   770→
+   722→   771→   771→C
+   723→   772→   772→(Shs) | Amounts billed
+   724→   773→   773→during the year
+   725→   774→   774→
+   726→   775→   775→
+   727→   776→   776→D
+   728→   777→   777→(Shs) | Actual Amounts collected for the year
+   729→   778→   778→
+   730→   779→   779→E
+   731→   780→   780→(Shs) | Arrears of Revenue for the Year
+   732→   781→   781→F
+   733→   782→   782→(D-E)
+   734→   783→   783→(Shs) | Cumulative Arrears of Revenue as at
+   735→   784→   784→30 June 2025
+   736→   785→   785→F
+   737→   786→   786→(A+B-C+F)
+   738→   787→   787→(Shs)
+   739→   788→   788→RECEIPTS | RECEIPTS |  |  |  |  |  |  | 
+   740→   789→   789→ | Revenue from non-exchange transactions | Revenue from non-exchange transactions | Revenue from non-exchange transactions | Revenue from non-exchange transactions | Revenue from non-exchange transactions | Revenue from non-exchange transactions | Revenue from non-exchange transactions | Revenue from non-exchange transactions
+   741→   790→   790→Local Services Tax | Local Services Tax |  |  |  |  |  |  | 
+   742→   791→   791→Land fees | Land fees |  |  |  |  |  |  | 
+   743→   792→   792→Business Licenses | Business Licenses |  |  |  |  |  |  | 
+   744→   793→   793→Other tax revenues | Other tax revenues |  |  |  |  |  |  | 
+   745→   794→   794→Administrative fees and licenses | Administrative fees and licenses |  |  |  |  |  |  | 
+   746→   795→   795→Court fines and Penalties | Court fines and Penalties |  |  |  |  |  |  | 
+   747→   796→   796→Other fines and Penalties | Other fines and Penalties |  |  |  |  |  |  | 
+   748→   797→   797→Other transfers- donations | Other transfers- donations |  |  |  |  |  |  | 
+   749→   798→   798→Miscellaneous revenue | Miscellaneous revenue |  |  |  |  |  |  | 
+   750→   799→   799→Sub total | Sub total |  |  |  |  |  |  | 
+   751→   800→   800→ | Revenue from exchange transactions | Revenue from exchange transactions | Revenue from exchange transactions | Revenue from exchange transactions | Revenue from exchange transactions | Revenue from exchange transactions | Revenue from exchange transactions | Revenue from exchange transactions
+   752→   801→   801→Investment income | Investment income |  |  |  |  |  |  | 
+   753→   802→   802→Dividends | Dividends |  |  |  |  |  |  | 
+   754→   803→   803→Rent | Rent |  |  |  |  |  |  | 
+   755→   804→   804→Other property income | Other property income |  |  |  |  |  |  | 
+   756→   805→   805→Sale of goods and services | Sale of goods and services |  |  |  |  |  |  | 
+   757→   806→   806→Sub-total | Sub-total |  |  |  |  |  |  | 
+   758→   807→   807→Total Revenue | Total Revenue |  |  |  |  |  |  | 
+   759→   808→   808→
+   760→   809→   809→=== Table 57 ===
+   761→   810→   810→ | Schedule | 30 June 2025
+   762→   811→   811→(Shs) | 30 June 2024
+   763→   812→   812→(Shs)
+   764→   813→   813→DOMESTIC |  |  | 
+   765→   814→   814→Legal proceedings |  |  | 
+   766→   815→   815→Guarantees and indemnities |  |  | 
+   767→   816→   816→Guarantees of bank overdrafts |  |  | 
+   768→   817→   817→Guarantees under Public Private Partnerships |  |  | 
+   769→   818→   818→Other contingent liabilities |  |  | 
+   770→   819→   819→Total Domestic Contingencies |  |  | 
+   771→   820→   820→FOREIGN |  |  | 
+   772→   821→   821→Legal proceedings |  |  | 
+   773→   822→   822→Guarantees and indemnities |  |  | 
+   774→   823→   823→Guarantees of bank overdrafts |  |  | 
+   775→   824→   824→Guarantees under Public Private Partnerships |  |  | 
+   776→   825→   825→Other contingent liabilities |  |  | 
+   777→   826→   826→Total Foreign Contingencies |  |  | 
+   778→   827→   827→Total Contingent Liabilities |  |  | 
+   779→   828→   828→
+   780→   829→   829→=== Table 58 ===
+   781→   830→   830→Serial
+   782→   831→   831→No. | Brief description of liability, its origin, nature, the uncertainty, and period of identification | Type of liability | Any other comment/responsibility
+   783→   832→   832→ |  |  | 
+   784→   833→   833→ |  |  | 
+   785→   834→   834→ |  |  | 
+   786→   835→   835→ |  |  | 
+   787→   836→   836→ |  |  | 
+   788→   837→   837→ |  |  | 
+   789→   838→   838→ |  |  | 
+   790→   839→   839→ |  |  | 
+   791→   840→   840→ |  |  | 
+   792→   841→   841→ |  |  | 
+   793→   842→   842→ |  |  | 
+   794→   843→   843→ |  |  | 
+   795→   844→   844→ |  |  | 
+   796→   845→   845→ |  |  | 
+   797→   846→   846→ |  |  | 
+   798→   847→   847→ |  |  | 
+   799→   848→   848→ |  |  | 
+   800→   849→   849→ |  |  | 
+   801→   850→   850→ |  |  | 
+   802→   851→   851→ |  |  | 
+   803→   852→   852→ |  |  | 
+   804→   853→   853→ |  |  | 
+   805→   854→   854→ |  |  | 
+   806→   855→   855→ |  |  | 
+   807→   856→   856→ |  |  | 
+   808→   857→   857→ |  |  | 
+   809→   858→   858→ |  |  | 
+   810→   859→   859→ |  |  | 
+   811→   860→   860→ |  |  | 
+   812→   861→   861→ |  |  | 
+   813→   862→   862→ |  |  | 
+   814→   863→   863→ |  |  | 
+   815→   864→   864→ |  |  | 
+   816→   865→   865→ |  |  | 
+   817→   866→   866→ |  |  | 
+   818→   867→   867→ |  |  | 
+   819→   868→   868→
+   820→   869→   869→=== Table 59 ===
+   821→   870→   870→ | Outstanding commitments at beginning of year
+   822→   871→   871→1 July 2024
+   823→   872→   872→(Shs) | Adjustments to the previous year’s commitments
+   824→   873→   873→
+   825→   874→   874→(Shs) | Prior years commitments paid during the year
+   826→   875→   875→
+   827→   876→   876→(Shs) | New outstanding commitments incurred during the year
+   828→   877→   877→(Shs) | Cumulative outstanding commitments
+   829→   878→   878→30 June 2025
+   830→   879→   879→
+   831→   880→   880→(Shs)
+   832→   881→   881→Payables & Pension liabilities | Payables & Pension liabilities | Payables & Pension liabilities | Payables & Pension liabilities | Payables & Pension liabilities | Payables & Pension liabilities
+   833→   882→   882→Operating Commitments |  |  |  |  | 
+   834→   883→   883→Utilities |  |  |  |  | 
+   835→   884→   884→Rent |  |  |  |  | 
+   836→   885→   885→Compensations to employees |  |  |  |  | 
+   837→   886→   886→Contributions to International Organization |  |  |  |  | 
+   838→   887→   887→Court Awards & Compensations |  |  |  |  | 
+   839→   888→   888→Taxes and other deductions |  |  |  |  | 
+   840→   889→   889→Goods and services Consumed | 59,215,130 | 59,215,130 | 59,215,130 | 59,215,130 | 59,215,130
+   841→   890→   890→Land, Property Plant & Equipment |  |  |  |  | 
+   842→   891→   891→Others |  |  |  |  | 
+   843→   892→   892→Total Payables | 59,215,130 | 59,215,130 | 59,215,130 | 59,215,130 | 59,215,130
+   844→   893→   893→Pensions |  |  |  |  | 
+   845→   894→   894→Deposits | Deposits | Deposits | Deposits | Deposits | Deposits
+   846→   895→   895→Deposits received |  |  |  |  | 
+   847→   896→   896→Deferred revenue |  |  |  |  | 
+   848→   897→   897→Total Deposits |  |  |  |  | 
+   849→   898→   898→Total incl Pensions& Deposits |  |  |  |  | 
+   850→   899→   899→
+   851→   900→   900→=== Table 60 ===
+   852→   901→   901→Reference number of reported loss/write off/claim abandoned. |  | Opening Balance as at 1 July 2024
+   853→   902→   902→
+   854→   903→   903→(Shs) | Losses written-off in the YR ended
+   855→   904→   904→30 June 2025
+   856→   905→   905→(Shs) | Cumulative
+   857→   906→   906→Losses written-off as at
+   858→   907→   907→30 June 2025
+   859→   908→   908→(Shs)
+   860→   909→   909→ | Losses of public moneys (cash    and cash equivalents) |  |  | 
+   861→   910→   910→ |  |  |  | 
+   862→   911→   911→ |  |  |  | 
+   863→   912→   912→ |  |  |  | 
+   864→   913→   913→ |  |  |  | 
+   865→   914→   914→ |  |  |  | 
+   866→   915→   915→ | Total losses of cash written off |  |  | 
+   867→   916→   916→ | Losses of stores |  |  | 
+   868→   917→   917→ |  |  |  | 
+   869→   918→   918→ |  |  |  | 
+   870→   919→   919→ |  |  |  | 
+   871→   920→   920→ |  |  |  | 
+   872→   921→   921→ | Total losses of stores written off |  |  | 
+   873→   922→   922→ | Losses of other assets (Property, Plant & Equipment) |  |  | 
+   874→   923→   923→ |  |  |  | 
+   875→   924→   924→ |  |  |  | 
+   876→   925→   925→ |  |  |  | 
+   877→   926→   926→ | Total losses of other assets written off |  |  | 
+   878→   927→   927→ | Claims abandoned |  |  | 
+   879→   928→   928→ |  |  |  | 
+   880→   929→   929→ |  |  |  | 
+   881→   930→   930→ |  |  |  | 
+   882→   931→   931→ |  |  |  | 
+   883→   932→   932→ | Total value of claims abandoned |  |  | 
+   884→   933→   933→ | Total losses of public funds, stores and claims abandoned |  |  | 
+   885→   934→   934→
+   886→   935→   935→=== Table 61 ===
+   887→   936→   936→Reference number of reported loss/bad debt |  | Opening Balance as at 1 July 2024
+   888→   937→   937→
+   889→   938→   938→(Shs) | Losses for the YR ended
+   890→   939→   939→30 June 2025
+   891→   940→   940→
+   892→   941→   941→(Shs) | Cumulative 
+   893→   942→   942→Losses as at
+   894→   943→   943→30 June 2025
+   895→   944→   944→
+   896→   945→   945→(Shs)
+   897→   946→   946→ | Bad debts |  |  | 
+   898→   947→   947→ |  |  |  | 
+   899→   948→   948→ |  |  |  | 
+   900→   949→   949→ |  |  |  | 
+   901→   950→   950→ |  |  |  | 
+   902→   951→   951→ | Total bad debts |  |  | 
+   903→   952→   952→ | Losses of public moneys reported (cash and cash equivalents) |  |  | 
+   904→   953→   953→ |  |  |  | 
+   905→   954→   954→ |  |  |  | 
+   906→   955→   955→ |  |  |  | 
+   907→   956→   956→ |  |  |  | 
+   908→   957→   957→ |  |  |  | 
+   909→   958→   958→ | Total losses of cash |  |  | 
+   910→   959→   959→ | Losses of stores reported. |  |  | 
+   911→   960→   960→ |  |  |  | 
+   912→   961→   961→ | Total losses of stores reported |  |  | 
+   913→   962→   962→ | Losses of other assets (Property, Plant & Equipment) |  |  | 
+   914→   963→   963→ | Total losses of other assets reported |  |  | 
+   915→   964→   964→ | Total losses of public funds, stores and other assets reported |  |  | 
+   916→   965→   965→
+   917→   966→   966→=== Table 62 ===
+   918→   967→   967→Category/ Description | Opening balance
+   919→   968→   968→1 July 2024
+   920→   969→   969→Cost | Adjustments to the opening balance | Additions during the year
+   921→   970→   970→30 June 2025 | Accumulated Depreciation
+   922→   971→   971→30 June 2025 | Disposals/Transfers during the year
+   923→   972→   972→30 June 2025 | Net Book Value
+   924→   973→   973→30th June 2025
+   925→   974→   974→Non-Produced Assets |  |  |  |  |  | 
+   926→   975→   975→Land |  |  |  |  |  | 
+   927→   976→   976→Cultivated Assets |  |  |  |  |  | 
+   928→   977→   977→Other naturally occurring assets |  |  |  |  |  | 
+   929→   978→   978→Buildings & Structures |  |  |  |  |  | 
+   930→   979→   979→Non-Residential buildings |  |  |  |  |  | 
+   931→   980→   980→Residential buildings |  |  |  |  |  | 
+   932→   981→   981→Roads and bridges |  |  |  |  |  | 
+   933→   982→   982→Other structures |  |  |  |  |  | 
+   934→   983→   983→Transport equipment |  |  |  |  |  | 
+   935→   984→   984→Motor Vehicle-Bus |  |  |  |  |  | 
+   936→   985→   985→Trailers/ Semi-trailers |  |  |  |  |  | 
+   937→   986→   986→Ships and other marine vessels |  |  |  |  |  | 
+   938→   987→   987→Railway locomotives |  |  |  |  |  | 
+   939→   988→   988→Aircrafts |  |  |  |  |  | 
+   940→   989→   989→Motor cycles and Bicycles |  |  |  |  |  | 
+   941→   990→   990→Other transport equipment |  |  |  |  |  | 
+   942→   991→   991→Machinery and equipment |  |  |  |  |  | 
+   943→   992→   992→Office equipment |  |  |  |  |  | 
+   944→   993→   993→Medical equipment |  |  |  |  |  | 
+   945→   994→   994→ICT Equipment | 16,019,670 |  |  | 3,203,934 |  | 12,815,736
+   946→   995→   995→Laboratory and research equipment |  |  |  |  |  | 
+   947→   996→   996→Other Machinery & equipment |  |  |  |  |  | 
+   948→   997→   997→Other Assets |  |  |  |  |  | 
+   949→   998→   998→ |  |  |  |  |  | 
+   950→   999→   999→Bore Hole | 16,800,000 |  |  | 504,504 |  | 16,295,496
+   951→  1000→  1000→Others-Mowing machines |  |  |  |  |  | 
+   952→  1001→  1001→Total value of physical assets acquired, disposed of and balances | 32,819,670 |  |  | 3,708,438 |  | 29,111,232
+   953→  1002→  1002→
+   954→  1003→  1003→=== Table 63 ===
+   955→  1004→  1004→Project /Subvention Name | End Date | Funding Source/Agency | Currency | Balance as at 1 July 2024 | Disbursements for the Year | Payments for the Year | Balance as at 30 June 2025
+   956→  1005→  1005→Project balances |  |  |  |  |  |  | 
+   957→  1006→  1006→ |  |  |  |  |  |  | 
+   958→  1007→  1007→ |  |  |  |  |  |  | 
+   959→  1008→  1008→ |  |  |  |  |  |  | 
+   960→  1009→  1009→ |  |  |  |  |  |  | 
+   961→  1010→  1010→ |  |  |  |  |  |  | 
+   962→  1011→  1011→ |  |  |  |  |  |  | 
+   963→  1012→  1012→ |  |  |  |  |  |  | 
+   964→  1013→  1013→ |  |  |  |  |  |  | 
+   965→  1014→  1014→ |  |  |  |  |  |  | 
+   966→  1015→  1015→ |  |  |  |  |  |  | 
+   967→  1016→  1016→ |  |  |  |  |  |  | 
+   968→  1017→  1017→ |  |  |  |  |  |  | 
+   969→  1018→  1018→ |  |  |  |  |  |  | 
+   970→  1019→  1019→Subvention Balances |  |  |  |  |  |  | 
+   971→  1020→  1020→ |  |  |  |  |  |  | 
+   972→  1021→  1021→ |  |  |  |  |  |  | 
+   973→  1022→  1022→ |  |  |  |  |  |  | 
+   974→  1023→  1023→ |  |  |  |  |  |  | 
+   975→  1024→  1024→ |  |  |  |  |  |  | 
+   976→  1025→  1025→ |  |  |  |  |  |  | 
+   977→  1026→  1026→ |  |  |  |  |  |  | 
+   978→  1027→  1027→ |  |  |  |  |  |  | 
+   979→  1028→  1028→ |  |  |  |  |  |  | 
+   980→  1029→  1029→ |  |  |  |  |  |  | 
+   981→  1030→  1030→
+   982→  1031→  1031→=== Table 64 ===
+   983→  1032→  1032→Name of Supplier | LC Number | Due date | Bank | Currency | Amount
+   984→  1033→  1033→ |  |  |  |  | 
+   985→  1034→  1034→ |  |  |  |  | 
+   986→  1035→  1035→ |  |  |  |  | 
+   987→  1036→  1036→ |  |  |  |  | 
+   988→  1037→  1037→ |  |  |  |  | 
+   989→  1038→  1038→ |  |  |  |  | 
+   990→  1039→  1039→ |  |  |  |  | 
+   991→  1040→  1040→ |  |  |  |  | 
+   992→  1041→  1041→ |  |  |  |  | 
+   993→  1042→  1042→ |  |  |  |  | 
+   994→  1043→  1043→ |  |  |  |  | 
+   995→  1044→  1044→ |  |  |  |  | 
+   996→  1045→  1045→ |  |  |  |  | 
+   997→  1046→  1046→ |  |  |  |  | 
+   998→  1047→  1047→ |  |  |  |  | 
+   999→  1048→  1048→ |  |  |  |  | 
+  1000→  1049→  1049→ |  |  |  |  | 
+  1001→  1050→  1050→ |  |  |  |  | 
+  1002→  1051→  1051→ |  |  |  |  | 
+  1003→  1052→  1052→ |  |  |  |  | 
+  1004→  1053→  1053→ |  |  |  |  | 
+  1005→  1054→  1054→ |  |  |  |  | 
+  1006→  1055→  1055→ |  |  |  |  | 
+  1007→  1056→  1056→ |  |  |  |  | 
+  1008→  1057→  1057→ |  |  |  |  | 
+  1009→  1058→  1058→
+  1010→  1059→  1059→=== Table 65 ===
+  1011→  1060→  1060→# | Asset Class (Major) | Asset Sub-class (Minor 1) | Asset Sub-sub-class (Minor 2) | Depreciate (Yes/No?) | Depreciation Method | Economic life for Depreciation in Years | Salvage Value
+  1012→  1061→  1061→1 | BUILDINGS AND STRUCTURES | STRUCTURES | ROADS AND BRIDGES | Yes | STL | 25 | 0
+  1013→  1062→  1062→2 | BUILDINGS AND STRUCTURES | STRUCTURES | AIRPORTS AND AIRFIELDS | Yes | STL | 25 | 0
+  1014→  1063→  1063→3 | BUILDINGS AND STRUCTURES | STRUCTURES | RAILWAYS AND SUBWAYS | Yes | STL | 50 | 0
+  1015→  1064→  1064→4 | BUILDINGS AND STRUCTURES | STRUCTURES | OIL PIPELINES RESERVOIRS | Yes | STL | 50 | 0
+  1016→  1065→  1065→5 | BUILDINGS AND STRUCTURES | STRUCTURES | WATER SUPPLY SYSTEMS | Yes | STL | 33.3 | 0
+  1017→  1066→  1066→6 | BUILDINGS AND STRUCTURES | STRUCTURES | POWER LINES STATIONS PLANTS | Yes | STL | 20 | 0
+  1018→  1067→  1067→7 | BUILDINGS AND STRUCTURES | STRUCTURES | ICT NETWORK LINES | Yes | STL | 20 | 0
+  1019→  1068→  1068→8 | BUILDINGS AND STRUCTURES | STRUCTURES | OTHER STRUCTURES | Yes | STL | 20 | 0
+  1020→  1069→  1069→9 | BUILDINGS AND STRUCTURES | DWELLINGS | RESIDENTIAL BUILDINGS | Yes | STL | 50 | 0
+  1021→  1070→  1070→10 | BUILDINGS AND STRUCTURES | DWELLINGS | OTHER DWELLINGS | Yes | STL | 50 | 0
+  1022→  1071→  1071→11 | BUILDINGS AND STRUCTURES | BUILDINGS OTHER THAN DWELLINGS | NON-RESIDENTIAL BUILDINGS | Yes | STL | 50 | 0
+  1023→  1072→  1072→12 | BUILDINGS AND STRUCTURES | BUILDINGS OTHER THAN DWELLINGS | BUILDINGS OTHER THAN DWELLINGS | Yes | STL | 50 | 0
+  1024→  1073→  1073→13 | MACHINERY AND EQUIPMENT | TRANSPORT EQUIPMENT | HEAVY VEHICLES | Yes | STL | 10 | 0
+  1025→  1074→  1074→14 | MACHINERY AND EQUIPMENT | TRANSPORT EQUIPMENT | LIGHT VEHICLES | Yes | STL | 5 | 0
+  1026→  1075→  1075→15 | MACHINERY AND EQUIPMENT | TRANSPORT EQUIPMENT | WATER VESSELS | Yes | STL | 10 | 0
+  1027→  1076→  1076→16 | MACHINERY AND EQUIPMENT | TRANSPORT EQUIPMENT | AIRCRAFTS | Yes | STL | 20 | 0
+  1028→  1077→  1077→17 | MACHINERY AND EQUIPMENT | TRANSPORT EQUIPMENT | TRAIN ENGINES AND WAGONS | Yes | STL | 30 | 0
+  1029→  1078→  1078→18 | MACHINERY AND EQUIPMENT | TRANSPORT EQUIPMENT | CYCLES | Yes | STL | 5 | 0
+  1030→  1079→  1079→19 | MACHINERY AND EQUIPMENT | TRANSPORT EQUIPMENT | OTHER TRANSPORT EQUIPMENT | Yes | STL | 5 | 0
+  1031→  1080→  1080→20 | MACHINERY AND EQUIPMENT | ICT EQUIPMENT | LIGHT ICT HARDWARE | Yes | STL | 5 | 0
+  1032→  1081→  1081→21 | MACHINERY AND EQUIPMENT | ICT EQUIPMENT | HEAVY ICT HARDWARE | Yes | STL | 5 | 0
+  1033→  1082→  1082→22 | MACHINERY AND EQUIPMENT | ICT EQUIPMENT | TELEVISION RADIO TRANSMITTER | Yes | STL | 5 | 0
+  1034→  1083→  1083→23 | MACHINERY AND EQUIPMENT | ICT EQUIPMENT | OTHER ICT EQUIPMENT | Yes | STL | 5 | 0
+  1035→  1084→  1084→24 | MACHINERY AND EQUIPMENT | OTHER MACHINERY AND EQUIPMENT | OFFICE EQUIPMENT | Yes | STL | 5 | 0
+  1036→  1085→  1085→25 | MACHINERY AND EQUIPMENT | OTHER MACHINERY AND EQUIPMENT | ELECTRICAL MACHINERY | Yes | STL | 5 | 0
+  1037→  1086→  1086→26 | MACHINERY AND EQUIPMENT | OTHER MACHINERY AND EQUIPMENT | MED LAB RESEARCH APPLIANCES | Yes | STL | 5 | 0
+  1038→  1087→  1087→27 | MACHINERY AND EQUIPMENT | OTHER MACHINERY AND EQUIPMENT | PRECISION OPTICAL INSTRUMENTS | Yes | STL | 5 | 0
+  1039→  1088→  1088→28 | MACHINERY AND EQUIPMENT | OTHER MACHINERY AND EQUIPMENT | FURNITURE AND FITTINGS | Yes | STL | 5 | 0
+  1040→  1089→  1089→29 | MACHINERY AND EQUIPMENT | OTHER MACHINERY AND EQUIPMENT | MUSICAL INSTRUMENTS | Yes | STL | 5 | 0
+  1041→  1090→  1090→30 | MACHINERY AND EQUIPMENT | OTHER MACHINERY AND EQUIPMENT | SPORTS EQUIPMENT | Yes | STL | 5 | 0
+  1042→  1091→  1091→31 | WEAPONS SYSTEMS | CLASSIFIED ASSETS | CLASSIFIED ASSETS | No | STL | 10 | 0
+  1043→  1092→  1092→32 | WEAPONS SYSTEMS | NON-CLASSIFIED | NON-CLASSIFIED | N/A | N/A | N/A | N/A
+  1044→  1093→  1093→33 | OTHER FIXED ASSETS | BIOLOGICAL ASSETS | CULTIVATED ANIMALS | No | STL | 5 | 0
+  1045→  1094→  1094→34 | OTHER FIXED ASSETS | BIOLOGICAL ASSETS | CULTIVATED PLANTS | No | STL | 5 | 0
+  1046→  1095→  1095→35 | OTHER FIXED ASSETS | INTELLECTUAL PROPERTY PRODUCTS | RESEARCH AND DEVELOPMENT | Yes | STL | 5 | 0
+  1047→  1096→  1096→36 | OTHER FIXED ASSETS | INTELLECTUAL PROPERTY PRODUCTS | MINERAL EXPLORATIO EVALUATION | Yes | STL | 5 | 0
+  1048→  1097→  1097→37 | OTHER FIXED ASSETS | INTELLECTUAL PROPERTY PRODUCTS | COMPUTER SOFTWARE | Yes | STL | 5 | 0
+  1049→  1098→  1098→38 | OTHER FIXED ASSETS | INTELLECTUAL PROPERTY PRODUCTS | COMPUTER DATABASES | Yes | STL | 5 | 0
+  1050→  1099→  1099→39 | OTHER FIXED ASSETS | INTELLECTUAL PROPERTY PRODUCTS | ENT LIT ARTISTIC ORIGINALS | Yes | STL | 5 | 0
+  1051→  1100→  1100→40 | OTHER FIXED ASSETS | INTELLECTUAL PROPERTY RIGHTS | COPY RIGHT NEIGHBOURING RIGHTS | Yes | STL | 5 | 0
+  1052→  1101→  1101→41 | OTHER FIXED ASSETS | INTELLECTUAL PROPERTY RIGHTS | PATENTS OR UTILITY MODEL | Yes | STL | 5 | 0
+  1053→  1102→  1102→42 | OTHER FIXED ASSETS | INTELLECTUAL PROPERTY RIGHTS | TRADE SECRETS | Yes | STL | 5 | 0
+  1054→  1103→  1103→43 | OTHER FIXED ASSETS | GOODWILL AND MARKETING ASSETS | GOODWILL AND MARKETING ASSETS | Yes | STL | 5 | 0
+  1055→  1104→  1104→44 | OTHER FIXED ASSETS | GOODWILL AND MARKETING ASSETS | OTHER INTELLECTUAL PROPERTY PR | Yes | STL | 5 | 0
+  1056→  1105→  1105→45 | VALUABLES | VALUABLES | NATIONAL TREASURES | Yes | STL | 50 | 0
+  1057→  1106→  1106→46 | MINERALS AND ENERGY RESOURCES | MINERALS AND ENERGY RESOURCES | MINERALS | No | N/A | 5 | N/A
+  1058→  1107→  1107→47 | MINERALS AND ENERGY RESOURCES | MINERALS AND ENERGY RESOURCES | OIL AND NATURAL GAS | No | N/A | 5 | N/A
+  1059→  1108→  1108→48 | MINERALS AND ENERGY RESOURCES | MINERALS AND ENERGY RESOURCES | ENERGY RESOURCES | No | N/A | 5 | 0
+  1060→  1109→  1109→49 | MINERALS AND ENERGY RESOURCES | MINERALS AND ENERGY RESOURCES | OTHER MINERAL AND ENERGY RESOU | No | N/A | 5 | 0
+  1061→  1110→  1110→50 | LAND | LAND | LAND | No | N/A | 50 | 0
+  1062→  1111→  1111→51 | NATURALLY OCCURRING ASSETS | NON-CULTIVATED BIOLOGICAL | WILD ANIMALS | No | N/A | 5 | 0
+  1063→  1112→  1112→52 | NATURALLY OCCURRING ASSETS | NON-CULTIVATED BIOLOGICAL | PLANTS | No | N/A | 5 | 0
+  1064→  1113→  1113→53 | NATURALLY OCCURRING ASSETS | WATER RESOURCES | LAKES | No | N/A | 5 | 0
+  1065→  1114→  1114→54 | NATURALLY OCCURRING ASSETS | WATER RESOURCES | RIVERS AND STEAMS | No | N/A | 50 | 0
+  1066→  1115→  1115→55 | NATURALLY OCCURRING ASSETS | WATER RESOURCES | SWAMPS AND WETLANDS | No | N/A | 5 | 0
+  1067→  1116→  1116→56 | NATURALLY OCCURRING ASSETS | WATER RESOURCES | OTHER WATER RESOURCES | No | N/A | 5 | 0
+  1068→  1117→  1117→57 | NATURALLY OCCURRING ASSETS | AIRSPACE | RADIO SPECTRUM | No | N/A | 5 | 0
+  1069→  1118→  1118→58 | NATURALLY OCCURRING ASSETS | AIRSPACE | AVIATION AIRSPACE | No | N/A | 5 | 0
+  1070→  1119→  1119→59 | NATURALLY OCCURRING ASSETS | NON-CULTIVATED NON-BIOLOGICAL | MOUNTAINS AND ROCKS | No | N/A | 50 | 0
+  1071→  1120→  1120→60 | NATURALLY OCCURRING ASSETS | NON-CULTIVATED NON-BIOLOGICAL | OTHER NATURAL RESOURCES | No | N/A | 5 | 0
+  1072→  1121→  1121→61 | INTANGIBLE ASSETS | INTANGIBLE ASSETS | MARKETABLE OPERATING LEASES | No | N/A | 5 | 0
+  1073→  1122→  1122→62 | INTANGIBLE ASSETS | INTANGIBLE ASSETS | PERMITS NATURAL RESOURCES | No | N/A | 5 | 0
+  1074→  1123→  1123→63 | INTANGIBLE ASSETS | INTANGIBLE ASSETS | SPECIAL PERMITS | No | N/A | 5 | 0
+  1075→  1124→  1124→64 | INTANGIBLE ASSETS | INTANGIBLE ASSETS | FUTURE ENTITLEMENTS | No | N/A | 5 | 0
+  1076→  1125→  1125→65 | INTANGIBLE ASSETS | INTANGIBLE ASSETS | GOODWILL AND MARKETING ASSETS | No | N/A | 5 | 0
+  1077→  1126→  1126→66 | INTANGIBLE ASSETS | INTANGIBLE ASSETS | OTHER INTELLECTUAL PROP PDTS | No | N/A | 50 | 
+  1078→  1127→  1127→
+  1079→  1128→  1128→=== Table 66 ===
+  1080→  1129→  1129→Revised Budget Estimate |  | 30-Jun-2025 | 30-Jun-2025
+  1081→  1130→  1130→2024/2025 |  | DR | CR
+  1082→  1131→  1131→167,921,378 | Capitation and block grant |  | 167,921,378
+  1083→  1132→  1132→0 | Training Material |  | 0
+  1084→  1133→  1133→931,713,866 | Students Fees Income |  | 931,713,866
+  1085→  1134→  1134→0 | Selection Exercise |  | 0
+  1086→  1135→  1135→1,300,000 | Graduation |  | 1,300,000
+  1087→  1136→  1136→31,100,000 | Others items in kind (new comers) |  | 31,100,000
+  1088→  1137→  1137→12,200,000 | Transfers received from other Government Units |  | 12,200,000
+  1089→  1138→  1138→1,144,235,244 |  |  | 1,144,235,244
+  1090→  1139→  1139→ | Employee costs and other Employee expenses |  | 
+  1091→  1140→  1140→63,000,000 | Staff salaries | 62,090,500 | 
+  1092→  1141→  1141→20,300,000 | Staff Welfare | 20,210,500 | 
+  1093→  1142→  1142→13,500,000 | B.O.G Expenditure | 13,310,000 | 
+  1094→  1143→  1143→7,600,000 | Staff break Tea & Package | 7,516,800 | 
+  1095→  1144→  1144→420,000 | Staff uniform and protective wear | 415,000 | 
+  1096→  1145→  1145→7,000,000 | Condolences, Contributions, and donations | 6,942,000 | 
+  1097→  1146→  1146→111,820,000 | Sub-total | 110,484,800 | 
+  1098→  1147→  1147→ |  |  | 
+  1099→  1148→  1148→ | Recreation and other welfare expenses |  | 
+  1100→  1149→  1149→11,500,000 | Games & Sports | 11,265,000 | 
+  1101→  1150→  1150→24,000,000 | Health care for students and staff | 23,653,300 | 
+  1102→  1151→  1151→0 | Entertainment to staff | 0 | 
+  1103→  1152→  1152→2,500,000 | DSTV to Students and staff | 2,098,000 | 
+  1104→  1153→  1153→38,000,000 | Sub-total | 37,016,300 | 
+  1105→  1154→  1154→ |  |  | 
+  1106→  1155→  1155→ | Utilities and property expenses |  | 
+  1107→  1156→  1156→50,000,000 | Water and electricity bills | 48,813,000 | 
+  1108→  1157→  1157→8,000,000 | Students hostels and classrooms | 7,526,888 | 
+  1109→  1158→  1158→22,764,700 | Security Services/CCTV cameras | 22,764,700 | 
+  1110→  1159→  1159→80,764,700 | Sub-total | 79,104,588 | 
+  1111→  1160→  1160→ |  |  | 
+  1112→  1161→  1161→ | Teaching Goods and Services |  | 
+  1113→  1162→  1162→7,000,000 | Postal and telephone | 6,860,000 | 
+  1114→  1163→  1163→22,000,000 | Printing and stationary | 21,052,600 | 
+  1115→  1164→  1164→5,000,000 | Advertising and public relations | 4,150,000 | 
+  1116→  1165→  1165→2,000,000 | Plumbing departing | 1,826,460 | 
+  1117→  1166→  1166→25,000,000 | Building construction department | 24,039,200 | 
+  1118→  1167→  1167→3,500,000 | Automotive Mechanics Department | 3,404,000 | 
+  1119→  1168→  1168→2,200,000 | Machine and Fitting department | 2,183,000 | 
+  1120→  1169→  1169→10,500,000 | Fashion and Garment Design department | 10,442,000 | 
+  1121→  1170→  1170→500,000 | ICT Department | 349,000 | 
+  1122→  1171→  1171→4,315,000 | Wood work technology department | 19,372,400 | 
+  1123→  1172→  1172→19,372,400 | Electrical installation systems department | 4,315,000 | 
+  1124→  1173→  1173→304,000,000 | Foodstuff | 303,912,600 | 
+  1125→  1174→  1174→10,100,000 | Firewood | 10,085,640 | 
+  1126→  1175→  1175→18,927,868 | Debt Servicing | 0 | 
+  1127→  1176→  1176→0 | Chapel | 0 | 
+  1128→  1177→  1177→434,415,268 | Sub-total | 411,991,900 | 
+  1129→  1178→  1178→ |  |  | 
+  1130→  1179→  1179→ | Travel and transport |  | 
+  1131→  1180→  1180→33,500,000 | Traveling and subsistence allowance | 33,319,000 | 
+  1132→  1181→  1181→53,500,000 | Safari day allowance | 53,378,000 | 
+  1133→  1182→  1182→500,000 | Hire of Transport/Services | 395,000 | 
+  1134→  1183→  1183→42,000,000 | Fuel and lubricants | 41,788,525 | 
+  1135→  1184→  1184→129,500,000 | Sub-total | 128,880,525 | 
+  1136→  1185→  1185→ | OTHER CAPITAL DEVELOPMENT EXPENSES |  | 
+  1137→  1186→  1186→13,500,000 | Septic tank Latrine Emptying | 13,303,000 | 
+  1138→  1187→  1187→3,500,000 | Maintenance of Compound Machines | 3,275,000 | 
+  1139→  1188→  1188→25,000,000 | Operation & Maintenance of Vehicles | 24,251,964 | 
+  1140→  1189→  1189→24,200,000 | Maintenance of Buildings Roads talking Compound, and renovations | 24,186,660 | 
+  1141→  1190→  1190→650,000 | Planting and Maintenance of trees | 610,000 | 
+  1142→  1191→  1191→3,500,000 | Comprehensive Insurance & 3rd Party | 3,428,000 | 
+  1143→  1192→  1192→3,500,000 | Maintenance of Machines | 3,243,750 | 
+  1144→  1193→  1193→73,850,000 | Sub-Total | 72,298,374 | 
+  1145→  1194→  1194→ |  |  | 
+  1146→  1195→  1195→44,832,000 | UBTEB Exam Registration | 44,832,000 | 
+  1147→  1196→  1196→145,054,776 | Ubteb Exams Materials | 145,054,776 | 
+  1148→  1197→  1197→3,000,000 | Workshops & Seminars | 2,944,000 | 
+  1149→  1198→  1198→1,100,000 | Staff & Students Utensils | 1,076,400 | 
+  1150→  1199→  1199→500,000 | Graduation Ceremony | 400,000 | 
+  1151→  1200→  1200→5,500,000 | Chapel | 5,433,500 | 
+  1152→  1201→  1201→7,700,000 | Industrial training Supervision | 7,640,000 | 
+  1153→  1202→  1202→9,350,000 | Guild Expenses | 9,350,000 | 
+  1154→  1203→  1203→310,000 | UNSA Expenses | 310,000 | 
+  1155→  1204→  1204→3,240,000 | Patriotism | 3,240,000 | 
+  1156→  1205→  1205→55,298,500 | Students Uniforms | 55,298,500 | 
+  1157→  1206→  1206→275,885,276 | Sub-Total | 275,579,176 | 
+  1158→  1207→  1207→ |  |  | 
+  1159→  1208→  1208→ | ICT Equipment | 16,019,670 | 
+  1160→  1209→  1209→ | Bore hole | 16,800,000 | 
+  1161→  1210→  1210→ | Sub-Total | 32,819,670 | 
+  1162→  1211→  1211→ |  |  | 
+  1163→  1212→  1212→ | Depreciation expense for the year | 3,708,438 | 
+  1164→  1213→  1213→ | Debtors | 143,476,563 | 
+  1165→  1214→  1214→ | Creditors | 0 | 59,215,130
+  1166→  1215→  1215→ | Bank Closing balances as at June 2025 | 102,448,606 | 
+  1167→  1216→  1216→ | Accumulated Depreciation |  | 3,708,438
+  1168→  1217→  1217→ | Reserves |  | 190,650,128
+  1169→  1218→  1218→1,144,235,244 | Total | 1,397,808,940 | 1,397,808,940
+  1170→  1219→  1219→
+  1171→  1220→  1220→=== Table 67 ===
+  1172→  1221→  1221→DOMESTIC | 30 June 2025
+  1173→  1222→  1222→UShs
+  1174→  1223→  1223→Stanbic Grant A/C 0140050252501 | 5,861,042
+  1175→  1224→  1224→Stanbic A/C 0140050245001 | 752,680
+  1176→  1225→  1225→Centenary Bank A/C 4510613099 | 95,834,884
+  1177→  1226→  1226→Total cash and bank balance held in local currency | 102,448,606
+  1178→  1227→  1227→
+  1179→  1228→  1228→=== Table 68 ===
+  1180→  1229→  1229→S/N | First Name | Middle Name | Last Name | Class Code | Outstanding Balance
+  1181→  1230→  1230→1 | Abali | Ben | Jonathan | AM YR1 | 726,000
+  1182→  1231→  1231→2 | Abilo |  | Isaac | AM YR1 | 497,000
+  1183→  1232→  1232→3 | Akol |  | Aloysius | AM YR1 | 509,000
+  1184→  1233→  1233→4 | Alomu |  | Joseph | AM YR1 | -
+  1185→  1234→  1234→5 | Amosing |  | Joseph | AM YR1 | 681,000
+  1186→  1235→  1235→6 | Amuron | Felistar | Vicky | AM YR1 | 403,000
+  1187→  1236→  1236→7 | Aogon |  | Isaac | AM YR1 | -
+  1188→  1237→  1237→8 | Aporu | Raymond | Job | AM YR1 | -
+  1189→  1238→  1238→9 | Ariko |  | Joseph | AM YR1 | 674,000
+  1190→  1239→  1239→10 | Asege |  | Comfort | AM YR1 | 398,000
+  1191→  1240→  1240→11 | Ebiru | Agape | Saviour | AM YR1 | -
+  1192→  1241→  1241→12 | Ebulet | Allan | Trevour | AM YR1 | 1,209,000
+  1193→  1242→  1242→13 | Egimu |  | Ivan | AM YR1 | 384,000
+  1194→  1243→  1243→14 | Ejanyu |  | Mackay | AM YR1 | 159,200
+  1195→  1244→  1244→15 | Ekiu |  | Martin | AM YR1 | 69,000
+  1196→  1245→  1245→16 | Ekunyuk |  | Emmanuel | AM YR1 | -
+  1197→  1246→  1246→17 | Eminai |  | Asher | AM YR1 | 210,000
+  1198→  1247→  1247→18 | Emorut |  | Francis | AM YR1 | 906,978
+  1199→  1248→  1248→19 | Emwodu |  | Tom | AM YR1 | -
+  1200→  1249→  1249→20 | Epel | George | William | AM YR1 | 710,000
+  1201→  1250→  1250→21 | Erone |  | Gabriel | AM YR1 | -
+  1202→  1251→  1251→22 | Etolu |  | Pius | AM YR1 | 1,209,000
+  1203→  1252→  1252→23 | Ewai |  | Emmanuel | AM YR1 | -
+  1204→  1253→  1253→24 | Hatima |  | Juma | AM YR1 | -
+  1205→  1254→  1254→25 | Imongit |  | Dominic | AM YR1 | -
+  1206→  1255→  1255→26 | Kedi |  | George | AM YR1 | 60,000
+  1207→  1256→  1256→27 | Kiluyi |  | Aggrey | AM YR1 | -
+  1208→  1257→  1257→28 | Kumungu |  | Fanuel | AM YR1 | 335,000
+  1209→  1258→  1258→29 | Ocen |  | Gideon | AM YR1 | -
+  1210→  1259→  1259→30 | Ocen | Mark | Anthony | AM YR1 | -
+  1211→  1260→  1260→31 | Ocugo |  | Samuel | AM YR1 | 188,000
+  1212→  1261→  1261→32 | Odeke |  | Benard | AM YR1 | -
+  1213→  1262→  1262→33 | Odongo |  | Sostine | AM YR1 | -
+  1214→  1263→  1263→34 | Ogwang |  | Isaac | AM YR1 | -
+  1215→  1264→  1264→35 | Ojula |  | Emmanuel | AM YR1 | -
+  1216→  1265→  1265→36 | Okello |  | Benjamin | AM YR1 | -
+  1217→  1266→  1266→37 | Okello | Thomas | Emmanuel | AM YR1 | 200,000
+  1218→  1267→  1267→38 | Okiria |  | Robert | AM YR1 | 200,000
+  1219→  1268→  1268→39 | Okwakol |  | Joshua | AM YR1 | -
+  1220→  1269→  1269→40 | Oleicho |  | Moris | AM YR1 | 534,800
+  1221→  1270→  1270→41 | Olila |  | Ivan | AM YR1 | 32,000
+  1222→  1271→  1271→42 | Olinga |  | Edward | AM YR1 | -
+  1223→  1272→  1272→43 | Oloit |  | Enock | AM YR1 | 210,000
+  1224→  1273→  1273→44 | Omino |  | Emmanuel | AM YR1 | -
+  1225→  1274→  1274→45 | Omoding | Okello | Robert | AM YR1 | -
+  1226→  1275→  1275→46 | Omoding |  | Michael | AM YR1 | 710,000
+  1227→  1276→  1276→47 | Omule | Elias | Andrew | AM YR1 | 202,300
+  1228→  1277→  1277→48 | Omwasa |  | Richard | AM YR1 | -
+  1229→  1278→  1278→49 | Onyanya |  | Samuel | AM YR1 | 509,000
+  1230→  1279→  1279→50 | Opale |  | Fabiano | AM YR1 | 199,000
+  1231→  1280→  1280→51 | Opejo |  | Sam | AM YR1 | -
+  1232→  1281→  1281→52 | Opio |  | Emmanuel | AM YR1 | -
+  1233→  1282→  1282→53 | Orono |  | Jeremiah | AM YR1 | 331,000
+  1234→  1283→  1283→54 | Otiti |  | Abel | AM YR1 | 489,000
+  1235→  1284→  1284→55 | Winyona |  | Isaac | AM YR1 | 1,337,000
+  1236→  1285→  1285→56 | Adungo |  | Emmanuel | AM YR2 | 210,000
+  1237→  1286→  1286→57 | Akol |  | Ben | AM YR2 | 10,000
+  1238→  1287→  1287→58 | Akope |  | Daniel | AM YR2 | -
+  1239→  1288→  1288→59 | Akora |  | Thomathy | AM YR2 | 2,472,000
+  1240→  1289→  1289→60 | Alado | Hilda | Mercy | AM YR2 | 375,000
+  1241→  1290→  1290→61 | Alenyo |  | Gereshom | AM YR2 | 310,000
+  1242→  1291→  1291→62 | Amongin | Gloria | Okalebo | AM YR2 | 406,000
+  1243→  1292→  1292→63 | Angita |  | Emmanuel | AM YR2 | 1,931,000
+  1244→  1293→  1293→64 | Anoto |  | Susan | AM YR2 | -
+  1245→  1294→  1294→65 | Apio | Scovia | Emodu | AM YR2 | 112,495
+  1246→  1295→  1295→66 | Aturia |  | Jasper | AM YR2 | 2,231,000
+  1247→  1296→  1296→67 | Cela |  | Pius | AM YR2 | 260,000
+  1248→  1297→  1297→68 | Egonyu |  | Moses | AM YR2 | 249,095
+  1249→  1298→  1298→69 | Elida | Haggai | Paul | AM YR2 | -
+  1250→  1299→  1299→70 | Enguyu |  | Jacob | AM YR2 | 210,000
+  1251→  1300→  1300→71 | Erayu |  | Powell | AM YR2 | 280,000
+  1252→  1301→  1301→72 | Etegu |  | Abdallah | AM YR2 | 1,521,000
+  1253→  1302→  1302→73 | Isami |  | John | AM YR2 | -
+  1254→  1303→  1303→74 | Iyoka |  | Silvester | AM YR2 | 1,805,000
+  1255→  1304→  1304→75 | Kasajja |  | Emmanuel | AM YR2 | 210,000
+  1256→  1305→  1305→76 | Lwembawo |  | Abubakari | AM YR2 | -
+  1257→  1306→  1306→77 | Malinga |  | Timothy | AM YR2 | 710,000
+  1258→  1307→  1307→78 | Maraka | Herbert | Daniel | AM YR2 | 2,121,000
+  1259→  1308→  1308→79 | Mayinja |  | Benjamin | AM YR2 | 240,000
+  1260→  1309→  1309→80 | Mukula |  | John | AM YR2 | -
+  1261→  1310→  1310→81 | Mwiluli |  | Kevin | AM YR2 | 290,000
+  1262→  1311→  1311→82 | Odeke | Ivan | Jacob | AM YR2 | -
+  1263→  1312→  1312→83 | Odongo |  | Joseph | AM YR2 | 205,000
+  1264→  1313→  1313→84 | Oduutu |  | Joshua | AM YR2 | 310,000
+  1265→  1314→  1314→85 | Ojok |  | Ronald | AM YR2 | 1,521,000
+  1266→  1315→  1315→86 | Ojore |  | Brian | AM YR2 | 606,000
+  1267→  1316→  1316→87 | Ojur |  | Simon | AM YR2 | 710,000
+  1268→  1317→  1317→88 | Okello | Carlo | David | AM YR2 | 14,000
+  1269→  1318→  1318→89 | Okiria |  | Samuel | AM YR2 | 10,000
+  1270→  1319→  1319→90 | Okiror | Ivan | Mark | AM YR2 | -
+  1271→  1320→  1320→91 | Okwii |  | Andrew | AM YR2 | 237,400
+  1272→  1321→  1321→92 | Omiji |  | Isaac | AM YR2 | -
+  1273→  1322→  1322→93 | Oneno |  | Moris | AM YR2 | 200,000
+  1274→  1323→  1323→94 | Ongola |  | Daniel | AM YR2 | 371,000
+  1275→  1324→  1324→95 | Opara |  | Silver | AM YR2 | -
+  1276→  1325→  1325→96 | Opio |  | Emmanuel | AM YR2 | -
+  1277→  1326→  1326→97 | Opio | Aarakit | Emmanuel | AM YR2 | 130,000
+  1278→  1327→  1327→98 | Opolo | Emmanuel | Winston | AM YR2 | 505,000
+  1279→  1328→  1328→99 | Osauk |  | Ignatius | AM YR2 | 890,000
+  1280→  1329→  1329→100 | Wesamoyo |  | Adam | AM YR2 | -
+  1281→  1330→  1330→101 | Adongo | Hellen | Brenda | BC YR1 | 329,000
+  1282→  1331→  1331→102 | Ajena |  | Samson | BC YR1 | 161,220
+  1283→  1332→  1332→103 | Amuge |  | Caroline | BC YR1 | 543,000
+  1284→  1333→  1333→104 | Anyou |  | Levi | BC YR1 | 210,000
+  1285→  1334→  1334→105 | Apungia |  | Moses | BC YR1 | -
+  1286→  1335→  1335→106 | Asianut |  | Denis | BC YR1 | -
+  1287→  1336→  1336→107 | Asire |  | Lucy | BC YR1 | -
+  1288→  1337→  1337→108 | Atuko |  | Selina | BC YR1 | 526,000
+  1289→  1338→  1338→109 | Cheptoyet |  | Ashum | BC YR1 | 710,000
+  1290→  1339→  1339→110 | Ecau |  | Stephen | BC YR1 | -
+  1291→  1340→  1340→111 | Elanyu |  | Ivan | BC YR1 | 409,000
+  1292→  1341→  1341→112 | Emongu | Simon | Peter | BC YR1 | -
+  1293→  1342→  1342→113 | Enomu |  | Douglas | BC YR1 | 49,000
+  1294→  1343→  1343→114 | Erau |  | Emmanuel | BC YR1 | 181,000
+  1295→  1344→  1344→115 | Lochoro |  | Moses | BC YR1 | 710,000
+  1296→  1345→  1345→116 | Obua |  | Jildo | BC YR1 | -
+  1297→  1346→  1346→117 | Ocen |  | Tonny | BC YR1 | -
+  1298→  1347→  1347→118 | Ochela |  | Anthony | BC YR1 | 534,800
+  1299→  1348→  1348→119 | Odeke |  | Isaac | BC YR1 | -
+  1300→  1349→  1349→120 | Ogwang |  | Abel | BC YR1 | 909,000
+  1301→  1350→  1350→121 | Okao |  | Daniel | BC YR1 | 210,000
+  1302→  1351→  1351→122 | Okello |  | Joshua | BC YR1 | 729,000
+  1303→  1352→  1352→123 | Okiring | Martin | Onyait | BC YR1 | 509,000
+  1304→  1353→  1353→124 | Okiror | Mark | Opolot | BC YR1 | -
+  1305→  1354→  1354→125 | Okitoi |  | Thomas | BC YR1 | -
+  1306→  1355→  1355→126 | Okurut |  | James | BC YR1 | 210,000
+  1307→  1356→  1356→127 | Okwii |  | Fred | BC YR1 | 185,000
+  1308→  1357→  1357→128 | Olupot | George | William | BC YR1 | -
+  1309→  1358→  1358→129 | Omongole |  | Pius | BC YR1 | 261,000
+  1310→  1359→  1359→130 | Onyait |  | Philips | BC YR1 | 509,000
+  1311→  1360→  1360→131 | Opolot | Innocent | Daniel | BC YR1 | -
+  1312→  1361→  1361→132 | Opolot |  | Morris | BC YR1 | 387,000
+  1313→  1362→  1362→133 | Osege |  | Jonathan | BC YR1 | -
+  1314→  1363→  1363→134 | Osele |  | Valerian | BC YR1 | -
+  1315→  1364→  1364→135 | Oumo |  | Julius | BC YR1 | -
+  1316→  1365→  1365→136 | Somikwo |  | Joshua | BC YR1 | 297,000
+  1317→  1366→  1366→137 | Achoroi |  | Joseph | BC YR2 | 284,000
+  1318→  1367→  1367→138 | Adungo |  | Martin | BC YR2 | -
+  1319→  1368→  1368→139 | Akiteng | Sharon | Loy | BC YR2 | -
+  1320→  1369→  1369→140 | Akubal | John | Michael | BC YR2 | -
+  1321→  1370→  1370→141 | Aleo | Scovia | Judith | BC YR2 | 321,000
+  1322→  1371→  1371→142 | Amolo |  | Nathan | BC YR2 | 271,000
+  1323→  1372→  1372→143 | Amulen |  | Sarah | BC YR2 | 1,281,000
+  1324→  1373→  1373→144 | Anyagan | Denis | Brian | BC YR2 | 1,011,000
+  1325→  1374→  1374→145 | Ecimu |  | Justine | BC YR2 | -
+  1326→  1375→  1375→146 | Egwadu |  | Didimos | BC YR2 | -
+  1327→  1376→  1376→147 | Emugu |  | Innocent | BC YR2 | 100,000
+  1328→  1377→  1377→148 | Engwau |  | Andrew | BC YR2 | 805,000
+  1329→  1378→  1378→149 | Erienyu |  | Rogers | BC YR2 | 210,000
+  1330→  1379→  1379→150 | Eswapu |  | Edward | BC YR2 | -
+  1331→  1380→  1380→151 | Lomongin |  | Emmanuel | BC YR2 | 154,000
+  1332→  1381→  1381→152 | Masinde |  | Shamim | BC YR2 | 260,000
+  1333→  1382→  1382→153 | Mukama |  | Bruno | BC YR2 | -
+  1334→  1383→  1383→154 | Naigo |  | Jerry | BC YR2 | -
+  1335→  1384→  1384→155 | Oboi |  | Fred | BC YR2 | 110,000
+  1336→  1385→  1385→156 | Ocen |  | Francis | BC YR2 | -
+  1337→  1386→  1386→157 | Ocen |  | Andrew | BC YR2 | 260,000
+  1338→  1387→  1387→158 | Okalebo |  | Amos | BC YR2 | 682,000
+  1339→  1388→  1388→159 | Okello | Didan | James | BC YR2 | -
+  1340→  1389→  1389→160 | Okello |  | Abraham | BC YR2 | -
+  1341→  1390→  1390→161 | Okello |  | Lameck | BC YR2 | 65,000
+  1342→  1391→  1391→162 | Okello | Robert | Emegu | BC YR2 | 500,000
+  1343→  1392→  1392→163 | Okia |  | Joel | BC YR2 | 110,000
+  1344→  1393→  1393→164 | Okou |  | Daniel | BC YR2 | -
+  1345→  1394→  1394→165 | Okudi |  | Isaac | BC YR2 | 1,053,300
+  1346→  1395→  1395→166 | Okure |  | Timothy | BC YR2 | -
+  1347→  1396→  1396→167 | Omagor |  | Aloysius | BC YR2 | 310,000
+  1348→  1397→  1397→168 | Omia |  | Gad | BC YR2 | 210,000
+  1349→  1398→  1398→169 | Omia | Lazarus | Atim | BC YR2 | 210,000
+  1350→  1399→  1399→170 | Omoit |  | Praise | BC YR2 | 394,000
+  1351→  1400→  1400→171 | Omongo | Linas | Libatin | BC YR2 | 96,000
+  1352→  1401→  1401→172 | Osaale |  | Paul | BC YR2 | -
+  1353→  1402→  1402→173 | Otai |  | Pius | BC YR2 | 280,000
+  1354→  1403→  1403→174 | Otemo |  | Benjamin | BC YR2 | 65,000
+  1355→  1404→  1404→175 | Otim | Brian | Okura | BC YR2 | 100,000
+  1356→  1405→  1405→176 | Otim | John | Robert | BC YR2 | 121,000
+  1357→  1406→  1406→177 | Otori |  | Ivan | BC YR2 | -
+  1358→  1407→  1407→178 | Rackara |  | Thomas | BC YR2 | 185,000
+  1359→  1408→  1408→179 | Aduk |  | Isaac | EISM YR1 | 310,000
+  1360→  1409→  1409→180 | Akwii |  | Joy | EISM YR1 | -
+  1361→  1410→  1410→181 | Amito |  | Cissylia | EISM YR1 | 710,000
+  1362→  1411→  1411→182 | Among |  | Brenda | EISM YR1 | 375,000
+  1363→  1412→  1412→183 | Amuriat |  | Nathan | EISM YR1 | -
+  1364→  1413→  1413→184 | Amwata |  | Aaron | EISM YR1 | 410,000
+  1365→  1414→  1414→185 | Angom |  | Rita | EISM YR1 | -
+  1366→  1415→  1415→186 | Aogon | Javis | Silas | EISM YR1 | 1,337,000
+  1367→  1416→  1416→187 | Apio | Petua | Osuban | EISM YR1 | 210,000
+  1368→  1417→  1417→188 | Ariko | John | Calvin | EISM YR1 | 70,000
+  1369→  1418→  1418→189 | Auta |  | Enos | EISM YR1 | 166,000
+  1370→  1419→  1419→190 | Baseke |  | Juma | EISM YR1 | -
+  1371→  1420→  1420→191 | Cherop |  | Tauheed | EISM YR1 | 397,000
+  1372→  1421→  1421→192 | Edangat |  | Emmanuel | EISM YR1 | -
+  1373→  1422→  1422→193 | Ekode |  | Charles | EISM YR1 | 88,000
+  1374→  1423→  1423→194 | Ekolu |  | Moses | EISM YR1 | -
+  1375→  1424→  1424→195 | Emaru |  | Ivan | EISM YR1 | 710,000
+  1376→  1425→  1425→196 | Eresu |  | Brian | EISM YR1 | 1,014,000
+  1377→  1426→  1426→197 | Eriongu |  | Jacob | EISM YR1 | -
+  1378→  1427→  1427→198 | Esalu |  | Daniel | EISM YR1 | -
+  1379→  1428→  1428→199 | Esanu |  | Abraham | EISM YR1 | 110,000
+  1380→  1429→  1429→200 | Etanu |  | Vanavencher | EISM YR1 | 210,000
+  1381→  1430→  1430→201 | Etiang | Ivan | Jude | EISM YR1 | -
+  1382→  1431→  1431→202 | Ewangu |  | Joel | EISM YR1 | -
+  1383→  1432→  1432→203 | Ewatu |  | Robins | EISM YR1 | -
+  1384→  1433→  1433→204 | Eyatu | Brian | Obale | EISM YR1 | -
+  1385→  1434→  1434→205 | Kiwujjo | Stephen | Olebe | EISM YR1 | -
+  1386→  1435→  1435→206 | Losiru |  | Fabia | EISM YR1 | 710,000
+  1387→  1436→  1436→207 | Oboga |  | Godfrey | EISM YR1 | 657,000
+  1388→  1437→  1437→208 | Obore |  | Richard | EISM YR1 | 284,000
+  1389→  1438→  1438→209 | Obur |  | Emmanuel | EISM YR1 | 401,000
+  1390→  1439→  1439→210 | Ocana |  | David | EISM YR1 | 197,000
+  1391→  1440→  1440→211 | Odongo |  | Julius | EISM YR1 | -
+  1392→  1441→  1441→212 | Odongo |  | Innocent | EISM YR1 | -
+  1393→  1442→  1442→213 | Ogari |  | Benard | EISM YR1 | -
+  1394→  1443→  1443→214 | Ogire |  | Jorem | EISM YR1 | 1,109,000
+  1395→  1444→  1444→215 | Okanya | Savio | Grace | EISM YR1 | -
+  1396→  1445→  1445→216 | Okedi |  | Samuel | EISM YR1 | 1,031,000
+  1397→  1446→  1446→217 | Okello |  | Denis | EISM YR1 | -
+  1398→  1447→  1447→218 | Okello |  | Timothy | EISM YR1 | 189,000
+  1399→  1448→  1448→219 | Okello | John | Donald | EISM YR1 | 198,000
+  1400→  1449→  1449→220 | Okiria | John | Daniel | EISM YR1 | -
+  1401→  1450→  1450→221 | Okiror |  | Amos | EISM YR1 | 331,000
+  1402→  1451→  1451→222 | Okodu |  | Paul | EISM YR1 | 1,336,000
+  1403→  1452→  1452→223 | Okoed |  | Stephen | EISM YR1 | 576,000
+  1404→  1453→  1453→224 | Okula | George | William | EISM YR1 | 284,000
+  1405→  1454→  1454→225 | Okwii |  | Calvin | EISM YR1 | -
+  1406→  1455→  1455→226 | Olian |  | Lawrence | EISM YR1 | 1,309,000
+  1407→  1456→  1456→227 | Omerileng |  | Samson | EISM YR1 | -
+  1408→  1457→  1457→228 | Omoda |  | Ivan | EISM YR1 | -
+  1409→  1458→  1458→229 | Omoding | Elijah | Smith | EISM YR1 | -
+  1410→  1459→  1459→230 | Ongodia | Leonard | Itubat | EISM YR1 | -
+  1411→  1460→  1460→231 | Ongwech |  | Santos | EISM YR1 | 327,000
+  1412→  1461→  1461→232 | Onoria | Francis | Exavior | EISM YR1 | -
+  1413→  1462→  1462→233 | Onyinge |  | David | EISM YR1 | 210,000
+  1414→  1463→  1463→234 | Opolot |  | Cathbert | EISM YR1 | 709,000
+  1415→  1464→  1464→235 | Opwonya | Gerald | Emma | EISM YR1 | 303,000
+  1416→  1465→  1465→236 | Orode | John | Denis | EISM YR1 | 509,000
+  1417→  1466→  1466→237 | Orom |  | Allan | EISM YR1 | 904,000
+  1418→  1467→  1467→238 | Orone |  | Isaac | EISM YR1 | 329,000
+  1419→  1468→  1468→239 | Osako |  | Jonathan | EISM YR1 | 230,000
+  1420→  1469→  1469→240 | Osekeny |  | Emma | EISM YR1 | 110,000
+  1421→  1470→  1470→241 | Osele |  | Joel | EISM YR1 | -
+  1422→  1471→  1471→242 | Oturu |  | Denis | EISM YR1 | -
+  1423→  1472→  1472→243 | Oumo | Solomon | Gideon | EISM YR1 | -
+  1424→  1473→  1473→244 | Ouni |  | Daniel | EISM YR1 | -
+  1425→  1474→  1474→245 | Owera | Mavin | Jethro | EISM YR1 | -
+  1426→  1475→  1475→246 | Owor |  | Fredrick | EISM YR1 | -
+  1427→  1476→  1476→247 | Sande |  | Laivin | EISM YR1 | 759,000
+  1428→  1477→  1477→248 | Tukei |  | David | EISM YR1 | 710,000
+  1429→  1478→  1478→249 | Tumusime |  | Yusuf | EISM YR1 | -
+  1430→  1479→  1479→250 | Aaca |  | Irene | EISM YR2 | 1,434,750
+  1431→  1480→  1480→251 | Adoko |  | Isaac | EISM YR2 | 785,000
+  1432→  1481→  1481→252 | Akiteng | Esther | Marion | EISM YR2 | 284,400
+  1433→  1482→  1482→253 | Akol |  | Stephen | EISM YR2 | -
+  1434→  1483→  1483→254 | Alaku | James | Peter | EISM YR2 | 2,231,000
+  1435→  1484→  1484→255 | Alele |  | Kenedy | EISM YR2 | 621,000
+  1436→  1485→  1485→256 | Amechu |  | Daniel | EISM YR2 | 238,000
+  1437→  1486→  1486→257 | Amoding |  | Lillian | EISM YR2 | 235,000
+  1438→  1487→  1487→258 | Amuge |  | Everline | EISM YR2 | -
+  1439→  1488→  1488→259 | Apolot | Dianah | Rose | EISM YR2 | 154,000
+  1440→  1489→  1489→260 | Arao | Juliet | Violet | EISM YR2 | 821,000
+  1441→  1490→  1490→261 | Atim | Winniefred | Aporu | EISM YR2 | -
+  1442→  1491→  1491→262 | Atwom | Jonnathan | Chris | EISM YR2 | 431,000
+  1443→  1492→  1492→263 | Chekweko |  | Bonex | EISM YR2 | -
+  1444→  1493→  1493→264 | Ebuga |  | Robert | EISM YR2 | 480,750
+  1445→  1494→  1494→265 | Echeru | Joseph | Stephen | EISM YR2 | 125,500
+  1446→  1495→  1495→266 | Ediru |  | David | EISM YR2 | 1,040,400
+  1447→  1496→  1496→267 | Edyangu |  | David | EISM YR2 | 50,400
+  1448→  1497→  1497→268 | Elebu |  | Emmanuel | EISM YR2 | 260,000
+  1449→  1498→  1498→269 | Eliku | Sam | Ogulei | EISM YR2 | -
+  1450→  1499→  1499→270 | Elocu |  | Simon | EISM YR2 | -
+  1451→  1500→  1500→271 | Epwaat |  | Naboth | EISM YR2 | -
+  1452→  1501→  1501→272 | Eragu | Isaac | Okiror | EISM YR2 | 321,300
+  1453→  1502→  1502→273 | Etwaruna |  | Ronald | EISM YR2 | 1,195,000
+  1454→  1503→  1503→274 | Eudu | Joel | Brian | EISM YR2 | -
+  1455→  1504→  1504→275 | Ichaki |  | Edward | EISM YR2 | 284,000
+  1456→  1505→  1505→276 | Ilukut | John | Emma | EISM YR2 | 200,000
+  1457→  1506→  1506→277 | Longoli |  | Aggrey | EISM YR2 | 710,000
+  1458→  1507→  1507→278 | Loor |  | Simon | EISM YR2 | -
+  1459→  1508→  1508→279 | Lunyolo |  | Mary | EISM YR2 | 1,805,000
+  1460→  1509→  1509→280 | Nakayima |  | Winniefred | EISM YR2 | 113,000
+  1461→  1510→  1510→281 | Obbo |  | Samuel | EISM YR2 | 260,000
+  1462→  1511→  1511→282 | Obia |  | Jonah | EISM YR2 | -
+  1463→  1512→  1512→283 | Obuku |  | Lambert | EISM YR2 | 574,000
+  1464→  1513→  1513→284 | Obur |  | Edmond | EISM YR2 | -
+  1465→  1514→  1514→285 | Obura |  | Emmanuel | EISM YR2 | 485,000
+  1466→  1515→  1515→286 | Ocan |  | Martin | EISM YR2 | 2,231,000
+  1467→  1516→  1516→287 | Ochan |  | Julius | EISM YR2 | 110,000
+  1468→  1517→  1517→288 | Ochodo | John | Michael | EISM YR2 | -
+  1469→  1518→  1518→289 | Ochom |  | Emmanuel | EISM YR2 | -
+  1470→  1519→  1519→290 | Odeke |  | Samuel | EISM YR2 | 710,000
+  1471→  1520→  1520→291 | Odica |  | Charles | EISM YR2 | 284,000
+  1472→  1521→  1521→292 | Odu |  | Joseph | EISM YR2 | -
+  1473→  1522→  1522→293 | Ogire |  | Paul | EISM YR2 | 1,521,000
+  1474→  1523→  1523→294 | Ogwal |  | David | EISM YR2 | 74,000
+  1475→  1524→  1524→295 | Ojulu |  | Kalifan | EISM YR2 | -
+  1476→  1525→  1525→296 | Okello | Jude | William | EISM YR2 | -
+  1477→  1526→  1526→297 | Okello |  | Jaspher | EISM YR2 | 81,000
+  1478→  1527→  1527→298 | Okello |  | Isaac | EISM YR2 | 280,000
+  1479→  1528→  1528→299 | Okello | Emmanuel | Jerome | EISM YR2 | 284,000
+  1480→  1529→  1529→300 | Okello | Daniel | Innocent | EISM YR2 | 2,190,800
+  1481→  1530→  1530→301 | Okias |  | Shadrack | EISM YR2 | -
+  1482→  1531→  1531→302 | Okiror |  | Benedict | EISM YR2 | -
+  1483→  1532→  1532→303 | Okoel |  | Moses | EISM YR2 | 114,000
+  1484→  1533→  1533→304 | Okwi |  | Joshua | EISM YR2 | 61,000
+  1485→  1534→  1534→305 | Omedo |  | Philemon | EISM YR2 | 1,021,000
+  1486→  1535→  1535→306 | Omongot |  | Silas | EISM YR2 | 351,000
+  1487→  1536→  1536→307 | Omunyokol |  | Joshua | EISM YR2 | 228,000
+  1488→  1537→  1537→308 | Onen |  | Sailus | EISM YR2 | 280,000
+  1489→  1538→  1538→309 | Onyait |  | Justine | EISM YR2 | -
+  1490→  1539→  1539→310 | Onyait |  | Alloysius | EISM YR2 | -
+  1491→  1540→  1540→311 | Onyait |  | Tom | EISM YR2 | 1,521,000
+  1492→  1541→  1541→312 | Otai |  | John | EISM YR2 | -
+  1493→  1542→  1542→313 | Otukei |  | Daniel | EISM YR2 | 213,000
+  1494→  1543→  1543→314 | Achaloi |  | Brenda | FGD YR1 | 261,000
+  1495→  1544→  1544→315 | Achom | Esther | Grace | FGD YR1 | 460,000
+  1496→  1545→  1545→316 | Agono |  | Jesca | FGD YR1 | 522,000
+  1497→  1546→  1546→317 | Agweto |  | Sharon | FGD YR1 | -
+  1498→  1547→  1547→318 | Akajo |  | Babra | FGD YR1 | 1,307,000
+  1499→  1548→  1548→319 | Akello | Fortune | Naume | FGD YR1 | -
+  1500→  1549→  1549→320 | Akello |  | Gloria | FGD YR1 | -
+  1501→  1550→  1550→321 | Amongo |  | Tracy | FGD YR1 | 132,000
+  1502→  1551→  1551→322 | Apiny |  | Everlyne | FGD YR1 | -
+  1503→  1552→  1552→323 | Apio |  | Racheal | FGD YR1 | -
+  1504→  1553→  1553→324 | Arienyo |  | Doreen | FGD YR1 | -
+  1505→  1554→  1554→325 | Ariku |  | Simon | FGD YR1 | 1,306,000
+  1506→  1555→  1555→326 | Arionget |  | Martha | FGD YR1 | -
+  1507→  1556→  1556→327 | Asado |  | Irene | FGD YR1 | -
+  1508→  1557→  1557→328 | Ayago | Pricila | Elizabeth | FGD YR1 | 682,000
+  1509→  1558→  1558→329 | Inyou |  | Leah | FGD YR1 | 110,000
+  1510→  1559→  1559→330 | Nambozo | Oliver | Elizabeth | FGD YR1 | -
+  1511→  1560→  1560→331 | Odong |  | Brian | FGD YR1 | -
+  1512→  1561→  1561→332 | Osler | Phionah | Aguti | FGD YR1 | -
+  1513→  1562→  1562→333 | Pedun |  | Rita | FGD YR1 | -
+  1514→  1563→  1563→334 | Agumar |  | Aloysius | FGD YR2 | -
+  1515→  1564→  1564→335 | Agwang | Agnes | Merab | FGD YR2 | -
+  1516→  1565→  1565→336 | Akale |  | Eseza | FGD YR2 | 200,000
+  1517→  1566→  1566→337 | Akello |  | Lydia | FGD YR2 | 60,000
+  1518→  1567→  1567→338 | Akiror |  | Philomine | FGD YR2 | 785,000
+  1519→  1568→  1568→339 | Akol |  | Julian | FGD YR2 | -
+  1520→  1569→  1569→340 | Akoli |  | Susan | FGD YR2 | 716,300
+  1521→  1570→  1570→341 | Akullo |  | Betty | FGD YR2 | 326,000
+  1522→  1571→  1571→342 | Akwii | Moreen | Oliver | FGD YR2 | -
+  1523→  1572→  1572→343 | Amagoro |  | Juliet | FGD YR2 | 301,000
+  1524→  1573→  1573→344 | Amuge | Jane | Frances | FGD YR2 | 1,270,000
+  1525→  1574→  1574→345 | Anyait |  | Christine | FGD YR2 | -
+  1526→  1575→  1575→346 | Apio |  | Racheal | FGD YR2 | -
+  1527→  1576→  1576→347 | Apolot | Esther | Ruth | FGD YR2 | 171,000
+  1528→  1577→  1577→348 | Apoo |  | Lucy | FGD YR2 | 210,000
+  1529→  1578→  1578→349 | Ayugi | Dinnah | Lucy | FGD YR2 | 207,000
+  1530→  1579→  1579→350 | Esaete | Jane | Mirriam | FGD YR2 | -
+  1531→  1580→  1580→351 | Ikiring |  | Hellen | FGD YR2 | 284,000
+  1532→  1581→  1581→352 | Kademere |  | Lydia | FGD YR2 | -
+  1533→  1582→  1582→353 | Kulume |  | Caroline | FGD YR2 | -
+  1534→  1583→  1583→354 | Lokeris |  | Brenda | FGD YR2 | -
+  1535→  1584→  1584→355 | Opolot |  | Aaron | FGD YR2 | 1,021,000
+  1536→  1585→  1585→356 | Pedun |  | Margret | FGD YR2 | -
+  1537→  1586→  1586→357 | Acubalang |  | Oliver | FGD-SKILLS | -
+  1538→  1587→  1587→358 | Audo |  | Betty | FGD-SKILLS | -
+  1539→  1588→  1588→359 | Ibilat | Jeanne | Racheal | FGD-SKILLS | 481,000
+  1540→  1589→  1589→360 | Acerimo | George | Wilson | MF YR1 | -
+  1541→  1590→  1590→361 | Alupo | Joan | Mercy | MF YR1 | 896,000
+  1542→  1591→  1591→362 | Ecodu |  | Kizito | MF YR1 | -
+  1543→  1592→  1592→363 | Emukura |  | Isaac | MF YR1 | -
+  1544→  1593→  1593→364 | Igadira |  | Paul | MF YR1 | 130,000
+  1545→  1594→  1594→365 | Kasada | Gracious | Kelly | MF YR1 | 457,000
+  1546→  1595→  1595→366 | Kasirye |  | Stephen | MF YR1 | 710,000
+  1547→  1596→  1596→367 | Mafabi |  | Ivan | MF YR1 | 535,000
+  1548→  1597→  1597→368 | Namonyo |  | Brian | MF YR1 | 959,000
+  1549→  1598→  1598→369 | Ochiriam |  | Nathan | MF YR1 | -
+  1550→  1599→  1599→370 | Ochola |  | Patrick | MF YR1 | 1,409,000
+  1551→  1600→  1600→371 | Ogwang |  | Thomas | MF YR1 | -
+  1552→  1601→  1601→372 | Ogwang |  | Joseph | MF YR1 | 280,000
+  1553→  1602→  1602→373 | Akol |  | Loyce | MF YR2 | -
+  1554→  1603→  1603→374 | Alany |  | Ambrose | MF YR2 | 60,000
+  1555→  1604→  1604→375 | Echongu |  | Andrew | MF YR2 | -
+  1556→  1605→  1605→376 | Eturuket |  | James | MF YR2 | 710,000
+  1557→  1606→  1606→377 | Hibuta |  | Abasa | MF YR2 | 71,000
+  1558→  1607→  1607→378 | Mugisha |  | Maxiel | MF YR2 | 909,000
+  1559→  1608→  1608→379 | Nakudo |  | Nathan | MF YR2 | 636,000
+  1560→  1609→  1609→380 | Okello |  | Gerald | MF YR2 | -
+  1561→  1610→  1610→381 | Okello |  | Charles | MF YR2 | 284,000
+  1562→  1611→  1611→382 | Olwol |  | Isaac | MF YR2 | 710,000
+  1563→  1612→  1612→383 | Oonyu |  | Joel | MF YR2 | 710,000
+  1564→  1613→  1613→384 | Aguti | Anna | Grace | PL YR1 | -
+  1565→  1614→  1614→385 | Ajilong |  | Grace | PL YR1 | -
+  1566→  1615→  1615→386 | Akello | Fiona | Acir | PL YR1 | -
+  1567→  1616→  1616→387 | Akware | Mary | Kevin | PL YR1 | 243,000
+  1568→  1617→  1617→388 | Amagoro | Eseza | Mary | PL YR1 | 235,000
+  1569→  1618→  1618→389 | Amiso |  | Betty | PL YR1 | -
+  1570→  1619→  1619→390 | Among |  | Gloria | PL YR1 | -
+  1571→  1620→  1620→391 | Among | Everlyne | Beatrice | PL YR1 | -
+  1572→  1621→  1621→392 | Amudu |  | Deogracious | PL YR1 | 219,000
+  1573→  1622→  1622→393 | Amujal |  | Judith | PL YR1 | -
+  1574→  1623→  1623→394 | Amulen |  | Jeniffer | PL YR1 | 72,000
+  1575→  1624→  1624→395 | Amuria |  | Rebecca | PL YR1 | -
+  1576→  1625→  1625→396 | Apungia |  | Robinah | PL YR1 | 229,900
+  1577→  1626→  1626→397 | Atim | Peace | Precious | PL YR1 | -
+  1578→  1627→  1627→398 | Atim |  | Mercy | PL YR1 | -
+  1579→  1628→  1628→399 | Chemusto |  | Racheal | PL YR1 | 303,000
+  1580→  1629→  1629→400 | Chemutai |  | Robina | PL YR1 | 753,000
+  1581→  1630→  1630→401 | Ecabu |  | Emmanuel | PL YR1 | 1,120,000
+  1582→  1631→  1631→402 | Ekwaru |  | Lawrence | PL YR1 | -
+  1583→  1632→  1632→403 | Epidu |  | Jorem | PL YR1 | 209,000
+  1584→  1633→  1633→404 | Ibuyat |  | Jonathan | PL YR1 | 709,000
+  1585→  1634→  1634→405 | Michael |  | Olowo | PL YR1 | 1,337,000
+  1586→  1635→  1635→406 | Nagudi |  | Recho | PL YR1 | 753,000
+  1587→  1636→  1636→407 | Obia |  | Brian | PL YR1 | 1,136,000
+  1588→  1637→  1637→408 | Ocen |  | Ronny | PL YR1 | 231,000
+  1589→  1638→  1638→409 | Ogagul |  | Michael | PL YR1 | 710,000
+  1590→  1639→  1639→410 | Ogwal |  | Jonathan | PL YR1 | -
+  1591→  1640→  1640→411 | Ojakol |  | Lawrance | PL YR1 | 569,000
+  1592→  1641→  1641→412 | Okello | Simon | Peter | PL YR1 | -
+  1593→  1642→  1642→413 | Okut |  | Emmanuel | PL YR1 | 710,000
+  1594→  1643→  1643→414 | Omunyokol |  | David | PL YR1 | -
+  1595→  1644→  1644→415 | Opori |  | Naume | PL YR1 | 710,000
+  1596→  1645→  1645→416 | Orianga |  | Edmond | PL YR1 | -
+  1597→  1646→  1646→417 | Otim |  | Ivan | PL YR1 | -
+  1598→  1647→  1647→418 | Otuba |  | Martine | PL YR1 | -
+  1599→  1648→  1648→419 | Tino | Deborah | Rebecca | PL YR1 | -
+  1600→  1649→  1649→420 | Adie |  | Babrah | PL YR2 | 153,000
+  1601→  1650→  1650→421 | Agunyo | Naume | Mary | PL YR2 | -
+  1602→  1651→  1651→422 | Akoli |  | Winny | PL YR2 | 314,000
+  1603→  1652→  1652→423 | Akujo | Joy | Christine | PL YR2 | 42,000
+  1604→  1653→  1653→424 | Alemo | Brian | Owiny | PL YR2 | 290,000
+  1605→  1654→  1654→425 | Aliabu |  | Paul | PL YR2 | -
+  1606→  1655→  1655→426 | Anyait |  | Everline | PL YR2 | 285,000
+  1607→  1656→  1656→427 | Apio |  | Mercy | PL YR2 | 10,000
+  1608→  1657→  1657→428 | Arimo | Scovia | Harriet | PL YR2 | -
+  1609→  1658→  1658→429 | Ariong |  | Pius | PL YR2 | -
+  1610→  1659→  1659→430 | Asio |  | Doreen | PL YR2 | 211,000
+  1611→  1660→  1660→431 | Atekit | Mary | Magdaline | PL YR2 | 100,200
+  1612→  1661→  1661→432 | Atyaku |  | Godfrey | PL YR2 | -
+  1613→  1662→  1662→433 | Ayao |  | Priscilla | PL YR2 | 285,000
+  1614→  1663→  1663→434 | Chekwurui |  | Charity | PL YR2 | -
+  1615→  1664→  1664→435 | Cherop |  | Jenuba | PL YR2 | 41,000
+  1616→  1665→  1665→436 | Ekeju |  | Walter | PL YR2 | 154,000
+  1617→  1666→  1666→437 | Elwelu | Joan | Genavive | PL YR2 | 106,875
+  1618→  1667→  1667→438 | Esenga |  | James | PL YR2 | 710,000
+  1619→  1668→  1668→439 | Gidagui |  | Rogers | PL YR2 | 1,010,000
+  1620→  1669→  1669→440 | Gulit |  | Gamaliel | PL YR2 | 631,000
+  1621→  1670→  1670→441 | Ibwala |  | Boniface | PL YR2 | 8,000
+  1622→  1671→  1671→442 | Lakaraber |  | Priscilia | PL YR2 | -
+  1623→  1672→  1672→443 | Logira |  | Reagan | PL YR2 | 394,400
+  1624→  1673→  1673→444 | Obangakene |  | Emmanuel | PL YR2 | 1,031,000
+  1625→  1674→  1674→445 | Obwala |  | Ambrose | PL YR2 | 1,045,000
+  1626→  1675→  1675→446 | Ocero |  | Elly | PL YR2 | 385,000
+  1627→  1676→  1676→447 | Odida |  | Emmanuel | PL YR2 | 148,000
+  1628→  1677→  1677→448 | Okanyakure | John | Bosco | PL YR2 | 1,010,000
+  1629→  1678→  1678→449 | Okello |  | Thomas | PL YR2 | -
+  1630→  1679→  1679→450 | Okito |  | Isaac | PL YR2 | 210,000
+  1631→  1680→  1680→451 | Okumu |  | Peter | PL YR2 | 260,000
+  1632→  1681→  1681→452 | Okurut |  | Enock | PL YR2 | 710,000
+  1633→  1682→  1682→453 | Olupot |  | Ambrose | PL YR2 | 285,000
+  1634→  1683→  1683→454 | Olupot | George | William | PL YR2 | 710,000
+  1635→  1684→  1684→455 | Opedun |  | Michael | PL YR2 | 110,000
+  1636→  1685→  1685→456 | Opio |  | Francis | PL YR2 | 710,000
+  1637→  1686→  1686→457 | Apule | Irene | Alele | WWT YR1 | -
+  1638→  1687→  1687→458 | Kedi | Kerespo | Nathan | WWT YR1 | 1,104,000
+  1639→  1688→  1688→459 | Ocom | Joshua | Peter | WWT YR1 | -
+  1640→  1689→  1689→460 | Opio | Divine | Othniel | WWT YR1 | -
+  1641→  1690→  1690→461 | Opolot |  | Samuel | WWT YR1 | -
+  1642→  1691→  1691→462 | Okello |  | Emmanuel | WWT YR2 | -
+  1643→  1692→  1692→ |  |  |  |  | 143,476,563
+  1644→  1693→  1693→
+  1645→  1694→  1694→=== Table 69 ===
+  1646→  1695→  1695→ | Name | Amount
+  1647→  1696→  1696→1 | Okapell 11 Ltd | 700,000
+  1648→  1697→  1697→ |  | 5,800,000
+  1649→  1698→  1698→ | Total | 6,500,000
+  1650→  1699→  1699→ |  | 
+  1651→  1700→  1700→2 | ABATA | 168,000
+  1652→  1701→  1701→ | Total | 168,000
+  1653→  1702→  1702→ |  | 
+  1654→  1703→  1703→3 | Agobi General Enterprise Ltd | 5,086,600
+  1655→  1704→  1704→ |  | 1,978,000
+  1656→  1705→  1705→ |  | 2,608,000
+  1657→  1706→  1706→ |  | 1,981,600
+  1658→  1707→  1707→ | Total | 11,654,200
+  1659→  1708→  1708→ |  | 
+  1660→  1709→  1709→4 | Amen book centre | 26,000
+  1661→  1710→  1710→ |  | 40,000
+  1662→  1711→  1711→ |  | 210,000
+  1663→  1712→  1712→ |  | 166,000
+  1664→  1713→  1713→ |  | 112,000
+  1665→  1714→  1714→ | Total | 554,000
+  1666→  1715→  1715→ |  | 
+  1667→  1716→  1716→5 | OPUCHO LEONARD | 1,120,000
+  1668→  1717→  1717→ |  | 1,920,000
+  1669→  1718→  1718→ |  | 1,120,000
+  1670→  1719→  1719→ |  | 1,424,000
+  1671→  1720→  1720→ |  | 1,886,000
+  1672→  1721→  1721→ |  | 320,000
+  1673→  1722→  1722→ |  | 1,280,000
+  1674→  1723→  1723→ |  | 2,272,000
+  1675→  1724→  1724→ |  | 1,600,000
+  1676→  1725→  1725→ | Total | 12,942,000
+  1677→  1726→  1726→ |  | 
+  1678→  1727→  1727→6 | Alupo Nobert | 648,000
+  1679→  1728→  1728→ | Totaal | 648,000
+  1680→  1729→  1729→ |  | 
+  1681→  1730→  1730→7 | Asilang Traders Enterprises | 900,000
+  1682→  1731→  1731→ |  | 400,000
+  1683→  1732→  1732→ |  | 1,100,000
+  1684→  1733→  1733→ |  | 100,000
+  1685→  1734→  1734→ |  | 100,000
+  1686→  1735→  1735→ |  | 224,000
+  1687→  1736→  1736→ | Total | 2,824,000
+  1688→  1737→  1737→ |  | 
+  1689→  1738→  1738→8 | Osma General Enterprises Ltd | 7,321,000
+  1690→  1739→  1739→ |  | 9,199,000
+  1691→  1740→  1740→ | Total | 16,520,000
+  1692→  1741→  1741→ |  | 
+  1693→  1742→  1742→9 | MLG POWER TOOLS LTD | 2,364,930
+  1694→  1743→  1743→ | Total | 2,364,930
+  1695→  1744→  1744→ |  | 
+  1696→  1745→  1745→10 | Atiida Enterprises Ltd | 5,040,000
+  1697→  1746→  1746→ | Total | 5,040,000
+  1698→  1747→  1747→ | Grand Total Creditors as at 30th June 2025 | 59,215,130
+  1699→  1748→  1748→
+  1700→  1749→  1749→Para 0: GOVERNMENT OF THE REPUBLIC OF UGANDA
+  1701→  1750→  1750→Para 10: [ST KIZITO’S TECHNICAL INSTITUTE, MADERA.]
+  1702→  1751→  1751→Para 13: Reports and Financial Statements
+  1703→  1752→  1752→Para 14: for the Year Ended 30 June 2025
+  1704→  1753→  1753→Para 30: List of Acronyms
+  1705→  1754→  1754→Para 92: Statement of Responsibilities of the Accounting Officer
+  1706→  1755→  1755→Para 93: The financial statements set out on pages 2 to 69. have been prepared in compliance with the provisions of the Public Finance Management Act, 2015 Cap 171 (the Act) and the generally accepted accounting principles for the public sector. They have been prepared on the modified accrual basis of accounting where revenue is recognized when earned with the exception of taxes and grants which are recognized when received. Expenditure on the other hand is recognized when incurred, as further detailed in the accounting policies that are part of these financial statements.
+  1707→  1756→  1756→Para 95: In accordance with the provisions of Section 43 and Schedule 5 of the Act, I am responsible for and personally accountable to Parliament for the activities of the vote to which I am the accounting officer. Further, I am responsible for the regularity and proper use of the money appropriated to the vote to which I am the Accounting Officer. I am also responsible for authorizing any commitments made by the vote and for controlling resources received, held or disposed of by or on account of the vote. Finally, I am responsible for putting in place effective systems of risk management and internal control in respect to all resources and transactions of the vote.
+  1708→  1757→  1757→Para 97: Section 43 (3) of the Act requires the Accounting Officer to enter into an annual budget performance contract with the Secretary to the Treasury which shall bind the Accounting Officer to deliver on the activities in the work plan of the vote for a financial year.
+  1709→  1758→  1758→Para 99: Sections 48 and 49 of the Act require me to prepare and submit financial statements of my vote to the Accountant General for consolidation and to the Auditor General for audit within the timelines specified in the Act using the prescribed formats.
+  1710→  1759→  1759→Para 101: Accordingly, I am pleased to report that I have complied with these provisions in all material respects, and I am also pleased to submit the required financial statements in compliance with the Act. I have provided and will continue to provide, all the information and explanations that may be required in relation to these financial statements.
+  1711→  1760→  1760→Para 103: To the best of my knowledge and belief, these financial statements are consistent with the books of account, which have been accurately maintained.
+  1712→  1761→  1761→Para 105: I accept responsibility for the integrity and objectivity of these financial statements, the financial information they contain, and their compliance with the Act, as amended.
+  1713→  1762→  1762→Para 108: …………………………………………………………………………………………….
+  1714→  1763→  1763→Para 109: Accounting Officer [Names and Signature]
+  1715→  1764→  1764→Para 111: …………………………….
+  1716→  1765→  1765→Para 112: Date
+  1717→  1766→  1766→Para 121: Commentary on the Financial Statements by the Accounting Officer
+  1718→  1767→  1767→Para 122: General Information about the Reporting Entity
+  1719→  1768→  1768→Para 123: St Kizitos Technical Institute is a government aided institution that was founded by catholic church in 1947.The Institute offers holistic technical Education based on Christian Principals while upholding good Morals and Co-curricular activities.
+  1720→  1769→  1769→Para 124: Please provide the following information within a maximum of a three (3) page commentary!
+  1721→  1770→  1770→Para 126: Principal Activity of the Vote
+  1722→  1771→  1771→Para 127: The Institute) is mandated under the provision pf the Public Finance and management ACT 2015 amended constitution of the republic of Uganda 1995, The mandate is to offer Technical Education to the population.
+  1723→  1772→  1772→Para 128: Structurally the Chairperson Board of governors is the Overseer of the Institute activities, assisted by the Board members, to monitor the general administration and oversee the implementation of policies and decisions made by the Board of Governors.
+  1724→  1773→  1773→Para 129: The principal is the accounting officer who supervises and coordinates the overall learning process and environment at the Institute.
+  1725→  1774→  1774→Para 131: VISION:
+  1726→  1775→  1775→Para 132: To be a center of excellence in Skills and Moral Training
+  1727→  1776→  1776→Para 134: MISSION:
+  1728→  1777→  1777→Para 135: To produce competent and Committed individuals for the world of work
+  1729→  1778→  1778→Para 136: CORE VALUES
+  1730→  1779→  1779→Para 137: Fear of God
+  1731→  1780→  1780→Para 138: Responsibility
+  1732→  1781→  1781→Para 139: Excellence
+  1733→  1782→  1782→Para 140: Equality
+  1734→  1783→  1783→Para 141: Discipline
+  1735→  1784→  1784→Para 142: COURSES OFFERED
+  1736→  1785→  1785→Para 143: The Institute, offers the following courses
+  1737→  1786→  1786→Para 144: National Certificate in Building Construction
+  1738→  1787→  1787→Para 145: National Certificate in Automotive Mechanics
+  1739→  1788→  1788→Para 146: National Certificate in Wood Work Technology
+  1740→  1789→  1789→Para 147: National Certificate in Fashion and Garment Design
+  1741→  1790→  1790→Para 148: National Certificate in Machining and Fitting
+  1742→  1791→  1791→Para 149: National Certificate in Plumbing
+  1743→  1792→  1792→Para 150: National Certificate in Electrical Installation systems
+  1744→  1793→  1793→Para 151: Key Performance highlights
+  1745→  1794→  1794→Para 152: During the reporting period, the vote undertook the following major activities besides recurrent expenditure)
+  1746→  1795→  1795→Para 153: Drilled the Borehole at the Institute and Installation of the borehole.
+  1747→  1796→  1796→Para 154: Renovation of Fr Wankya Dormitory.
+  1748→  1797→  1797→Para 155: Renovated 4 classroom block roof at the old site
+  1749→  1798→  1798→Para 156: Installed CCTV Cameras
+  1750→  1799→  1799→Para 157: Renovation works at the old site Lubiri Girls Dormitory ongoing
+  1751→  1800→  1800→Para 158: Making Concrete Blocks on going for fencing the Institute.
+  1752→  1801→  1801→Para 159: Sinking of a 3 Stance Pit Latrine at the Old Site for boys
+  1753→  1802→  1802→Para 160: Sinking of A pit latrine at the old site Lubiri Dormitory for girls
+  1754→  1803→  1803→Para 163: Renovation of a Dormitory and classroom block
+  1755→  1804→  1804→Para 187: Risk Management Practice and Internal Control
+  1756→  1805→  1805→Para 188: The vote maintained a system of internal control through the following
+  1757→  1806→  1806→Para 189: The Board of Governors is responsible for the management of all Institutes Property Including all funds generated and   due to the Institute. It also supervises and controls all matters relating to financial affairs of the Institute.
+  1758→  1807→  1807→Para 190: The funds are sent to the Institute through Soroti District Local Government; therefore, we are being guided by the Chief administrative officer who is the overall supervisor.
+  1759→  1808→  1808→Para 191: The principal is the accounting officer and is responsible for the establishment of Internal Controls that is designed to provide assurance that the transactions recorded are within the authority and all financial transactions are captured correctly and posted to the relevant books of accounts
+  1760→  1809→  1809→Para 192: We make sure that no cash is received at source. All funds must be banked intact.
+  1761→  1810→  1810→Para 193: The School Pay system has given us a big relief.
+  1762→  1811→  1811→Para 194: The Internal Control system has operated smoothly throughout the financial year ended June 2025
+  1763→  1812→  1812→Para 195: More temporal staff have continuously been recruited to bridge the gaps not filled and those created by the retired staff hence reducing the possible available risks
+  1764→  1813→  1813→Para 196: Report on achievements of the audit
+  1765→  1814→  1814→Para 197: The Audit Generally has been very Good and Helpful so much so that our financial Statements are up-to date and more so a reminder to all persons holding Public offices to always follow the set rules and regulations of the Management of Government funds and resources.
+  1766→  1815→  1815→Para 198: Payroll and Pensions Management
+  1767→  1816→  1816→Para 199: Salary is paid at the Center under Government of Uganda for the staff appointed by the Ministry of Education and sports.
+  1768→  1817→  1817→Para 200: For staff appointed by the Board of Governors, they are paid through the school fees paid by the parents with a budget line allocated to it in the approved budget for the year under review.
+  1769→  1818→  1818→Para 201: Asset Management
+  1770→  1819→  1819→Para 202: St Kizito’s Technical Institute, Madera has land that was given by the Catholic church and a variety of buildings. Later on, the Government under ADB11 Constructed new structures and equipped them and handed to the Institute.
+  1771→  1820→  1820→Para 203: The Institute also received a donation of Vehicles and motorcycles for practical purposes.
+  1772→  1821→  1821→Para 204: Action(s) taken on recommendations of oversight institutions
+  1773→  1822→  1822→Para 205: During the year the Board of survey did its work and made recommendations for action but since the Institute is practical oriented most of the assets like motorcycles and old vehicles are for trading purposes.
+  1774→  1823→  1823→Para 207: Accounting Officer [Names and Signature]
+  1775→  1824→  1824→Para 209: …………………………….
+  1776→  1825→  1825→Para 210: Date
+  1777→  1826→  1826→Para 212: Commentary on the Financial Statements by the Head of Accounts
+  1778→  1827→  1827→Para 213: Give a maximum of a three-page commentary on financial performance and financial position of the vote covering a trend analysis in comparison to previous year’s performance.
+  1779→  1828→  1828→Para 214: Commentary on the Income and Expenditure of the vote against budget
+  1780→  1829→  1829→Para 215: In the year under review the Institute had a total anticipated revenue of 1,231,886,860. however, at the end of the year the Institute was able to collect1,144,235,244
+  1781→  1830→  1830→Para 216: Comment on the Assets and Liabilities of the vote and mention any significant acquisition or disposal of asset as well as liability incurred or settled during the reporting period. The Assets acquired during the period include, Bore hole, installation of CCTV CAMERAS
+  1782→  1831→  1831→Para 217: The Institute was able to pay its outstanding commitments totaling to 58,411,375. That was majorly for Consumables
+  1783→  1832→  1832→Para 218: During the period the institute paid of 58,411,375,
+  1784→  1833→  1833→Para 219: Comment on the going concern status of the vote [ Especially for the votes that are under Rationalization]
+  1785→  1834→  1834→Para 220: Currently we are appointed by the Education Service commission under Ministry of Education, and that is where we fall.
+  1786→  1835→  1835→Para 221: Comment on any multiyear commitments and outstanding obligations by year end
+  1787→  1836→  1836→Para 222: At the end of the year the outstanding commitments totaled to 59,215,130
+  1788→  1837→  1837→Para 223: Comment(s)/ explanatory notes on any adjustments made in the Statement of Changes in Equity or Reconciliation of movement of cash during the year if any [Explain the cause of the adjustments i.e whether they are as a result of a change in the accounting policy, changes in estimates or as a result of errors and or omissions]
+  1789→  1838→  1838→Para 224: The adjustments were made as a result of the new format of making financial statements that involved Depreciation.
+  1790→  1839→  1839→Para 225: Departure from accounting principles or practice and justification if any
+  1791→  1840→  1840→Para 226: Previously we were on cash accounting but now we are on modified cash accrual accounting. This is because we are taken as a tertiary Institution much as we enroll students who have completed form four and those who have Junior Certificate in Technical Education
+  1792→  1841→  1841→Para 227: Any other information that is deemed relevant by the Head of Accounts
+  1793→  1842→  1842→Para 228: The Accountant Generals office should at least organize for capacity training workshop to a quant the Senior Assistant accountants with new formats of making financial statements
+  1794→  1843→  1843→Para 230: I take full responsibility for the completeness and integrity of these Financial Statements
+  1795→  1844→  1844→Para 232: …………………………………………………………………………………………….
+  1796→  1845→  1845→Para 233: Head of Accounts [Names and Signature]
+  1797→  1846→  1846→Para 235: …………………………….
+  1798→  1847→  1847→Para 236: Date
+  1799→  1848→  1848→Para 251: Statement of Financial Performance for the Financial Year Ended 30 June 2025
+  1800→  1849→  1849→Para 252: [Based on classification of expenditures by nature]
+  1801→  1850→  1850→Para 255: …………………………………………………………………………………………………
+  1802→  1851→  1851→Para 256: Accounting Officer [Names & Signature]
+  1803→  1852→  1852→Para 259: Statement of Financial Position as at 30 June 2025
+  1804→  1853→  1853→Para 261: Statement of Changes in Net Assets/Equity for the Financial Year ended 30 June 2025
+  1805→  1854→  1854→Para 263: ……………………………………………………………………………………………
+  1806→  1855→  1855→Para 264: Accounting Officer [Names & Signature]
+  1807→  1856→  1856→Para 266: Cash flow Statement
+  1808→  1857→  1857→Para 267: For the Financial Year ended 30 June 2025
+  1809→  1858→  1858→Para 268: [Direct Method]
+  1810→  1859→  1859→Para 274: …………………………………………………………………………………………………
+  1811→  1860→  1860→Para 275: Accounting Officer [Names & Signature]
+  1812→  1861→  1861→Para 277: Cash flow Statement for the year ended (continued)
+  1813→  1862→  1862→Para 279: For cash flow purposes receipts from revenue comprise;
+  1814→  1863→  1863→Para 282: Reconciliation of movement of cash during the year
+  1815→  1864→  1864→Para 287: For purposes of the cash flow statement, cash and cash equivalents comprise;
+  1816→  1865→  1865→Para 293: …………………………………………………………………………………………………
+  1817→  1866→  1866→Para 294: Accounting Officer [Names & Signature]
+  1818→  1867→  1867→Para 297: Statement of Appropriation based on Classification of Expenditure by Nature
+  1819→  1868→  1868→Para 298: For the Financial Year ended 30 June 2025
+  1820→  1869→  1869→Para 301: Provide explanations in the table explaining variations for the following; -
+  1821→  1870→  1870→Para 302: Differences between revised budget and actual performance amounts that exceed 5%
+  1822→  1871→  1871→Para 303: The difference a rose because TVET as a department wanted to attract the girl child to some rear courses for example WOOD WORK TECHNOLOGY. The department therefore sponsored 2 girls to do a course in woodwork technology
+  1823→  1872→  1872→Para 304: Differences between initial and revised budgets.
+  1824→  1873→  1873→Para 305: The difference is between Initial and revised budget is because the Institute was not able to collect to what was budgeted originally due to failure of parents to clear fees hence affecting budget performance.
+  1825→  1874→  1874→Para 311: Table (i) explaining material variances in the Statement of Appropriation
+  1826→  1875→  1875→Para 316: Reconciliation between total expenditure per Appropriation Accounts and per Statement of Financial Performance
+  1827→  1876→  1876→Para 321: …………………………………………………………………………………………………
+  1828→  1877→  1877→Para 322: Accounting Officer [Names & Signature]
+  1829→  1878→  1878→Para 326: Notes to the Financial Statements
+  1830→  1879→  1879→Para 329: Note 1(a): Accounting Policies
+  1831→  1880→  1880→Para 330: These are the specific principles, bases, conventions, rules and practices adopted by the Government of the Republic of Uganda in preparing and presenting the financial statements. The principal accounting policies adopted in the preparation of these financial statements as set out below have been consistently applied in all material aspects unless otherwise stated.
+  1832→  1881→  1881→Para 332: Presentation of Financial Statements
+  1833→  1882→  1882→Para 333: The Financial Statements have been prepared and presented in accordance with the following policies, which have been applied consistently in all material aspects, unless otherwise indicated. However, where appropriate, additional information has been disclosed to enhance the usefulness of the Financial Statements and to comply with the statutory requirements of the Public Finance Management Act (PFMA), 2015 Cap 171, the Public Finance Management Regulations (2016), The Treasury Instructions 2017, and other guidance to Accounting Officers made from time to time.
+  1834→  1883→  1883→Para 334: General Information
+  1835→  1884→  1884→Para 335: As required by Sections 48(1) and 49(1) of the Public Finance Management Act, 2015 Cap 171 [Act], each vote shall prepare Semi-Annual, Annual financial statements and any other such reports within such a time as the Accountant General may require. All these reports are submitted to the Accountant General for review and Consolidation. The Annual Financial Statements shall also be submitted for Audit to the Auditor General.
+  1836→  1885→  1885→Para 337: Reporting Entity
+  1837→  1886→  1886→Para 338: [ST KIZITO’S TECHNICAL INSTITUTE, MADERA.] is a reporting entity of the Government of the Republic of Uganda and is domiciled in Uganda [for Missions state Country of residence].
+  1838→  1887→  1887→Para 339: The principal address of the entity is:
+  1839→  1888→  1888→Para 340: ST. KIZITO’S TECHNICAL INSTITUTE, MADERA.
+  1840→  1889→  1889→Para 341: P.O BOX 320, SOROTI CITY EAST, ASINGE CELL
+  1841→  1890→  1890→Para 342: TELEPHONE NUMBERS
+  1842→  1891→  1891→Para 343: PRINCIPAL                        0772309660
+  1843→  1892→  1892→Para 344: WEBSITE: stkizitmad@gmail.com
+  1844→  1893→  1893→Para 347: Basis of preparation of financial statements
+  1845→  1894→  1894→Para 349: The Financial Statements have been prepared using the modified accrual basis of accounting except were stated otherwise. The modified accrual basis of accounting recognizes revenue when earned with the exception of revenue from grants, taxes and NTR from non- exchange transactions that is recognized when received. Expenses are recognized when incurred with the exception of pension for active staff in the civil service that is recognized when it is due for payment.
+  1846→  1895→  1895→Para 351: All non-current assets with the exception of non-produced assets are depreciated at the appropriate depreciation rates as detailed in accounting policy (1.11.4) below
+  1847→  1896→  1896→Para 352: Going concern consideration
+  1848→  1897→  1897→Para 353: The financial statements have been prepared on a going concern basis. [ For entities undergoing rationalization, this needs to be qualified]
+  1849→  1898→  1898→Para 354: Presentation currency
+  1850→  1899→  1899→Para 355: The reporting and presentation currency is the Uganda Shilling (Shs), which is the functional currency of the Republic of Uganda. Items included in the financial statements are measured in the currency of the primary economic environment in which the entity operates.
+  1851→  1900→  1900→Para 356: Rounding
+  1852→  1901→  1901→Para 357: Unless otherwise stated, the financial figures have been rounded to the nearest shilling (Shs).
+  1853→  1902→  1902→Para 359: Translation of transactions in foreign currency
+  1854→  1903→  1903→Para 360: Foreign currency transactions are translated into Uganda Shillings using the exchange rates prevailing at the dates of the transactions (spot rates). Any realized gains/losses are recognized in the Statement of Financial Performance. Foreign currency assets and liabilities held by the entity at period-end are translated into Uganda Shillings using the period closing rate provided by the central bank. Any unrealized gains/losses are recognized in the statement of changes in Equity through the revaluation reserve.
+  1855→  1904→  1904→Para 362: Reporting Period
+  1856→  1905→  1905→Para 363: The reporting period for these financial statements is from 1 July, 2024 to 30 June, 2025. Prior period comparative information has been presented in the current year’s financial statements. Where necessary, figures included in the prior period financial statements have been reclassified to ensure that the format in which the information was presented is consistent with the format in the current year’s financial statements.
+  1857→  1906→  1906→Para 364: Comparison with Budget
+  1858→  1907→  1907→Para 365: The initial budget is the original forecast as presented and approved. A revised budget is the initial approved budget adjusted by a supplementary or reallocations/ virements. A comparison between the revised budget and actual amounts for each category of expenditure and Programmed included in the appropriation statements.
+  1859→  1908→  1908→Para 366: Comparatives
+  1860→  1909→  1909→Para 367: Prior period comparative information has been presented in the current period’s financial statements. Where necessary figures included in the prior period financial statements have been reclassified to ensure that the format in which the information is presented is consistent with the format of the current year’s financial statements.
+  1861→  1910→  1910→Para 369: Revenue
+  1862→  1911→  1911→Para 370: Revenue includes the gross inflows of economic benefits or service potential received and or receivable by the entity/vote.  It is broadly divided into revenue from exchange transactions and revenue from non-exchange transactions.
+  1863→  1912→  1912→Para 371: An exchange transaction is one in which a vote receives assets or services, or has liabilities extinguished, and directly gives approximately equal value (primarily in the form of goods, services or use of assets) to the other party in exchange. Examples of exchange transactions include the purchase or sale of goods or services; or the lease of property, plant and equipment, at market rates. Examples of revenues from exchange transactions include rent, proceeds from hire of goods, sale of drugs, disposal of assets, the use by others of entity assets yielding interest, royalties, dividends, etc. These are recognized when earned at a point when bills/invoices are issued.
+  1864→  1913→  1913→Para 372: In a non-exchange transaction, a vote either receives value from another entity without directly giving approximately equal value in exchange, or gives value to another entity without directly receiving approximately equal value in exchange. Examples of revenues from non-exchange transactions include taxes, grants, fines and fees (passport, visa fees, driving permits), etc., All revenue from non-exchange transactions is recognized when earned with the exception of tax revenue and revenue from grants. Below are further details; -
+  1865→  1914→  1914→Para 373: Tax revenues
+  1866→  1915→  1915→Para 374: Taxes are levied with the authority of Parliament subject to Article 152 of the Constitution of the Republic of Uganda. All tax revenues are recognised when received.
+  1867→  1916→  1916→Para 375: External Assistance/Grants
+  1868→  1917→  1917→Para 376: Grants are received by the entity either as cash or in-kind from foreign governments (bilateral) or from international Organizations (multi-lateral). All grants are recognized as revenue when received. In-kind receipts (donations) are recognized at fair value when received.
+  1869→  1918→  1918→Para 377: Transfers received
+  1870→  1919→  1919→Para 378: Transfers received include; transfers received from the Consolidated Fund (UCF), transfers from the Contingencies Fund (CF) and transfers received from other government units. All transfers are recognized when received by the vote.
+  1871→  1920→  1920→Para 379: Separate detailed financial statements of the Contingencies Fund shall be prepared by the Accountant General’s Office in line with section 26(15) of the PFMA.
+  1872→  1921→  1921→Para 380: Non-Tax Revenue
+  1873→  1922→  1922→Para 381: Non-Tax Revenue (NTR) refers to all revenue due to government that is not tax revenue, and grants
+  1874→  1923→  1923→Para 382: NTR from both exchange and non-exchange transactions whether directly collected by the entity or collected by another on its behalf is recognized when revenue is earned. NTR earned but not received is reported in the statement of Financial Position as receivables.
+  1875→  1924→  1924→Para 383: Deferred revenue
+  1876→  1925→  1925→Para 384: Monies received before services are provided or the goods are delivered will be recognized as a liability until the services are provided or on delivery of goods to the clients. Revenue will be recognized when the services/ goods are delivered
+  1877→  1926→  1926→Para 385: Expenses
+  1878→  1927→  1927→Para 386: Expenses are recognized when incurred. Qualifying unsettled obligations are recognized in the Statement of Financial position as payables. Pension expense is recognized when due. Pension obligations for staff in active service are neither recognized nor disclosed in the financial statements
+  1879→  1928→  1928→Para 387: Projects expenditure
+  1880→  1929→  1929→Para 388: Government projects are a series of undertakings of a reporting entity with specific objectives and a defined time frame and could be either: (a) fully funded by a Government; (b) jointly funded by Government and a development partner; (c) fully funded by a development partner through either budget support or project support; and (d) fully funded by development partner through provision of physical items rather than funds.
+  1881→  1930→  1930→Para 389: Unless otherwise stated, project transactions are included in the financial statements of the parent MALG on a line-by-line basis
+  1882→  1931→  1931→Para 390: Compensation of Employees
+  1883→  1932→  1932→Para 391: These include salaries, and other related-employment costs. Employee benefits are recognized when incurred. No provision is made for accrued leave or reimbursable duty allowances.
+  1884→  1933→  1933→Para 392: Research and development costs
+  1885→  1934→  1934→Para 393: Research costs are expensed as incurred. Development costs on an individual project are recognized as intangible assets when the entity/ vote can demonstrate:
+  1886→  1935→  1935→Para 394: The technical feasibility of completing the asset so that the asset will be available for use or sale
+  1887→  1936→  1936→Para 395: Its intention to complete and its ability to use or sell the asset
+  1888→  1937→  1937→Para 396: How the asset will generate future economic benefits or service potential
+  1889→  1938→  1938→Para 397: The availability of resources to complete the asset
+  1890→  1939→  1939→Para 398: The ability to measure reliably the expenditure during development
+  1891→  1940→  1940→Para 400: Following initial recognition of an asset, the asset is carried at cost less any accumulated amortization and accumulated impairment losses. Amortization of the asset begins when development is complete and the asset is available for use. It is amortized over the period of expected future benefit.
+  1892→  1941→  1941→Para 401: Depreciation and Impairment
+  1893→  1942→  1942→Para 402: Depreciation of PPE is calculated on the depreciable amount using the straight-line method. Non-produced assets shall not be depreciated (i.e a zero-depreciation rate shall be used). The various asset classes, descriptions together with their respective useful lives and depreciation method are provided in Annex (i).
+  1894→  1943→  1943→Para 403: The assets’ useful lives are reviewed, and adjusted prospectively, if appropriate, at the end of each reporting period.
+  1895→  1944→  1944→Para 404: The entity assesses at each reporting date whether there is an indication that an asset may be impaired. If any indication exists, or when annual impairment testing for an asset is required, the entity estimates the asset’s recoverable service amount. An asset’s recoverable service amount is the higher of the asset’s fair value less costs to sell and its value in use. Where the carrying amount of an asset exceeds its recoverable service amount, the asset is considered impaired and is written down to its recoverable service amount
+  1896→  1945→  1945→Para 406: Disposal
+  1897→  1946→  1946→Para 407: Items of PPE are derecognized when the asset is disposed of, or when there are no further economic benefits or service potential expected from their usage. The gain/loss arising from the disposal or retirement of an item of PPE is determined as the difference between the sales proceeds and the carrying value and is recognized the Statement of Financial Performance. Proceeds from disposal of property, plant and equipment are recognized as non-tax revenue in the period when it is due.
+  1898→  1947→  1947→Para 411: Assets
+  1899→  1948→  1948→Para 412: Assets are categorized into current and non-current assets. Current assets are expected to be converted into cash within a period of one year. Any asset that ca                                                                                             nnot be converted into cash within one year is categorized as a non-current asset.
+  1900→  1949→  1949→Para 413: Cash and cash equivalents
+  1901→  1950→  1950→Para 414: Cash and cash equivalents are carried in the balance sheet at cost. For the purposes of the cash flow statement, cash and cash equivalents comprise cash on hand, deposits held at call with banks, other short-term highly liquid investments, and bank overdrafts.
+  1902→  1951→  1951→Para 415: Foreign cash and cash equivalents are carried in the statement of financial position at the closing rate. Gains and losses on translation are recognized in the statement of Changes in Equity.
+  1903→  1952→  1952→Para 416: Unspent cash balances
+  1904→  1953→  1953→Para 417: Any Unspent cash balances by Government entities at the end of the financial year are returned to the Consolidated Fund. Votes with unspent balances will debit the statement of performance for same year balances and or debit the statement of changes in equity for balances crossing financial years respectively. However, unspent balances for Externally Funded Projects (EFP) are not transferred to the UCF but rolled over to the subsequent financial year. Unspent balances relating to EFPs can only be used upon appropriation.
+  1905→  1954→  1954→Para 418: Prepayments and Advances
+  1906→  1955→  1955→Para 419: These include payments made for the goods/ services but not delivered by the financial year end. Such will be recognised as receivable if the goods /services are not delivered within 60 days after closure of the financial year. However, if the services/ goods are delivered and verified before the audit is completed, these are not recognized as receivables but rather as expenses for the year under review. The latter is only applicable for the period of six months after the end of the financial year. Prepayments and advances outstanding at the end of the year are carried in the statement of financial position at cost.
+  1907→  1956→  1956→Para 420: Letters of credit
+  1908→  1957→  1957→Para 421: Procurement of goods and services through letters of credit which are cash covered are recognized in the statement of appropriation when the letter of credit is opened. Outstanding letters of credit at period-end are treated as receivables and expensed through the Statement of Financial Performance in the period when the goods and services are delivered (recurrent expenditure) or capitalized in the Statement of Financial position.
+  1909→  1958→  1958→Para 423: Receivables
+  1910→  1959→  1959→Para 424: Receivables arise from cash payments made that are recoverable from another party and are derecognized upon recovery or write-off and revenue earned but not collected. Receivables outstanding at year-end are carried in the statement of financial position at cost plus any accrued interest were applicable.
+  1911→  1960→  1960→Para 425: Accrued Non-Tax Revenue
+  1912→  1961→  1961→Para 426: This includes revenue earned but not collected by the reporting date. These are carried at historical cost and are written down by recovered receipts or write–off of unrecoverable amounts (bad debts are written-off with the approval of Parliament, when identified in the Statement of Changes in Equity).
+  1913→  1962→  1962→Para 427: Inventories
+  1914→  1963→  1963→Para 428: Comprise consumable supplies and goods purchased for resale, finished goods produced or work in progress being produced by the entity. They can also include materials and supplies awaiting use in the production process and, goods purchased or produced by an entity which are for distribution to other parties for no charge or a nominal charge. All inventories are expensed in the period in which they are acquired.
+  1915→  1964→  1964→Para 430: Property, Plant and Equipment (physical assets or fixed assets)
+  1916→  1965→  1965→Para 431: Definition and Recognition
+  1917→  1966→  1966→Para 432: Property, Plant, and Equipment (PPE) are tangible items that are held for use in the production or supply of goods or services, or for administrative purposes; and are expected to be used during more than one reporting period.
+  1918→  1967→  1967→Para 433: The cost of an item of PPE will be recognized as an asset if, and only if it is probable that future economic benefits or service potential associated with the item will flow to the entity; and the cost or fair value of the item can be measured reliably. Acquisitions of PPE are recorded in the asset register on receipt of the item at historical cost at the point when the related invoice is approved or recognized at fair value in the absence of the former.  Historical cost includes expenditure directly attributable to the acquisition of the Asset. The day-to-day servicing of PPE will be recognized in the statement of performance as repairs and maintenance expense and not included in the carrying amount of the asset. Where an asset is acquired in a non-exchange transaction for nil or nominal consideration, the asset is initially measured at its fair value.
+  1919→  1968→  1968→Para 434: On the other hand, costs that improve the useful life of an asset [improvement / major overhaul costs] will be recognized and consolidated with the cost of the main item.
+  1920→  1969→  1969→Para 435: Subsequent to initial recognition, an item of PPE is measured at either cost less any accumulated depreciation or at a revalued amount, being its fair value at the date of the revaluation, less any subsequent accumulated depreciation, and subsequent accumulated impairment losses.
+  1921→  1970→  1970→Para 436: The cost of a self-constructed asset is determined using the same principles as for an acquired asset. All direct and indirect production costs are capitalized. Overheads are not included in the cost of a self-constructed asset unless they are incremental (directly attributed to the asset). Borrowing costs for assets that take long to complete shall be capitalized and included in the cost of the asset.
+  1922→  1971→  1971→Para 438: Assets and liabilities under Service Concession Arrangements
+  1923→  1972→  1972→Para 439: Assets under Service Concession arrangement where the Government is established as the ‘grantor’ are recognised as asset provided by the operator and an upgrade to an existing asset(s) of the grantor as a service concession asset if:
+  1924→  1973→  1973→Para 441: The grantor controls or regulates what services the operator must provide with the asset, to whom it must provide them, and at what price; and
+  1925→  1974→  1974→Para 442: The grantor controls—through ownership, beneficial entitlement or otherwise—any significant residual interest in the asset at the end of the term of the arrangement.
+  1926→  1975→  1975→Para 443: The assets used in a service concession arrangement for their entire useful life (a “whole-of-life” asset).
+  1927→  1976→  1976→Para 445: Service Concession Arrangement assets
+  1928→  1977→  1977→Para 446: The Government has classified certain assets as Service Concession Assets and these will be recognized prospectively and recorded in the reporting period when identified.
+  1929→  1978→  1978→Para 447: Service concession assets are measured initially at fair value. In particular, fair value is used to determine the cost of a constructed or developed service concession asset or the cost of any upgrades to existing assets, on initial recognition. After initial recognition or reclassification, service concession assets are accounted for as a separate class of assets as Property, plant & equipment or intangible asset as appropriate.
+  1930→  1979→  1979→Para 448: On reclassification the original service concession asset is measured at its fair value and any difference between its fair value and its book value is recognised in the Statement of Financial Performance. If the terms of the arrangement require the Government to compensate the operator for the concession asset by making payments (either through a financial liability model or Grant of a Right to the Operator Model) and the payments are separable between the asset and service portions of the payment then the fair value of the original service concession asset is the sum total of the asset portion of the payments.
+  1931→  1980→  1980→Para 450: Biological assets
+  1932→  1981→  1981→Para 451: Biological assets are those assets of a biological nature like animals and plants which are used for agricultural activities by the Government entities. This excludes those used for research, education, transportation, entertainment, recreation, customs control or in any other activities that are not agricultural activities.
+  1933→  1982→  1982→Para 453: The entity recognises a biological asset or agricultural produce when and only when:
+  1934→  1983→  1983→Para 454: The entity controls the asset as a result of past events;
+  1935→  1984→  1984→Para 455: It is probable that future economic benefits or service potential associated with the asset will flow to the Government; and
+  1936→  1985→  1985→Para 456: The fair value or cost of the asset can be measured reliably
+  1937→  1986→  1986→Para 457: Heritage Assets
+  1938→  1987→  1987→Para 458: Heritage assets refer to assets of a historical, environment or cultural nature. Heritage assets shall be recognized if their cost/value can be measured reliably and the treatment for PPE shall apply. Heritage assets shall not be depreciated
+  1939→  1988→  1988→Para 461: Intangible assets
+  1940→  1989→  1989→Para 462: An intangible item should be recognized as an intangible asset if, and only if, all of the following criteria are met:
+  1941→  1990→  1990→Para 463: It is identifiable, i.e. either it is separable (i.e. it can be sold, transferred, rented, licensed or exchanged) or it arises from legal contractual or rights;
+  1942→  1991→  1991→Para 464: The entity has control over it, i.e. it has the power to obtain the future economic benefits or service potential flowing from the underlying asset and to restrict access of others to such benefits or service potential;
+  1943→  1992→  1992→Para 465: It is probable that future economic benefits or service potential will flow to the entity; and
+  1944→  1993→  1993→Para 466: The cost of the asset can be measured reliably.
+  1945→  1994→  1994→Para 467: Intangible assets acquired separately are initially recognized at cost. The cost of a separately acquired intangible asset comprises its purchase price, including import duties and non-refundable purchase taxes, after deducting trade discounts and rebates, as well as any directly attributable cost of preparing the asset for its intended use. The cost of an internally generated intangible asset is the total of directly attributable costs incurred since the point when all criteria are met for capitalization.  The cost of intangible assets acquired in a non-exchange transaction is their fair value at the date of the exchange. Following initial recognition, intangible assets are carried at cost less any accumulated amortization and accumulated impairment losses. Internally generated intangible assets, excluding capitalized development costs, are not capitalized and expenditure is reflected in surplus or deficit in the period in which the expenditure is incurred. Research costs are to be expensed directly.
+  1946→  1995→  1995→Para 468: The useful life of the intangible assets is assessed as either finite or indefinite.
+  1947→  1996→  1996→Para 470: Intangible assets with a finite life are amortized over their useful life. Refer to the useful lives in the Annex (i).
+  1948→  1997→  1997→Para 471: Intangible assets with a finite useful life are assessed for impairment whenever there is an indication that the asset may be impaired.
+  1949→  1998→  1998→Para 472: The amortization period and the amortization method, for an intangible asset with a finite useful life, are reviewed at the end of each reporting period. Changes in the expected useful life or the expected pattern of consumption of future economic benefits embodied in the asset are considered to modify the amortization period or method, as appropriate, and are treated as changes in accounting estimates.
+  1950→  1999→  1999→Para 473: Gains or losses arising from derecognition of an intangible asset are measured as the difference between the net disposal proceeds and the carrying amount of the asset and are recognized in the surplus or deficit when the asset is derecognized.
+  1951→  2000→  2000→Para 475: Investments
+  1952→  2001→
+  1953→  2002→[showing lines 1-2000 of 2207; use offset=2001 with limit to continue reading]

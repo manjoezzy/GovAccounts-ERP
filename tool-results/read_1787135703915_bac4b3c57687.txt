@@ -1,0 +1,857 @@
+   230→  }, [form, addCashbookEntry, resetForm])
+   231→
+   232→  const handleDelete = useCallback(
+   233→    (index: number) => {
+   234→      deleteCashbookEntry(index)
+   235→      toast.success('Entry deleted')
+   236→    },
+   237→    [deleteCashbookEntry]
+   238→  )
+   239→
+   240→  const handleSave = useCallback(async () => {
+   241→    if (cashbookEntries.length === 0) {
+   242→      toast.error('No entries to save')
+   243→      return
+   244→    }
+   245→    setSaving(true)
+   246→    try {
+   247→      await saveCashbookEntries()
+   248→      toast.success('Cashbook saved successfully')
+   249→    } catch (err) {
+   250→      toast.error(err instanceof Error ? err.message : 'Failed to save cashbook')
+   251→    } finally {
+   252→      setSaving(false)
+   253→    }
+   254→  }, [cashbookEntries, saveCashbookEntries])
+   255→
+   256→  const handleClearAll = useCallback(() => {
+   257→    clearCashbookEntries()
+   258→    setClearDialogOpen(false)
+   259→    toast.success('All cashbook entries cleared')
+   260→  }, [clearCashbookEntries])
+   261→
+   262→  const handleImport = useCallback(async () => {
+   263→    const unposted = transactions.filter((t) => !t.postedToCashbook)
+   264→    if (unposted.length === 0) {
+   265→      toast.info('No unposted transactions to import')
+   266→      return
+   267→    }
+   268→    setImporting(true)
+   269→    try {
+   270→      await postTransactionsToCashbook()
+   271→    } catch (err) {
+   272→      toast.error(err instanceof Error ? err.message : 'Failed to import transactions')
+   273→    } finally {
+   274→      setImporting(false)
+   275→    }
+   276→  }, [transactions, postTransactionsToCashbook])
+   277→
+   278→  const clearFilters = useCallback(() => {
+   279→    setFilterType('all')
+   280→    setSearchQuery('')
+   281→    setDateFrom('')
+   282→    setDateTo('')
+   283→  }, [])
+   284→
+   285→  const hasActiveFilters =
+   286→    filterType !== 'all' || searchQuery.trim() !== '' || dateFrom !== '' || dateTo !== ''
+   287→
+   288→  // ── Summary cards data ───────────────────────────────────────
+   289→  const summaryCards = [
+   290→    {
+   291→      label: 'Opening Balance',
+   292→      value: `${entityConfig.currency} ${formatNum(openingBalance)}`,
+   293→      icon: <Wallet className="h-5 w-5" />,
+   294→      color: 'text-blue-600',
+   295→      bg: 'bg-blue-50 dark:bg-blue-950/40',
+   296→      border: 'border-blue-200 dark:border-blue-800/50',
+   297→    },
+   298→    {
+   299→      label: 'Total Receipts',
+   300→      value: `${entityConfig.currency} ${formatNum(totalReceipts)}`,
+   301→      icon: <ArrowDownCircle className="h-5 w-5" />,
+   302→      color: 'text-emerald-600',
+   303→      bg: 'bg-emerald-50 dark:bg-emerald-950/40',
+   304→      border: 'border-emerald-200 dark:border-emerald-800/50',
+   305→    },
+   306→    {
+   307→      label: 'Total Payments',
+   308→      value: `${entityConfig.currency} ${formatNum(totalPayments)}`,
+   309→      icon: <ArrowUpCircle className="h-5 w-5" />,
+   310→      color: 'text-red-600',
+   311→      bg: 'bg-red-50 dark:bg-red-950/40',
+   312→      border: 'border-red-200 dark:border-red-800/50',
+   313→    },
+   314→    {
+   315→      label: 'Closing Balance',
+   316→      value: `${entityConfig.currency} ${formatNum(closingBalance)}`,
+   317→      icon: <CircleDollarSign className="h-5 w-5" />,
+   318→      color: closingBalance >= 0 ? 'text-emerald-600' : 'text-red-600',
+   319→      bg: closingBalance >= 0
+   320→        ? 'bg-emerald-50 dark:bg-emerald-950/40'
+   321→        : 'bg-red-50 dark:bg-red-950/40',
+   322→      border: closingBalance >= 0
+   323→        ? 'border-emerald-200 dark:border-emerald-800/50'
+   324→        : 'border-red-200 dark:border-red-800/50',
+   325→    },
+   326→    {
+   327→      label: 'Entry Count',
+   328→      value: String(cashbookEntries.length),
+   329→      icon: <BookOpen className="h-5 w-5" />,
+   330→      color: 'text-violet-600',
+   331→      bg: 'bg-violet-50 dark:bg-violet-950/40',
+   332→      border: 'border-violet-200 dark:border-violet-800/50',
+   333→    },
+   334→  ]
+   335→
+   336→  // ── Render ───────────────────────────────────────────────────
+   337→  return (
+   338→    <TooltipProvider>
+   339→      <motion.div
+   340→        variants={pageVariants}
+   341→        initial="initial"
+   342→        animate="animate"
+   343→        exit="exit"
+   344→        transition={{ duration: 0.3, ease: 'easeOut' }}
+   345→        className="space-y-6"
+   346→      >
+   347→        {/* ---------------------------------------------------------------- */}
+   348→        {/* HEADER */}
+   349→        {/* --------------------------------------------------------- */}
+   350→        <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+   351→          <div>
+   352→            <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+   353→              <BookOpen className="h-6 w-6 text-primary" />
+   354→              Cashbook
+   355→            </h2>
+   356→            <p className="text-sm text-muted-foreground mt-1 max-w-xl">
+   357→              Record all cash receipts and payments in chronological order. The running balance is
+   358→              auto-calculated to maintain an accurate picture of your cash position throughout the
+   359→              financial period.
+   360→            </p>
+   361→          </div>
+   362→          <Badge
+   363→            variant="outline"
+   364→            className="w-fit text-xs font-medium shrink-0 mt-2 sm:mt-0"
+   365→          >
+   366→            Step 3 of 10
+   367→          </Badge>
+   368→        </div>
+   369→
+   370→        {/* ---------------------------------------------------------------- */}
+   371→        {/* SUMMARY CARDS */}
+   372→        {/* --------------------------------------------------------- */}
+   373→        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+   374→          {summaryCards.map((card) => (
+   375→            <Card
+   376→              key={card.label}
+   377→              className={`${card.bg} ${card.border} border`}
+   378→            >
+   379→              <CardContent className="p-4">
+   380→                <div className="flex items-center gap-2 mb-1">
+   381→                  <span className={card.color}>{card.icon}</span>
+   382→                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+   383→                    {card.label}
+   384→                  </span>
+   385→                </div>
+   386→                <p className={`text-lg font-bold font-mono ${card.color}`}>{card.value}</p>
+   387→              </CardContent>
+   388→            </Card>
+   389→          ))}
+   390→        </div>
+   391→
+   392→        {/* ---------------------------------------------------------------- */}
+   393→        {/* ACTION BAR */}
+   394→        {/* --------------------------------------------------------- */}
+   395→        <div className="flex flex-wrap items-center gap-2">
+   396→          <Button
+   397→            onClick={() => setShowForm((prev) => !prev)}
+   398→            size="sm"
+   399→            className="gap-1.5"
+   400→          >
+   401→            <Plus className="h-4 w-4" />
+   402→            {showForm ? 'Hide Form' : 'Add Entry'}
+   403→          </Button>
+   404→
+   405→          <Button
+   406→            variant="outline"
+   407→            size="sm"
+   408→            onClick={handleSave}
+   409→            disabled={saving || cashbookEntries.length === 0}
+   410→            className="gap-1.5"
+   411→          >
+   412→            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+   413→            Save
+   414→          </Button>
+   415→
+   416→          <Button
+   417→            variant="outline"
+   418→            size="sm"
+   419→            onClick={() => setClearDialogOpen(true)}
+   420→            disabled={cashbookEntries.length === 0}
+   421→            className="gap-1.5 text-destructive hover:text-destructive"
+   422→          >
+   423→            <Trash2 className="h-4 w-4" />
+   424→            Clear All
+   425→          </Button>
+   426→
+   427→          <Button
+   428→            variant="outline"
+   429→            size="sm"
+   430→            onClick={handleImport}
+   431→            disabled={importing || unpostedCount === 0}
+   432→            className="gap-1.5"
+   433→          >
+   434→            {importing ? (
+   435→              <Loader2 className="h-4 w-4 animate-spin" />
+   436→            ) : (
+   437→              <ArrowDownCircle className="h-4 w-4" />
+   438→            )}
+   439→            Import from Transactions
+   440→            {unpostedCount > 0 && (
+   441→              <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">
+   442→                {unpostedCount}
+   443→              </Badge>
+   444→            )}
+   445→          </Button>
+   446→        </div>
+   447→
+   448→        {/* ---------------------------------------------------------------- */}
+   449→        {/* INLINE ADD-ENTRY FORM (COLLAPSIBLE) */}
+   450→        {/* --------------------------------------------------------- */}
+   451→        {showForm && (
+   452→          <motion.div
+   453→            initial={{ opacity: 0, height: 0 }}
+   454→            animate={{ opacity: 1, height: 'auto' }}
+   455→            exit={{ opacity: 0, height: 0 }}
+   456→            transition={{ duration: 0.25 }}
+   457→          >
+   458→            <Card className="border-primary/20 bg-muted/30">
+   459→              <CardHeader className="pb-4">
+   460→                <div className="flex items-center justify-between">
+   461→                  <div>
+   462→                    <CardTitle className="text-base">New Cashbook Entry</CardTitle>
+   463→                    <CardDescription className="text-xs mt-0.5">
+   464→                      Fill in the details below and submit to add to the cashbook.
+   465→                    </CardDescription>
+   466→                  </div>
+   467→                  <Button
+   468→                    variant="ghost"
+   469→                    size="icon"
+   470→                    className="h-8 w-8"
+   471→                    onClick={resetForm}
+   472→                  >
+   473→                    <X className="h-4 w-4" />
+   474→                  </Button>
+   475→                </div>
+   476→              </CardHeader>
+   477→              <CardContent>
+   478→                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+   479→                  {/* Date */}
+   480→                  <div className="space-y-1.5">
+   481→                    <Label htmlFor="cb-date" className="text-xs font-medium">
+   482→                      Date <span className="text-destructive">*</span>
+   483→                    </Label>
+   484→                    <Input
+   485→                      id="cb-date"
+   486→                      type="date"
+   487→                      value={form.entryDate}
+   488→                      onChange={(e) => setForm((f) => ({ ...f, entryDate: e.target.value }))}
+   489→                      className="h-9"
+   490→                    />
+   491→                  </div>
+   492→
+   493→                  {/* Type Toggle */}
+   494→                  <div className="space-y-1.5">
+   495→                    <Label className="text-xs font-medium">Type</Label>
+   496→                    <div className="flex rounded-md border overflow-hidden h-9">
+   497→                      <button
+   498→                        type="button"
+   499→                        onClick={() =>
+   500→                          setForm((f) => ({
+   501→                            ...f,
+   502→                            type: 'receipt',
+   503→                            debitAmount: f.creditAmount || '',
+   504→                            creditAmount: '',
+   505→                          }))
+   506→                        }
+   507→                        className={`flex-1 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
+   508→                          form.type === 'receipt'
+   509→                            ? 'bg-emerald-600 text-white'
+   510→                            : 'bg-background text-muted-foreground hover:bg-muted'
+   511→                        }`}
+   512→                      >
+   513→                        <ArrowDownCircle className="h-3.5 w-3.5" />
+   514→                        Receipt
+   515→                      </button>
+   516→                      <button
+   517→                        type="button"
+   518→                        onClick={() =>
+   519→                          setForm((f) => ({
+   520→                            ...f,
+   521→                            type: 'payment',
+   522→                            creditAmount: f.debitAmount || '',
+   523→                            debitAmount: '',
+   524→                          }))
+   525→                        }
+   526→                        className={`flex-1 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
+   527→                          form.type === 'payment'
+   528→                            ? 'bg-red-600 text-white'
+   529→                            : 'bg-background text-muted-foreground hover:bg-muted'
+   530→                        }`}
+   531→                      >
+   532→                        <ArrowUpCircle className="h-3.5 w-3.5" />
+   533→                        Payment
+   534→                      </button>
+   535→                    </div>
+   536→                  </div>
+   537→
+   538→                  {/* Reference */}
+   539→                  <div className="space-y-1.5">
+   540→                    <Label htmlFor="cb-ref" className="text-xs font-medium">
+   541→                      Reference
+   542→                    </Label>
+   543→                    <Input
+   544→                      id="cb-ref"
+   545→                      placeholder="e.g. RCV-001"
+   546→                      value={form.reference}
+   547→                      onChange={(e) => setForm((f) => ({ ...f, reference: e.target.value }))}
+   548→                      className="h-9"
+   549→                    />
+   550→                  </div>
+   551→
+   552→                  {/* Description */}
+   553→                  <div className="space-y-1.5">
+   554→                    <Label htmlFor="cb-desc" className="text-xs font-medium">
+   555→                      Description <span className="text-destructive">*</span>
+   556→                    </Label>
+   557→                    <Input
+   558→                      id="cb-desc"
+   559→                      placeholder="Narrative"
+   560→                      value={form.description}
+   561→                      onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+   562→                      className="h-9"
+   563→                    />
+   564→                  </div>
+   565→
+   566→                  {/* Account Code */}
+   567→                  <div className="space-y-1.5">
+   568→                    <Label htmlFor="cb-acct-code" className="text-xs font-medium">
+   569→                      Account Code
+   570→                    </Label>
+   571→                    <Input
+   572→                      id="cb-acct-code"
+   573→                      placeholder="e.g. 1001"
+   574→                      value={form.accountCode}
+   575→                      onChange={(e) => setForm((f) => ({ ...f, accountCode: e.target.value }))}
+   576→                      className="h-9 font-mono"
+   577→                    />
+   578→                  </div>
+   579→
+   580→                  {/* Account Name */}
+   581→                  <div className="space-y-1.5">
+   582→                    <Label htmlFor="cb-acct-name" className="text-xs font-medium">
+   583→                      Account Name
+   584→                    </Label>
+   585→                    <Input
+   586→                      id="cb-acct-name"
+   587→                      placeholder="e.g. Cash at Bank"
+   588→                      value={form.accountName}
+   589→                      onChange={(e) => setForm((f) => ({ ...f, accountName: e.target.value }))}
+   590→                      className="h-9"
+   591→                    />
+   592→                  </div>
+   593→
+   594→                  {/* Debit Amount */}
+   595→                  <div className="space-y-1.5">
+   596→                    <Label htmlFor="cb-debit" className="text-xs font-medium">
+   597→                      {form.type === 'receipt' ? (
+   598→                        <span className="text-emerald-600">
+   599→                          Debit (Receipt) <span className="text-destructive">*</span>
+   600→                        </span>
+   601→                      ) : (
+   602→                        'Debit'
+   603→                      )}
+   604→                    </Label>
+   605→                    <Input
+   606→                      id="cb-debit"
+   607→                      type="number"
+   608→                      placeholder="0.00"
+   609→                      value={form.debitAmount}
+   610→                      onChange={(e) => setForm((f) => ({ ...f, debitAmount: e.target.value }))}
+   611→                      disabled={form.type === 'payment'}
+   612→                      className={`h-9 font-mono ${form.type === 'receipt' ? 'border-emerald-300 focus-visible:ring-emerald-500/30' : ''}`}
+   613→                    />
+   614→                  </div>
+   615→
+   616→                  {/* Credit Amount */}
+   617→                  <div className="space-y-1.5">
+   618→                    <Label htmlFor="cb-credit" className="text-xs font-medium">
+   619→                      {form.type === 'payment' ? (
+   620→                        <span className="text-red-600">
+   621→                          Credit (Payment) <span className="text-destructive">*</span>
+   622→                        </span>
+   623→                      ) : (
+   624→                        'Credit'
+   625→                      )}
+   626→                    </Label>
+   627→                    <Input
+   628→                      id="cb-credit"
+   629→                      type="number"
+   630→                      placeholder="0.00"
+   631→                      value={form.creditAmount}
+   632→                      onChange={(e) => setForm((f) => ({ ...f, creditAmount: e.target.value }))}
+   633→                      disabled={form.type === 'receipt'}
+   634→                      className={`h-9 font-mono ${form.type === 'payment' ? 'border-red-300 focus-visible:ring-red-500/30' : ''}`}
+   635→                    />
+   636→                  </div>
+   637→
+   638→                  {/* Bank Account */}
+   639→                  <div className="space-y-1.5">
+   640→                    <Label htmlFor="cb-bank" className="text-xs font-medium">
+   641→                      Bank Account
+   642→                    </Label>
+   643→                    <Select
+   644→                      value={form.bankAccount}
+   645→                      onValueChange={(v) => setForm((f) => ({ ...f, bankAccount: v }))}
+   646→                    >
+   647→                      <SelectTrigger id="cb-bank" className="h-9">
+   648→                        <SelectValue placeholder="Select bank" />
+   649→                      </SelectTrigger>
+   650→                      <SelectContent>
+   651→                        <SelectItem value="main">Main Account</SelectItem>
+   652→                        <SelectItem value="operations">Operations Account</SelectItem>
+   653→                        <SelectItem value="development">Development Fund</SelectItem>
+   654→                        <SelectItem value="retention">Retention Account</SelectItem>
+   655→                        <SelectItem value="petty-cash">Petty Cash</SelectItem>
+   656→                      </SelectContent>
+   657→                    </Select>
+   658→                  </div>
+   659→
+   660→                  {/* Cheque No */}
+   661→                  <div className="space-y-1.5">
+   662→                    <Label htmlFor="cb-cheque" className="text-xs font-medium">
+   663→                      Cheque No
+   664→                    </Label>
+   665→                    <Input
+   666→                      id="cb-cheque"
+   667→                      placeholder="e.g. CHQ-1234"
+   668→                      value={form.chequeNo}
+   669→                      onChange={(e) => setForm((f) => ({ ...f, chequeNo: e.target.value }))}
+   670→                      className="h-9 font-mono"
+   671→                    />
+   672→                  </div>
+   673→
+   674→                  {/* Payee/Payer */}
+   675→                  <div className="space-y-1.5 sm:col-span-2">
+   676→                    <Label htmlFor="cb-payee" className="text-xs font-medium">
+   677→                      Payee / Payer
+   678→                    </Label>
+   679→                    <Input
+   680→                      id="cb-payee"
+   681→                      placeholder="Name of payee or payer"
+   682→                      value={form.payeePayer}
+   683→                      onChange={(e) => setForm((f) => ({ ...f, payeePayer: e.target.value }))}
+   684→                      className="h-9"
+   685→                    />
+   686→                  </div>
+   687→                </div>
+   688→
+   689→                {/* Form Actions */}
+   690→                <div className="flex items-center justify-end gap-2 mt-5 pt-4 border-t">
+   691→                  <Button
+   692→                    variant="ghost"
+   693→                    size="sm"
+   694→                    onClick={resetForm}
+   695→                    className="text-muted-foreground"
+   696→                  >
+   697→                    Cancel
+   698→                  </Button>
+   699→                  <Button size="sm" onClick={handleSubmit} className="gap-1.5">
+   700→                    <Plus className="h-4 w-4" />
+   701→                    Add to Cashbook
+   702→                  </Button>
+   703→                </div>
+   704→              </CardContent>
+   705→            </Card>
+   706→          </motion.div>
+   707→        )}
+   708→
+   709→        {/* ---------------------------------------------------------------- */}
+   710→        {/* FILTER BAR */}
+   711→        {/* --------------------------------------------------------- */}
+   712→        <Card className="border-dashed">
+   713→          <CardContent className="p-3">
+   714→            <div className="flex flex-wrap items-center gap-2">
+   715→              <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
+   716→
+   717→              <Select
+   718→                value={filterType}
+   719→                onValueChange={(v) => setFilterType(v as 'all' | 'receipt' | 'payment')}
+   720→              >
+   721→                <SelectTrigger className="h-8 w-[130px] text-xs">
+   722→                  <SelectValue />
+   723→                </SelectTrigger>
+   724→                <SelectContent>
+   725→                  <SelectItem value="all">All Types</SelectItem>
+   726→                  <SelectItem value="receipt">Receipts</SelectItem>
+   727→                  <SelectItem value="payment">Payments</SelectItem>
+   728→                </SelectContent>
+   729→              </Select>
+   730→
+   731→              <Input
+   732→                type="date"
+   733→                value={dateFrom}
+   734→                onChange={(e) => setDateFrom(e.target.value)}
+   735→                className="h-8 w-[140px] text-xs"
+   736→                placeholder="From date"
+   737→              />
+   738→
+   739→              <Input
+   740→                type="date"
+   741→                value={dateTo}
+   742→                onChange={(e) => setDateTo(e.target.value)}
+   743→                className="h-8 w-[140px] text-xs"
+   744→                placeholder="To date"
+   745→              />
+   746→
+   747→              <div className="relative flex-1 min-w-[180px] max-w-[280px]">
+   748→                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+   749→                <Input
+   750→                  value={searchQuery}
+   751→                  onChange={(e) => setSearchQuery(e.target.value)}
+   752→                  placeholder="Search description, ref, account, payee…"
+   753→                  className="h-8 text-xs pl-7 pr-7"
+   754→                />
+   755→                {searchQuery && (
+   756→                  <button
+   757→                    onClick={() => setSearchQuery('')}
+   758→                    className="absolute right-2 top-1/2 -translate-y-1/2"
+   759→                  >
+   760→                    <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+   761→                  </button>
+   762→                )}
+   763→              </div>
+   764→
+   765→              {hasActiveFilters && (
+   766→                <Button
+   767→                  variant="ghost"
+   768→                  size="sm"
+   769→                  onClick={clearFilters}
+   770→                  className="h-8 text-xs text-muted-foreground hover:text-foreground gap-1"
+   771→                >
+   772→                  <X className="h-3 w-3" />
+   773→                  Clear
+   774→                </Button>
+   775→              )}
+   776→
+   777→              <span className="text-xs text-muted-foreground ml-auto">
+   778→                {filteredEntries.length} of {cashbookEntries.length} entries
+   779→              </span>
+   780→            </div>
+   781→          </CardContent>
+   782→        </Card>
+   783→
+   784→        {/* ---------------------------------------------------------------- */}
+   785→        {/* DATA TABLE */}
+   786→        {/* --------------------------------------------------------- */}
+   787→        <Card>
+   788→          <CardContent className="p-0">
+   789→            {cashbookEntries.length === 0 ? (
+   790→              /* ── EMPTY STATE ──────────────────────────────────────── */
+   791→              <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+   792→                <div className="rounded-full bg-muted p-4 mb-4">
+   793→                  <BookOpen className="h-10 w-10 text-muted-foreground" />
+   794→                </div>
+   795→                <h3 className="text-sm font-semibold text-foreground">No cashbook entries yet</h3>
+   796→                <p className="text-xs text-muted-foreground mt-1 max-w-sm">
+   797→                  Add entries manually or import from your captured revenue and expenditure
+   798→                  transactions to populate the cashbook.
+   799→                </p>
+   800→                <div className="flex gap-2 mt-4">
+   801→                  <Button
+   802→                    variant="outline"
+   803→                    size="sm"
+   804→                    onClick={() => setShowForm(true)}
+   805→                    className="gap-1.5"
+   806→                  >
+   807→                    <Plus className="h-4 w-4" />
+   808→                    Add Entry
+   809→                  </Button>
+   810→                  {unpostedCount > 0 && (
+   811→                    <Button
+   812→                      variant="outline"
+   813→                      size="sm"
+   814→                      onClick={handleImport}
+   815→                      className="gap-1.5"
+   816→                    >
+   817→                      <ArrowDownCircle className="h-4 w-4" />
+   818→                      Import {unpostedCount} Transactions
+   819→                    </Button>
+   820→                  )}
+   821→                </div>
+   822→              </div>
+   823→            ) : (
+   824→              /* ── TABLE ─────────────────────────────────────────────── */
+   825→              <div className="overflow-x-auto">
+   826→                <table className="w-full text-xs">
+   827→                  <thead>
+   828→                    <tr className="border-b bg-muted/50">
+   829→                      <th className="text-left px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap">
+   830→                        Date
+   831→                      </th>
+   832→                      <th className="text-left px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap">
+   833→                        Type
+   834→                      </th>
+   835→                      <th className="text-left px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap">
+   836→                        Ref
+   837→                      </th>
+   838→                      <th className="text-left px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap min-w-[160px]">
+   839→                        Description
+   840→                      </th>
+   841→                      <th className="text-left px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap">
+   842→                        Account
+   843→                      </th>
+   844→                      <th className="text-right px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap">
+   845→                        Debit
+   846→                      </th>
+   847→                      <th className="text-right px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap">
+   848→                        Credit
+   849→                      </th>
+   850→                      <th className="text-right px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap">
+   851→                        Running Bal.
+   852→                      </th>
+   853→                      <th className="text-left px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap">
+   854→                        Bank
+   855→                      </th>
+   856→                      <th className="text-left px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap">
+   857→                        Payee/Payer
+   858→                      </th>
+   859→                      <th className="text-center px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap">
+   860→                        Actions
+   861→                      </th>
+   862→                    </tr>
+   863→                  </thead>
+   864→                  <tbody>
+   865→                    {filteredEntries.map((entry, idx) => {
+   866→                      const isEven = idx % 2 === 0
+   867→                      const isReceipt = entry.type === 'receipt'
+   868→                      return (
+   869→                        <tr
+   870→                          key={entry._id ?? idx}
+   871→                          className={`
+   872→                            border-b transition-colors hover:bg-muted/40
+   873→                            ${isEven ? 'bg-background' : 'bg-muted/20'}
+   874→                          `}
+   875→                        >
+   876→                          {/* Date */}
+   877→                          <td className="px-3 py-2 whitespace-nowrap font-mono">
+   878→                            {entry.entryDate}
+   879→                          </td>
+   880→
+   881→                          {/* Type Badge */}
+   882→                          <td className="px-3 py-2 whitespace-nowrap">
+   883→                            <Badge
+   884→                              variant="secondary"
+   885→                              className={`
+   886→                                text-[10px] font-semibold uppercase tracking-wider
+   887→                                ${
+   888→                                  isReceipt
+   889→                                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50'
+   890→                                    : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 border border-red-200 dark:border-red-800/50'
+   891→                                }
+   892→                              `}
+   893→                            >
+   894→                              {isReceipt ? (
+   895→                                <span className="flex items-center gap-1">
+   896→                                  <ArrowDownCircle className="h-3 w-3" />
+   897→                                  RCP
+   898→                                </span>
+   899→                              ) : (
+   900→                                <span className="flex items-center gap-1">
+   901→                                  <ArrowUpCircle className="h-3 w-3" />
+   902→                                  PAY
+   903→                                </span>
+   904→                              )}
+   905→                            </Badge>
+   906→                          </td>
+   907→
+   908→                          {/* Reference */}
+   909→                          <td className="px-3 py-2 whitespace-nowrap font-mono text-muted-foreground">
+   910→                            {entry.reference || '—'}
+   911→                          </td>
+   912→
+   913→                          {/* Description */}
+   914→                          <td className="px-3 py-2">
+   915→                            <span className={`font-medium ${isReceipt ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'}`}>
+   916→                              {entry.description}
+   917→                            </span>
+   918→                          </td>
+   919→
+   920→                          {/* Account */}
+   921→                          <td className="px-3 py-2 whitespace-nowrap">
+   922→                            <span className="font-mono text-muted-foreground">
+   923→                              {entry.accountCode}
+   924→                            </span>
+   925→                            {entry.accountName && (
+   926→                              <span className="ml-1.5 text-muted-foreground">
+   927→                                {entry.accountName}
+   928→                              </span>
+   929→                            )}
+   930→                          </td>
+   931→
+   932→                          {/* Debit */}
+   933→                          <td className={`px-3 py-2 text-right font-mono font-medium whitespace-nowrap ${entry.debitAmount > 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-muted-foreground'}`}>
+   934→                            {entry.debitAmount > 0 ? formatNum(entry.debitAmount) : '—'}
+   935→                          </td>
+   936→
+   937→                          {/* Credit */}
+   938→                          <td className={`px-3 py-2 text-right font-mono font-medium whitespace-nowrap ${entry.creditAmount > 0 ? 'text-red-700 dark:text-red-400' : 'text-muted-foreground'}`}>
+   939→                            {entry.creditAmount > 0 ? formatNum(entry.creditAmount) : '—'}
+   940→                          </td>
+   941→
+   942→                          {/* Running Balance */}
+   943→                          <td
+   944→                            className={`px-3 py-2 text-right font-mono font-bold whitespace-nowrap ${
+   945→                              entry.runningBalance < 0
+   946→                                ? 'text-red-600 dark:text-red-400'
+   947→                                : 'text-foreground'
+   948→                            }`}
+   949→                          >
+   950→                            {entry.runningBalance < 0 ? '(' : ''}
+   951→                            {formatNum(Math.abs(entry.runningBalance))}
+   952→                            {entry.runningBalance < 0 ? ')' : ''}
+   953→                          </td>
+   954→
+   955→                          {/* Bank */}
+   956→                          <td className="px-3 py-2 whitespace-nowrap text-muted-foreground">
+   957→                            {entry.bankAccount ? (
+   958→                              <Badge variant="outline" className="text-[10px] font-mono">
+   959→                                {entry.bankAccount}
+   960→                              </Badge>
+   961→                            ) : (
+   962→                              '—'
+   963→                            )}
+   964→                          </td>
+   965→
+   966→                          {/* Payee/Payer */}
+   967→                          <td className="px-3 py-2 whitespace-nowrap text-muted-foreground max-w-[140px] truncate">
+   968→                            {entry.payeePayer || '—'}
+   969→                          </td>
+   970→
+   971→                          {/* Actions */}
+   972→                          <td className="px-3 py-2 text-center whitespace-nowrap">
+   973→                            <Tooltip>
+   974→                              <TooltipTrigger asChild>
+   975→                                <Button
+   976→                                  variant="ghost"
+   977→                                  size="icon"
+   978→                                  className="h-7 w-7 text-muted-foreground hover:text-destructive"
+   979→                                  onClick={() => {
+   980→                                    const originalIndex = cashbookEntries.findIndex(
+   981→                                      (e) => e._id === entry._id
+   982→                                    )
+   983→                                    if (originalIndex !== -1) handleDelete(originalIndex)
+   984→                                  }}
+   985→                                >
+   986→                                  <Trash2 className="h-3.5 w-3.5" />
+   987→                                </Button>
+   988→                              </TooltipTrigger>
+   989→                              <TooltipContent>Delete entry</TooltipContent>
+   990→                            </Tooltip>
+   991→                          </td>
+   992→                        </tr>
+   993→                      )
+   994→                    })}
+   995→                  </tbody>
+   996→
+   997→                  {/* ── FOOTER TOTALS ────────────────────────────────────── */}
+   998→                  <tfoot>
+   999→                    <tr className="border-t-2 border-foreground/10 bg-muted/50 font-semibold">
+  1000→                      <td colSpan={5} className="px-3 py-2.5 text-right">
+  1001→                        Totals
+  1002→                      </td>
+  1003→                      <td className="px-3 py-2.5 text-right font-mono text-emerald-700 dark:text-emerald-400">
+  1004→                        {formatNum(totalReceipts)}
+  1005→                      </td>
+  1006→                      <td className="px-3 py-2.5 text-right font-mono text-red-700 dark:text-red-400">
+  1007→                        {formatNum(totalPayments)}
+  1008→                      </td>
+  1009→                      <td
+  1010→                        className={`px-3 py-2.5 text-right font-mono font-bold ${
+  1011→                          closingBalance < 0
+  1012→                            ? 'text-red-600 dark:text-red-400'
+  1013→                            : 'text-foreground'
+  1014→                        }`}
+  1015→                      >
+  1016→                        {closingBalance < 0 ? '(' : ''}
+  1017→                        {formatNum(Math.abs(closingBalance))}
+  1018→                        {closingBalance < 0 ? ')' : ''}
+  1019→                      </td>
+  1020→                      <td colSpan={2} />
+  1021→                    </tr>
+  1022→                  </tfoot>
+  1023→                </table>
+  1024→              </div>
+  1025→            )}
+  1026→          </CardContent>
+  1027→        </Card>
+  1028→
+  1029→        {/* ---------------------------------------------------------------- */}
+  1030→        {/* NAVIGATION */}
+  1031→        {/* --------------------------------------------------------- */}
+  1032→        <div className="flex items-center justify-between pt-2">
+  1033→          <Button
+  1034→            variant="outline"
+  1035→            onClick={() => setWizardStep(2)}
+  1036→            className="gap-2"
+  1037→            disabled={isLoading}
+  1038→          >
+  1039→            <ArrowLeft className="h-4 w-4" />
+  1040→            Back to Rev / Exp Capture
+  1041→          </Button>
+  1042→
+  1043→          <Button
+  1044→            onClick={() => setWizardStep(4)}
+  1045→            className="gap-2"
+  1046→            disabled={isLoading}
+  1047→          >
+  1048→            Continue to Ledger
+  1049→            <ArrowRight className="h-4 w-4" />
+  1050→          </Button>
+  1051→        </div>
+  1052→
+  1053→        {/* ---------------------------------------------------------------- */}
+  1054→        {/* CLEAR CONFIRMATION DIALOG */}
+  1055→        {/* --------------------------------------------------------- */}
+  1056→        <Dialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
+  1057→          <DialogContent>
+  1058→            <DialogHeader>
+  1059→              <DialogTitle>Clear All Cashbook Entries?</DialogTitle>
+  1060→              <DialogDescription>
+  1061→                This will permanently remove all {cashbookEntries.length} cashbook entry
+  1062→                {cashbookEntries.length !== 1 ? 'ies' : 'y'}. This action cannot be undone.
+  1063→              </DialogDescription>
+  1064→            </DialogHeader>
+  1065→            <DialogFooter className="gap-2 sm:gap-0">
+  1066→              <Button
+  1067→                variant="ghost"
+  1068→                onClick={() => setClearDialogOpen(false)}
+  1069→              >
+  1070→                Cancel
+  1071→              </Button>
+  1072→              <Button
+  1073→                variant="destructive"
+  1074→                onClick={handleClearAll}
+  1075→                className="gap-1.5"
+  1076→              >
+  1077→                <Trash2 className="h-4 w-4" />
+  1078→                Yes, Clear All
+  1079→              </Button>
+  1080→            </DialogFooter>
+  1081→          </DialogContent>
+  1082→        </Dialog>
+  1083→      </motion.div>
+  1084→    </TooltipProvider>
+  1085→  )
+  1086→}

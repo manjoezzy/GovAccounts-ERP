@@ -1,0 +1,1114 @@
+   102→] as const
+   103→
+   104→const formatNum = (n: number) =>
+   105→  Math.abs(n).toLocaleString('en-US', {
+   106→    minimumFractionDigits: 0,
+   107→    maximumFractionDigits: 0,
+   108→  })
+   109→
+   110→// ═══════════════════════════════════════════════════════════════════
+   111→// FORM DEFAULTS
+   112→// ═══════════════════════════════════════════════════════════════════
+   113→
+   114→interface FormData {
+   115→  transactionDate: string
+   116→  reference: string
+   117→  description: string
+   118→  accountCode: string
+   119→  accountName: string
+   120→  classification: string
+   121→  category: string
+   122→  amount: string
+   123→  taxAmount: string
+   124→  payeePayer: string
+   125→  voucherNo: string
+   126→  invoiceNo: string
+   127→  receiptNo: string
+   128→  fundSource: string
+   129→}
+   130→
+   131→const emptyForm: FormData = {
+   132→  transactionDate: '',
+   133→  reference: '',
+   134→  description: '',
+   135→  accountCode: '',
+   136→  accountName: '',
+   137→  classification: '',
+   138→  category: '',
+   139→  amount: '',
+   140→  taxAmount: '',
+   141→  payeePayer: '',
+   142→  voucherNo: '',
+   143→  invoiceNo: '',
+   144→  receiptNo: '',
+   145→  fundSource: '',
+   146→}
+   147→
+   148→// ═══════════════════════════════════════════════════════════════════
+   149→// COMPONENT
+   150→// ═══════════════════════════════════════════════════════════════════
+   151→
+   152→export default function RevExpCaptureStep() {
+   153→  const {
+   154→    transactions,
+   155→    entityConfig,
+   156→    addTransaction,
+   157→    deleteTransaction,
+   158→    postTransactionsToLedger,
+   159→    postTransactionsToCashbook,
+   160→    saveTransactions,
+   161→    clearTransactions,
+   162→    setWizardStep,
+   163→  } = useFinancialStore()
+   164→
+   165→  // ── Local state ──────────────────────────────────────────────
+   166→  const [activeTab, setActiveTab] = useState<'revenue' | 'expenditure'>('revenue')
+   167→  const [formVisible, setFormVisible] = useState(false)
+   168→  const [formData, setFormData] = useState<FormData>({ ...emptyForm })
+   169→  const [searchTerm, setSearchTerm] = useState('')
+   170→  const [isPostingLedger, setIsPostingLedger] = useState(false)
+   171→  const [isPostingCashbook, setIsPostingCashbook] = useState(false)
+   172→  const [isSaving, setIsSaving] = useState(false)
+   173→  const [clearDialogOpen, setClearDialogOpen] = useState(false)
+   174→
+   175→  const searchRef = useRef<HTMLInputElement>(null)
+   176→  const formRef = useRef<HTMLDivElement>(null)
+   177→
+   178→  // ── Computed summaries ───────────────────────────────────────
+   179→  const revenueItems = useMemo(
+   180→    () => transactions.filter((t) => t.type === 'revenue'),
+   181→    [transactions]
+   182→  )
+   183→  const expenditureItems = useMemo(
+   184→    () => transactions.filter((t) => t.type === 'expenditure'),
+   185→    [transactions]
+   186→  )
+   187→
+   188→  const totalRevenueAmount = useMemo(
+   189→    () => revenueItems.reduce((sum, t) => sum + t.amount, 0),
+   190→    [revenueItems]
+   191→  )
+   192→  const totalExpenditureAmount = useMemo(
+   193→    () => expenditureItems.reduce((sum, t) => sum + t.amount, 0),
+   194→    [expenditureItems]
+   195→  )
+   196→  const netPosition = totalRevenueAmount - totalExpenditureAmount
+   197→  const postedToLedgerCount = useMemo(
+   198→    () => transactions.filter((t) => t.postedToLedger).length,
+   199→    [transactions]
+   200→  )
+   201→  const postedToCashbookCount = useMemo(
+   202→    () => transactions.filter((t) => t.postedToCashbook).length,
+   203→    [transactions]
+   204→  )
+   205→
+   206→  // ── Filtered table data ──────────────────────────────────────
+   207→  const filteredTransactions = useMemo(() => {
+   208→    let list = transactions.filter((t) => t.type === activeTab)
+   209→    if (searchTerm.trim()) {
+   210→      const q = searchTerm.toLowerCase()
+   211→      list = list.filter(
+   212→        (t) =>
+   213→          t.reference.toLowerCase().includes(q) ||
+   214→          t.description.toLowerCase().includes(q) ||
+   215→          t.accountCode.toLowerCase().includes(q) ||
+   216→          t.accountName.toLowerCase().includes(q) ||
+   217→          t.payeePayer.toLowerCase().includes(q) ||
+   218→          t.classification.toLowerCase().includes(q) ||
+   219→          t.category.toLowerCase().includes(q)
+   220→      )
+   221→    }
+   222→    return list
+   223→  }, [transactions, activeTab, searchTerm])
+   224→
+   225→  // ── Category options based on tab ────────────────────────────
+   226→  const categoryOptions =
+   227→    activeTab === 'revenue' ? REVENUE_CATEGORIES : EXPENSE_CATEGORIES
+   228→
+   229→  // ── Auto-calculate net amount ────────────────────────────────
+   230→  const netAmount = useMemo(() => {
+   231→    const gross = parseFloat(formData.amount) || 0
+   232→    const tax = parseFloat(formData.taxAmount) || 0
+   233→    return gross - tax
+   234→  }, [formData.amount, formData.taxAmount])
+   235→
+   236→  // ── Form handlers ────────────────────────────────────────────
+   237→  const handleFieldChange = useCallback(
+   238→    (field: keyof FormData, value: string) => {
+   239→      setFormData((prev) => ({ ...prev, [field]: value }))
+   240→    },
+   241→    []
+   242→  )
+   243→
+   244→  const resetForm = useCallback(() => {
+   245→    setFormData({ ...emptyForm })
+   246→  }, [])
+   247→
+   248→  const toggleForm = useCallback(() => {
+   249→    setFormVisible((prev) => {
+   250→      if (!prev) resetForm()
+   251→      return !prev
+   252→    })
+   253→  }, [resetForm])
+   254→
+   255→  const handleSubmit = useCallback(() => {
+   256→    if (!formData.transactionDate) {
+   257→      toast.error('Transaction date is required')
+   258→      return
+   259→    }
+   260→    if (!formData.description.trim()) {
+   261→      toast.error('Description is required')
+   262→      return
+   263→    }
+   264→    if (!formData.accountCode.trim()) {
+   265→      toast.error('Account code is required')
+   266→      return
+   267→    }
+   268→    if (!formData.classification) {
+   269→      toast.error('Classification is required')
+   270→      return
+   271→    }
+   272→    if (!(parseFloat(formData.amount) > 0)) {
+   273→      toast.error('Gross amount must be greater than zero')
+   274→      return
+   275→    }
+   276→
+   277→    const entry: TransactionEntry = {
+   278→      _id: crypto.randomUUID(),
+   279→      transactionDate: formData.transactionDate,
+   280→      type: activeTab,
+   281→      reference: formData.reference.trim(),
+   282→      description: formData.description.trim(),
+   283→      accountCode: formData.accountCode.trim(),
+   284→      accountName: formData.accountName.trim(),
+   285→      classification: formData.classification,
+   286→      category: formData.category,
+   287→      amount: parseFloat(formData.amount),
+   288→      taxAmount: parseFloat(formData.taxAmount) || 0,
+   289→      netAmount,
+   290→      payeePayer: formData.payeePayer.trim(),
+   291→      voucherNo: formData.voucherNo.trim(),
+   292→      invoiceNo: formData.invoiceNo.trim(),
+   293→      receiptNo: formData.receiptNo.trim(),
+   294→      fundSource: formData.fundSource.trim(),
+   295→      postedToLedger: false,
+   296→      postedToCashbook: false,
+   297→    }
+   298→
+   299→    addTransaction(entry)
+   300→    toast.success(`${activeTab === 'revenue' ? 'Revenue' : 'Expenditure'} transaction added`)
+   301→    resetForm()
+   302→    setFormVisible(false)
+   303→  }, [formData, activeTab, netAmount, addTransaction, resetForm])
+   304→
+   305→  const handleDelete = useCallback(
+   306→    (index: number) => {
+   307→      deleteTransaction(index)
+   308→      toast.success('Transaction deleted')
+   309→    },
+   310→    [deleteTransaction]
+   311→  )
+   312→
+   313→  const handlePostToLedger = useCallback(async () => {
+   314→    if (transactions.length === 0) {
+   315→      toast.error('No transactions to post')
+   316→      return
+   317→    }
+   318→    setIsPostingLedger(true)
+   319→    try {
+   320→      await postTransactionsToLedger()
+   321→      toast.success('All transactions posted to General Ledger')
+   322→    } catch {
+   323→      toast.error('Failed to post to ledger')
+   324→    } finally {
+   325→      setIsPostingLedger(false)
+   326→    }
+   327→  }, [transactions, postTransactionsToLedger])
+   328→
+   329→  const handlePostToCashbook = useCallback(async () => {
+   330→    if (transactions.length === 0) {
+   331→      toast.error('No transactions to post')
+   332→      return
+   333→    }
+   334→    setIsPostingCashbook(true)
+   335→    try {
+   336→      await postTransactionsToCashbook()
+   337→      toast.success('All transactions posted to Cashbook')
+   338→    } catch {
+   339→      toast.error('Failed to post to cashbook')
+   340→    } finally {
+   341→      setIsPostingCashbook(false)
+   342→    }
+   343→  }, [transactions, postTransactionsToCashbook])
+   344→
+   345→  const handleSave = useCallback(async () => {
+   346→    setIsSaving(true)
+   347→    try {
+   348→      await saveTransactions()
+   349→      toast.success('Transactions saved successfully')
+   350→    } catch {
+   351→      toast.error('Failed to save transactions')
+   352→    } finally {
+   353→      setIsSaving(false)
+   354→    }
+   355→  }, [saveTransactions])
+   356→
+   357→  const handleClearAll = useCallback(() => {
+   358→    clearTransactions()
+   359→    setClearDialogOpen(false)
+   360→    toast.success('All transactions cleared')
+   361→  }, [clearTransactions])
+   362→
+   363→  // ── Keyboard shortcuts ───────────────────────────────────────
+   364→  useEffect(() => {
+   365→    const handleKeyDown = (e: KeyboardEvent) => {
+   366→      // Ctrl+N → Add new transaction
+   367→      if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+   368→        e.preventDefault()
+   369→        if (!formVisible) {
+   370→          setFormVisible(true)
+   371→          resetForm()
+   372→        }
+   373→      }
+   374→      // Ctrl+S → Save
+   375→      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+   376→        e.preventDefault()
+   377→        handleSave()
+   378→      }
+   379→      // Ctrl+F or / → Focus search
+   380→      if (((e.ctrlKey || e.metaKey) && e.key === 'f') || (e.key === '/' && !formVisible)) {
+   381→        e.preventDefault()
+   382→        searchRef.current?.focus()
+   383→      }
+   384→      // Escape → Close form or dialog
+   385→      if (e.key === 'Escape') {
+   386→        if (formVisible) setFormVisible(false)
+   387→        if (clearDialogOpen) setClearDialogOpen(false)
+   388→      }
+   389→    }
+   390→    window.addEventListener('keydown', handleKeyDown)
+   391→    return () => window.removeEventListener('keydown', handleKeyDown)
+   392→  }, [formVisible, clearDialogOpen, handleSave, resetForm])
+   393→
+   394→  // ── Class label helper ───────────────────────────────────────
+   395→  const getClassLabel = (val: string) =>
+   396→    CLASSIFICATION_OPTIONS.find((c) => c.value === val)?.label ?? val
+   397→
+   398→  // ═══════════════════════════════════════════════════════════════
+   399→  // RENDER
+   400→  // ═══════════════════════════════════════════════════════════════
+   401→  return (
+   402→    <TooltipProvider>
+   403→      <motion.div
+   404→        variants={pageVariants}
+   405→        initial="initial"
+   406→        animate="animate"
+   407→        exit="exit"
+   408→        transition={{ duration: 0.3, ease: 'easeOut' }}
+   409→        className="mx-auto w-full max-w-[1400px] space-y-6 p-4 md:p-6"
+   410→      >
+   411→        {/* ── Header ──────────────────────────────────────────── */}
+   412→        <div className="flex flex-col gap-1">
+   413→          <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+   414→            Revenue &amp; Expenditure Capture
+   415→          </h1>
+   416→          <p className="text-sm text-muted-foreground">
+   417→            Step 2 &mdash; Record and classify all revenue and expenditure
+   418→            transactions for{' '}
+   419→            <span className="font-medium text-foreground">
+   420→              {entityConfig.name}
+   421→            </span>{' '}
+   422→            ({entityConfig.periodLabel}). IPSAS-compliant classification required for every
+   423→            entry.
+   424→          </p>
+   425→        </div>
+   426→
+   427→        {/* ── Tab Toggle ──────────────────────────────────────── */}
+   428→        <div className="flex items-center gap-1 rounded-lg border bg-muted/40 p-1">
+   429→          <Button
+   430→            variant={activeTab === 'revenue' ? 'default' : 'ghost'}
+   431→            size="sm"
+   432→            onClick={() => setActiveTab('revenue')}
+   433→            className={
+   434→              activeTab === 'revenue'
+   435→                ? 'gap-2 shadow-sm'
+   436→                : 'gap-2 text-muted-foreground hover:text-foreground'
+   437→            }
+   438→          >
+   439→            <ArrowUpCircle className="h-4 w-4" />
+   440→            Revenue
+   441→            <Badge
+   442→              variant="secondary"
+   443→              className={
+   444→                activeTab === 'revenue'
+   445→                  ? 'ml-1 bg-background/20 text-background'
+   446→                  : 'ml-1'
+   447→              }
+   448→            >
+   449→              {revenueItems.length}
+   450→            </Badge>
+   451→          </Button>
+   452→          <Button
+   453→            variant={activeTab === 'expenditure' ? 'default' : 'ghost'}
+   454→            size="sm"
+   455→            onClick={() => setActiveTab('expenditure')}
+   456→            className={
+   457→              activeTab === 'expenditure'
+   458→                ? 'gap-2 shadow-sm'
+   459→                : 'gap-2 text-muted-foreground hover:text-foreground'
+   460→            }
+   461→          >
+   462→            <ArrowDownCircle className="h-4 w-4" />
+   463→            Expenditure
+   464→            <Badge
+   465→              variant="secondary"
+   466→              className={
+   467→                activeTab === 'expenditure'
+   468→                  ? 'ml-1 bg-background/20 text-background'
+   469→                  : 'ml-1'
+   470→              }
+   471→            >
+   472→              {expenditureItems.length}
+   473→            </Badge>
+   474→          </Button>
+   475→        </div>
+   476→
+   477→        {/* ── Summary Cards ───────────────────────────────────── */}
+   478→        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
+   479→          {/* Total Revenue */}
+   480→          <Card className="border-l-4 border-l-emerald-500">
+   481→            <CardContent className="p-4">
+   482→              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+   483→                Total Revenue
+   484→              </p>
+   485→              <p className="mt-1 text-lg font-bold text-emerald-600">
+   486→                {entityConfig.currency} {formatNum(totalRevenueAmount)}
+   487→              </p>
+   488→              <p className="text-xs text-muted-foreground">
+   489→                {revenueItems.length} {revenueItems.length === 1 ? 'entry' : 'entries'}
+   490→              </p>
+   491→            </CardContent>
+   492→          </Card>
+   493→
+   494→          {/* Total Expenditure */}
+   495→          <Card className="border-l-4 border-l-rose-500">
+   496→            <CardContent className="p-4">
+   497→              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+   498→                Total Expenditure
+   499→              </p>
+   500→              <p className="mt-1 text-lg font-bold text-rose-600">
+   501→                {entityConfig.currency} {formatNum(totalExpenditureAmount)}
+   502→              </p>
+   503→              <p className="text-xs text-muted-foreground">
+   504→                {expenditureItems.length}{' '}
+   505→                {expenditureItems.length === 1 ? 'entry' : 'entries'}
+   506→              </p>
+   507→            </CardContent>
+   508→          </Card>
+   509→
+   510→          {/* Net Position */}
+   511→          <Card className="border-l-4 border-l-blue-500">
+   512→            <CardContent className="p-4">
+   513→              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+   514→                Net Position
+   515→              </p>
+   516→              <p
+   517→                className={`mt-1 text-lg font-bold ${
+   518→                  netPosition >= 0 ? 'text-blue-600' : 'text-orange-600'
+   519→                }`}
+   520→              >
+   521→                {netPosition >= 0 ? '+' : '-'}{' '}
+   522→                {entityConfig.currency} {formatNum(netPosition)}
+   523→              </p>
+   524→              <p className="text-xs text-muted-foreground">
+   525→                {netPosition >= 0 ? 'Surplus' : 'Deficit'}
+   526→              </p>
+   527→            </CardContent>
+   528→          </Card>
+   529→
+   530→          {/* Posted to Ledger */}
+   531→          <Card className="border-l-4 border-l-violet-500">
+   532→            <CardContent className="p-4">
+   533→              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+   534→                Posted to Ledger
+   535→              </p>
+   536→              <p className="mt-1 text-lg font-bold text-violet-600">
+   537→                {postedToLedgerCount}
+   538→              </p>
+   539→              <p className="text-xs text-muted-foreground">
+   540→                of {transactions.length} total
+   541→              </p>
+   542→            </CardContent>
+   543→          </Card>
+   544→
+   545→          {/* Posted to Cashbook */}
+   546→          <Card className="col-span-2 border-l-4 border-l-amber-500 md:col-span-1">
+   547→            <CardContent className="p-4">
+   548→              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+   549→                Posted to Cashbook
+   550→              </p>
+   551→              <p className="mt-1 text-lg font-bold text-amber-600">
+   552→                {postedToCashbookCount}
+   553→              </p>
+   554→              <p className="text-xs text-muted-foreground">
+   555→                of {transactions.length} total
+   556→              </p>
+   557→            </CardContent>
+   558→          </Card>
+   559→        </div>
+   560→
+   561→        {/* ── Action Bar: Add + Bulk Actions ──────────────────── */}
+   562→        <div className="flex flex-wrap items-center gap-2">
+   563→          <Button onClick={toggleForm} className="gap-2">
+   564→            {formVisible ? (
+   565→              <X className="h-4 w-4" />
+   566→            ) : (
+   567→              <Plus className="h-4 w-4" />
+   568→            )}
+   569→            {formVisible ? 'Cancel' : 'Add Transaction'}
+   570→          </Button>
+   571→
+   572→          <div className="mx-1 hidden h-6 w-px bg-border sm:block" />\n
+   573→          <Tooltip>
+   574→            <TooltipTrigger asChild>
+   575→              <Button
+   576→                variant="outline"
+   577→                size="sm"
+   578→                onClick={handlePostToLedger}
+   579→                disabled={isPostingLedger || transactions.length === 0}
+   580→                className="gap-2"
+   581→              >
+   582→                {isPostingLedger ? (
+   583→                  <Loader2 className="h-4 w-4 animate-spin" />
+   584→                ) : (
+   585→                  <BookOpen className="h-4 w-4" />
+   586→                )}
+   587→                Post All to Ledger
+   588→              </Button>
+   589→            </TooltipTrigger>
+   590→            <TooltipContent>
+   591→              <p>Post all transactions to the General Ledger</p>
+   592→            </TooltipContent>
+   593→          </Tooltip>
+   594→
+   595→          <Tooltip>
+   596→            <TooltipTrigger asChild>
+   597→              <Button
+   598→                variant="outline"
+   599→                size="sm"
+   600→                onClick={handlePostToCashbook}
+   601→                disabled={isPostingCashbook || transactions.length === 0}
+   602→                className="gap-2"
+   603→              >
+   604→                {isPostingCashbook ? (
+   605→                  <Loader2 className="h-4 w-4 animate-spin" />
+   606→                ) : (
+   607→                  <FileText className="h-4 w-4" />
+   608→                )}
+   609→                Post All to Cashbook
+   610→              </Button>
+   611→            </TooltipTrigger>
+   612→            <TooltipContent>
+   613→              <p>Post all transactions to the Cashbook</p>
+   614→            </TooltipContent>
+   615→          </Tooltip>
+   616→
+   617→          <Tooltip>
+   618→            <TooltipTrigger asChild>
+   619→              <Button
+   620→                variant="outline"
+   621→                size="sm"
+   622→                onClick={handleSave}
+   623→                disabled={isSaving}
+   624→                className="gap-2"
+   625→              >
+   626→                {isSaving ? (
+   627→                  <Loader2 className="h-4 w-4 animate-spin" />
+   628→                ) : (
+   629→                  <Save className="h-4 w-4" />
+   630→                )}
+   631→                Save
+   632→              </Button>
+   633→            </TooltipTrigger>
+   634→            <TooltipContent>
+   635→              <p>Save transactions (Ctrl+S)</p>
+   636→            </TooltipContent>
+   637→          </Tooltip>
+   638→
+   639→          <Tooltip>
+   640→            <TooltipTrigger asChild>
+   641→              <Button
+   642→                variant="outline"
+   643→                size="sm"
+   644→                onClick={() => setClearDialogOpen(true)}
+   645→                disabled={transactions.length === 0}
+   646→                className="gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
+   647→              >
+   648→                <Trash2 className="h-4 w-4" />
+   649→                Clear All
+   650→              </Button>
+   651→            </TooltipTrigger>
+   652→            <TooltipContent>
+   653→              <p>Remove all transactions</p>
+   654→            </TooltipContent>
+   655→          </Tooltip>
+   656→
+   657→          <div className="ml-auto hidden text-xs text-muted-foreground md:block">
+   658→            <kbd className="rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px]">
+   659→              Ctrl+N
+   660→            </kbd>{' '}
+   661→            New &nbsp;
+   662→            <kbd className="rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px]">
+   663→              Ctrl+S
+   664→            </kbd>{' '}
+   665→            Save &nbsp;
+   666→            <kbd className="rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px]">
+   667→              /
+   668→            </kbd>{' '}
+   669→            Search
+   670→          </div>
+   671→        </div>
+   672→
+   673→        {/* ── Inline Add Form (Collapsible) ───────────────────── */}
+   674→        {formVisible && (
+   675→          <motion.div
+   676→            initial={{ opacity: 0, height: 0 }}
+   677→            animate={{ opacity: 1, height: 'auto' }}
+   678→            exit={{ opacity: 0, height: 0 }}
+   679→            transition={{ duration: 0.25 }}
+   680→          >
+   681→            <Card className="border-2 border-dashed border-primary/30 bg-primary/[0.02]">
+   682→              <CardHeader className="pb-3">
+   683→                <CardTitle className="flex items-center gap-2 text-base">
+   684→                  <Plus className="h-4 w-4 text-primary" />
+   685→                  New{' '}
+   686→                  {activeTab === 'revenue' ? 'Revenue' : 'Expenditure'}{' '}
+   687→                  Transaction
+   688→                </CardTitle>
+   689→                <CardDescription>
+   690→                  Fill in the details below. Fields marked * are required.
+   691→                </CardDescription>
+   692→              </CardHeader>
+   693→              <CardContent>
+   694→                <div
+   695→                  ref={formRef}
+   696→                  className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+   697→                >
+   698→                  {/* Date */}
+   699→                  <div className="space-y-1.5">
+   700→                    <Label htmlFor="txDate">
+   701→                      Date <span className="text-destructive">*</span>
+   702→                    </Label>
+   703→                    <Input
+   704→                      id="txDate"
+   705→                      type="date"
+   706→                      value={formData.transactionDate}
+   707→                      onChange={(e) =>
+   708→                        handleFieldChange('transactionDate', e.target.value)
+   709→                      }
+   710→                    />
+   711→                  </div>
+   712→
+   713→                  {/* Reference */}
+   714→                  <div className="space-y-1.5">
+   715→                    <Label htmlFor="txRef">Reference</Label>
+   716→                    <Input
+   717→                      id="txRef"
+   718→                      placeholder="e.g. RV-001"
+   719→                      value={formData.reference}
+   720→                      onChange={(e) =>
+   721→                        handleFieldChange('reference', e.target.value)
+   722→                      }
+   723→                    />
+   724→                  </div>
+   725→
+   726→                  {/* Description */}
+   727→                  <div className="space-y-1.5">
+   728→                    <Label htmlFor="txDesc">
+   729→                      Description <span className="text-destructive">*</span>
+   730→                    </Label>
+   731→                    <Input
+   732→                      id="txDesc"
+   733→                      placeholder="Transaction description"
+   734→                      value={formData.description}
+   735→                      onChange={(e) =>
+   736→                        handleFieldChange('description', e.target.value)
+   737→                      }
+   738→                    />
+   739→                  </div>
+   740→
+   741→                  {/* Account Code */}
+   742→                  <div className="space-y-1.5">
+   743→                    <Label htmlFor="txAcctCode">
+   744→                      Account Code <span className="text-destructive">*</span>
+   745→                    </Label>
+   746→                    <Input
+   747→                      id="txAcctCode"
+   748→                      placeholder="e.g. 4101"
+   749→                      value={formData.accountCode}
+   750→                      onChange={(e) =>
+   751→                        handleFieldChange('accountCode', e.target.value)
+   752→                      }
+   753→                    />
+   754→                  </div>
+   755→
+   756→                  {/* Account Name */}
+   757→                  <div className="space-y-1.5">
+   758→                    <Label htmlFor="txAcctName">Account Name</Label>
+   759→                    <Input
+   760→                      id="txAcctName"
+   761→                      placeholder="Account name"
+   762→                      value={formData.accountName}
+   763→                      onChange={(e) =>
+   764→                        handleFieldChange('accountName', e.target.value)
+   765→                      }
+   766→                    />
+   767→                  </div>
+   768→
+   769→                  {/* Classification */}
+   770→                  <div className="space-y-1.5">
+   771→                    <Label htmlFor="txClass">
+   772→                      Classification <span className="text-destructive">*</span>
+   773→                    </Label>
+   774→                    <Select
+   775→                      value={formData.classification}
+   776→                      onValueChange={(val) =>
+   777→                        handleFieldChange('classification', val)
+   778→                      }
+   779→                    >
+   780→                      <SelectTrigger id="txClass">
+   781→                        <SelectValue placeholder="Select classification" />
+   782→                      </SelectTrigger>
+   783→                      <SelectContent>
+   784→                        {CLASSIFICATION_OPTIONS.map((opt) => (
+   785→                          <SelectItem key={opt.value} value={opt.value}>
+   786→                            {opt.label}
+   787→                          </SelectItem>
+   788→                        ))}
+   789→                      </SelectContent>
+   790→                    </Select>
+   791→                  </div>
+   792→
+   793→                  {/* Category */}
+   794→                  <div className="space-y-1.5">
+   795→                    <Label htmlFor="txCat">Category</Label>
+   796→                    <Select
+   797→                      value={formData.category}
+   798→                      onValueChange={(val) =>
+   799→                        handleFieldChange('category', val)
+   800→                      }
+   801→                    >
+   802→                      <SelectTrigger id="txCat">
+   803→                        <SelectValue placeholder="Select category" />
+   804→                      </SelectTrigger>
+   805→                      <SelectContent>
+   806→                        {categoryOptions.map((cat) => (
+   807→                          <SelectItem key={cat} value={cat}>
+   808→                            {cat}
+   809→                          </SelectItem>
+   810→                        ))}
+   811→                      </SelectContent>
+   812→                    </Select>
+   813→                  </div>
+   814→
+   815→                  {/* Gross Amount */}
+   816→                  <div className="space-y-1.5">
+   817→                    <Label htmlFor="txGross">
+   818→                      Gross Amount <span className="text-destructive">*</span>
+   819→                    </Label>
+   820→                    <Input
+   821→                      id="txGross"
+   822→                      type="number"
+   823→                      min="0"
+   824→                      step="0.01"
+   825→                      placeholder="0.00"
+   826→                      value={formData.amount}
+   827→                      onChange={(e) =>
+   828→                        handleFieldChange('amount', e.target.value)
+   829→                      }
+   830→                    />
+   831→                  </div>
+   832→
+   833→                  {/* Tax Amount */}
+   834→                  <div className="space-y-1.5">
+   835→                    <Label htmlFor="txTax">Tax Amount</Label>
+   836→                    <Input
+   837→                      id="txTax"
+   838→                      type="number"
+   839→                      min="0"
+   840→                      step="0.01"
+   841→                      placeholder="0.00"
+   842→                      value={formData.taxAmount}
+   843→                      onChange={(e) =>
+   844→                        handleFieldChange('taxAmount', e.target.value)
+   845→                      }
+   846→                    />
+   847→                  </div>
+   848→
+   849→                  {/* Net Amount (auto) */}
+   850→                  <div className="space-y-1.5">
+   851→                    <Label>Net Amount</Label>
+   852→                    <div className="flex h-9 items-center rounded-md border bg-muted/50 px-3 text-sm font-medium">
+   853→                      {entityConfig.currency}{' '}
+   854→                      {formatNum(netAmount)}
+   855→                    </div>
+   856→                    <p className="text-[10px] text-muted-foreground">
+   857→                      Auto-calculated (Gross &minus; Tax)
+   858→                    </p>
+   859→                  </div>
+   860→
+   861→                  {/* Payee / Payer */}
+   862→                  <div className="space-y-1.5">
+   863→                    <Label htmlFor="txPayee">Payee / Payer</Label>
+   864→                    <Input
+   865→                      id="txPayee"
+   866→                      placeholder="Name of payee or payer"
+   867→                      value={formData.payeePayer}
+   868→                      onChange={(e) =>
+   869→                        handleFieldChange('payeePayer', e.target.value)
+   870→                      }
+   871→                    />
+   872→                  </div>
+   873→
+   874→                  {/* Voucher No */}
+   875→                  <div className="space-y-1.5">
+   876→                    <Label htmlFor="txVoucher">Voucher No</Label>
+   877→                    <Input
+   878→                      id="txVoucher"
+   879→                      placeholder="Voucher number"
+   880→                      value={formData.voucherNo}
+   881→                      onChange={(e) =>
+   882→                        handleFieldChange('voucherNo', e.target.value)
+   883→                      }
+   884→                    />
+   885→                  </div>
+   886→
+   887→                  {/* Invoice No */}
+   888→                  <div className="space-y-1.5">
+   889→                    <Label htmlFor="txInvoice">Invoice No</Label>
+   890→                    <Input
+   891→                      id="txInvoice"
+   892→                      placeholder="Invoice number"
+   893→                      value={formData.invoiceNo}
+   894→                      onChange={(e) =>
+   895→                        handleFieldChange('invoiceNo', e.target.value)
+   896→                      }
+   897→                    />
+   898→                  </div>
+   899→
+   900→                  {/* Receipt No */}
+   901→                  <div className="space-y-1.5">
+   902→                    <Label htmlFor="txReceipt">Receipt No</Label>
+   903→                    <Input
+   904→                      id="txReceipt"
+   905→                      placeholder="Receipt number"
+   906→                      value={formData.receiptNo}
+   907→                      onChange={(e) =>
+   908→                        handleFieldChange('receiptNo', e.target.value)
+   909→                      }
+   910→                    />
+   911→                  </div>
+   912→
+   913→                  {/* Fund Source */}
+   914→                  <div className="space-y-1.5">
+   915→                    <Label htmlFor="txFund">Fund Source</Label>
+   916→                    <Input
+   917→                      id="txFund"
+   918→                      placeholder="e.g. Consolidated Fund"
+   919→                      value={formData.fundSource}
+   920→                      onChange={(e) =>
+   921→                        handleFieldChange('fundSource', e.target.value)
+   922→                      }
+   923→                    />
+   924→                  </div>
+   925→
+   926→                  {/* Submit button spans to fill row */}
+   927→                  <div className="col-span-full flex justify-end gap-2 border-t pt-4">
+   928→                    <Button
+   929→                      variant="ghost"
+   930→                      onClick={() => {
+   931→                        resetForm()
+   932→                      }}
+   933→                    >
+   934→                      Reset
+   935→                    </Button>
+   936→                    <Button onClick={handleSubmit} className="gap-2">
+   937→                      <Plus className="h-4 w-4" />
+   938→                      Add {activeTab === 'revenue' ? 'Revenue' : 'Expenditure'}
+   939→                    </Button>
+   940→                  </div>
+   941→                </div>
+   942→              </CardContent>
+   943→            </Card>
+   944→          </motion.div>
+   945→        )}
+   946→
+   947→        {/* ── Filter / Search Bar ─────────────────────────────── */}
+   948→        <div className="flex items-center gap-3">
+   949→          <div className="relative flex-1">
+   950→            <Filter className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+   951→            <Input
+   952→              ref={searchRef}
+   953→              placeholder="Search by reference, description, account, payee/payer..."
+   954→              value={searchTerm}
+   955→              onChange={(e) => setSearchTerm(e.target.value)}
+   956→              className="pl-9"
+   957→            />
+   958→          </div>
+   959→          {searchTerm && (
+   960→            <Button
+   961→              variant="ghost"
+   962→              size="sm"
+   963→              onClick={() => setSearchTerm('')}
+   964→              className="shrink-0 gap-1"
+   965→            >
+   966→              <X className="h-3.5 w-3.5" />
+   967→              Clear
+   968→            </Button>
+   969→          )}
+   970→          <Badge variant="secondary" className="shrink-0 tabular-nums">
+   971→            {filteredTransactions.length}{' '}
+   972→            {filteredTransactions.length === 1 ? 'result' : 'results'}
+   973→          </Badge>
+   974→        </div>
+   975→
+   976→        {/* ── Data Table ──────────────────────────────────────── */}
+   977→        <Card>
+   978→          <CardContent className="p-0">
+   979→            {filteredTransactions.length === 0 ? (
+   980→              /* Empty state */
+   981→              <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+   982→                <div className="rounded-full bg-muted p-4">
+   983→                  {activeTab === 'revenue' ? (
+   984→                    <ArrowUpCircle className="h-10 w-10 text-muted-foreground" />
+   985→                  ) : (
+   986→                    <ArrowDownCircle className="h-10 w-10 text-muted-foreground" />
+   987→                  )}
+   988→                </div>
+   989→                <div>
+   990→                  <p className="text-sm font-medium text-foreground">
+   991→                    No {activeTab} transactions yet
+   992→                  </p>
+   993→                  <p className="mt-1 text-xs text-muted-foreground">
+   994→                    {searchTerm
+   995→                      ? 'Try adjusting your search terms.'
+   996→                      : 'Click "Add Transaction" or press Ctrl+N to get started.'}
+   997→                  </p>
+   998→                </div>
+   999→                {!searchTerm && (
+  1000→                  <Button
+  1001→                    variant="outline"
+  1002→                    size="sm"
+  1003→                    onClick={() => {
+  1004→                      setFormVisible(true)
+  1005→                      resetForm()
+  1006→                    }}
+  1007→                    className="mt-1 gap-2"
+  1008→                  >
+  1009→                    <Plus className="h-4 w-4" />
+  1010→                    Add Your First Transaction
+  1011→                  </Button>
+  1012→                )}
+  1013→              </div>
+  1014→            ) : (
+  1015→              /* Scrollable table */
+  1016→              <div className="overflow-x-auto">
+  1017→                <table className="w-full text-sm">
+  1018→                  <thead>
+  1019→                    <tr className="border-b bg-muted/50">
+  1020→                      <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+  1021→                        Date
+  1022→                      </th>
+  1023→                      <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+  1024→                        Ref
+  1025→                      </th>
+  1026→                      <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+  1027→                        Description
+  1028→                      </th>
+  1029→                      <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+  1030→                        Account
+  1031→                      </th>
+  1032→                      <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+  1033→                        Classification
+  1034→                      </th>
+  1035→                      <th className="whitespace-nowrap px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+  1036→                        Gross
+  1037→                      </th>
+  1038→                      <th className="whitespace-nowrap px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+  1039→                        Net
+  1040→                      </th>
+  1041→                      <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+  1042→                        Payee/Payer
+  1043→                      </th>
+  1044→                      <th className="whitespace-nowrap px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+  1045→                        Ledger
+  1046→                      </th>
+  1047→                      <th className="whitespace-nowrap px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+  1048→                        Cashbook
+  1049→                      </th>
+  1050→                      <th className="whitespace-nowrap px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+  1051→                        Actions
+  1052→                      </th>
+  1053→                    </tr>
+  1054→                  </thead>
+  1055→                  <tbody>
+  1056→                    {filteredTransactions.map((tx, idx) => {
+  1057→                      // Find actual index in the master array
+  1058→                      const realIndex = transactions.indexOf(tx)
+  1059→                      return (
+  1060→                        <tr
+  1061→                          key={tx._id ?? idx}
+  1062→                          className={
+  1063→                            idx % 2 === 0
+  1064→                              ? 'border-b transition-colors hover:bg-muted/40'
+  1065→                              : 'border-b bg-muted/20 transition-colors hover:bg-muted/40'
+  1066→                          }
+  1067→                        >
+  1068→                          <td className="whitespace-nowrap px-4 py-2.5 tabular-nums text-muted-foreground">
+  1069→                            {tx.transactionDate}
+  1070→                          </td>
+  1071→                          <td className="whitespace-nowrap px-4 py-2.5 font-medium">
+  1072→                            {tx.reference || '—'}
+  1073→                          </td>
+  1074→                          <td className="max-w-[220px] truncate px-4 py-2.5">
+  1075→                            {tx.description}
+  1076→                          </td>
+  1077→                          <td className="whitespace-nowrap px-4 py-2.5">
+  1078→                            <span className="font-mono text-xs">
+  1079→                              {tx.accountCode}
+  1080→                            </span>
+  1081→                            {tx.accountName && (
+  1082→                              <span className="ml-1.5 text-muted-foreground">
+  1083→                                {tx.accountName}
+  1084→                              </span>
+  1085→                            )}
+  1086→                          </td>
+  1087→                          <td className="max-w-[180px] truncate px-4 py-2.5 text-xs text-muted-foreground">
+  1088→                            {getClassLabel(tx.classification)}
+  1089→                          </td>
+  1090→                          <td className="whitespace-nowrap px-4 py-2.5 text-right tabular-nums font-medium">
+  1091→                            {entityConfig.currency} {formatNum(tx.amount)}
+  1092→                          </td>
+  1093→                          <td className="whitespace-nowrap px-4 py-2.5 text-right tabular-nums">
+  1094→                            {entityConfig.currency} {formatNum(tx.netAmount)}
+  1095→                          </td>
+  1096→                          <td className="whitespace-nowrap px-4 py-2.5 text-muted-foreground">
+  1097→                            {tx.payeePayer || '—'}
+  1098→                          </td>
+  1099→                          <td className="whitespace-nowrap px-4 py-2.5 text-center">
+  1100→                            {tx.postedToLedger ? (
+  1101→                              <Badge
+  1102→                                variant="default"
+  1103→                                className="gap-1 bg-emerald-600 hover:bg-emerald-700"
+  1104→                              >
+  1105→                                <CheckCircle2 className="h-3 w-3" />
+  1106→                                Posted
+  1107→                              </Badge>
+  1108→                            ) : (
+  1109→                              <Badge
+  1110→                                variant="outline"
+  1111→                                className="gap-1 text-muted-foreground"
+  1112→                              >
+  1113→                                <AlertCircle className="h-3 w-3" />
+  1114→                                Unposted
+  1115→                              </Badge>
+  1116→                            )}
+  1117→                          </td>
+  1118→                          <td className="whitespace-nowrap px-4 py-2.5 text-center">
+  1119→                            {tx.postedToCashbook ? (
+  1120→                              <Badge
+  1121→                                variant="default"
+  1122→                                className="gap-1 bg-emerald-600 hover:bg-emerald-700"
+  1123→                              >
+  1124→                                <CheckCircle2 className="h-3 w-3" />
+  1125→                                Posted
+  1126→                              </Badge>
+  1127→                            ) : (
+  1128→                              <Badge
+  1129→                                variant="outline"
+  1130→                                className="gap-1 text-muted-foreground"
+  1131→                              >
+  1132→                                <AlertCircle className="h-3 w-3" />
+  1133→                                Unposted
+  1134→                              </Badge>
+  1135→                            )}
+  1136→                          </td>
+  1137→                          <td className="whitespace-nowrap px-4 py-2.5 text-center">
+  1138→                            <Tooltip>
+  1139→                              <TooltipTrigger asChild>
+  1140→                                <Button
+  1141→                                  variant="ghost"
+  1142→                                  size="icon"
+  1143→                                  className="h-7 w-7 text-destructive hover:bg-destructive/10 hover:text-destructive"
+  1144→                                  onClick={() => handleDelete(realIndex)}
+  1145→                                >
+  1146→                                  <Trash2 className="h-3.5 w-3.5" />
+  1147→                                </Button>
+  1148→                              </TooltipTrigger>
+  1149→                              <TooltipContent>Delete this transaction</TooltipContent>
+  1150→                            </Tooltip>
+  1151→                          </td>
+  1152→                        </tr>
+  1153→                      )
+  1154→                    })}
+  1155→                  </tbody>
+  1156→                </table>
+  1157→              </div>
+  1158→            )}
+  1159→          </CardContent>
+  1160→        </Card>
+  1161→
+  1162→        {/* ── Navigation ──────────────────────────────────────── */}
+  1163→        <div className="flex items-center justify-between pt-2">
+  1164→          <Button
+  1165→            variant="outline"
+  1166→            onClick={() => setWizardStep(1)}
+  1167→            className="gap-2"
+  1168→          >
+  1169→            <ArrowLeft className="h-4 w-4" />
+  1170→            Back to Entity Setup
+  1171→          </Button>
+  1172→          <Button
+  1173→            onClick={() => setWizardStep(3)}
+  1174→            className="gap-2"
+  1175→          >
+  1176→            Continue to Cashbook
+  1177→            <ArrowRight className="h-4 w-4" />
+  1178→          </Button>
+  1179→        </div>
+  1180→
+  1181→        {/* ── Clear Confirmation Dialog ───────────────────────── */}
+  1182→        <Dialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
+  1183→          <DialogContent>
+  1184→            <DialogHeader>
+  1185→              <DialogTitle className="flex items-center gap-2">
+  1186→                <AlertCircle className="h-5 w-5 text-destructive" />
+  1187→                Clear All Transactions
+  1188→              </DialogTitle>
+  1189→              <DialogDescription>
+  1190→                This will permanently remove all {transactions.length} transaction(s) from
+  1191→                the current session. This action cannot be undone.
+  1192→              </DialogDescription>
+  1193→            </DialogHeader>
+  1194→            <DialogFooter className="gap-2">
+  1195→              <Button
+  1196→                variant="outline"
+  1197→                onClick={() => setClearDialogOpen(false)}
+  1198→              >
+  1199→                Cancel
+  1200→              </Button>
+  1201→              <Button
+  1202→                variant="destructive"
+  1203→                onClick={handleClearAll}
+  1204→                className="gap-2"
+  1205→              >
+  1206→                <Trash2 className="h-4 w-4" />
+  1207→                Yes, Clear All
+  1208→              </Button>
+  1209→            </DialogFooter>
+  1210→          </DialogContent>
+  1211→        </Dialog>
+  1212→      </motion.div>
+  1213→    </TooltipProvider>
+  1214→  )
+  1215→}

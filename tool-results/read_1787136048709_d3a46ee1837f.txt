@@ -1,0 +1,880 @@
+   260→    resetForm()
+   261→  }, [form, addVotebookEntry, resetForm])
+   262→
+   263→  const handleDelete = useCallback(
+   264→    (index: number) => {
+   265→      deleteVotebookEntry(index)
+   266→      toast.success('Vote entry deleted')
+   267→    },
+   268→    [deleteVotebookEntry],
+   269→  )
+   270→
+   271→  const handleSave = useCallback(async () => {
+   272→    if (votebookEntries.length === 0) {
+   273→      toast.error('No vote entries to save')
+   274→      return
+   275→    }
+   276→    setSaving(true)
+   277→    try {
+   278→      await saveVotebookEntries()
+   279→      toast.success('Votebook saved successfully')
+   280→    } catch (err) {
+   281→      toast.error(err instanceof Error ? err.message : 'Failed to save votebook')
+   282→    } finally {
+   283→      setSaving(false)
+   284→    }
+   285→  }, [votebookEntries, saveVotebookEntries])
+   286→
+   287→  const handleClearAll = useCallback(() => {
+   288→    clearVotebookEntries()
+   289→    setClearDialogOpen(false)
+   290→    toast.success('All vote entries cleared')
+   291→  }, [clearVotebookEntries])
+   292→
+   293→  const handleImport = useCallback(() => {
+   294→    setImporting(true)
+   295→    try {
+   296→      importVotesFromBudget()
+   297→      toast.success('Votes imported from budget')
+   298→    } catch {
+   299→      toast.error('Failed to import votes from budget')
+   300→    } finally {
+   301→      setImporting(false)
+   302→    }
+   303→  }, [importVotesFromBudget])
+   304→
+   305→  const handleRecalculate = useCallback(() => {
+   306→    setRecalculating(true)
+   307→    try {
+   308→      recalculateVotebook()
+   309→      toast.success('Votebook recalculated')
+   310→    } catch {
+   311→      toast.error('Failed to recalculate votebook')
+   312→    } finally {
+   313→      setRecalculating(false)
+   314→    }
+   315→  }, [recalculateVotebook])
+   316→
+   317→  const clearFilters = useCallback(() => {
+   318→    setFilterStatus('all')
+   319→    setFilterQuarter('all')
+   320→    setSearchQuery('')
+   321→  }, [])
+   322→
+   323→  const hasActiveFilters = filterStatus !== 'all' || filterQuarter !== 'all' || searchQuery.trim() !== ''
+   324→
+   325→  // ── Expenditure percentage helper ────────────────────────────
+   326→  const getExpenditurePercent = (entry: VotebookEntryUI) => {
+   327→    if (!entry.totalAppropriation) return 0
+   328→    return Math.min(100, (entry.expenditures / entry.totalAppropriation) * 100)
+   329→  }
+   330→
+   331→  const getProgressColor = (pct: number) => {
+   332→    if (pct >= 95) return '[&>div]:bg-red-500'
+   333→    if (pct >= 80) return '[&>div]:bg-amber-500'
+   334→    return '[&>div]:bg-emerald-500'
+   335→  }
+   336→
+   337→  const getWarningIcon = (pct: number) => {
+   338→    if (pct >= 95) return <ShieldAlert className="h-3.5 w-3.5 text-red-500 shrink-0" />
+   339→    if (pct >= 80) return <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+   340→    return null
+   341→  }
+   342→
+   343→  // ── Summary cards data ───────────────────────────────────────
+   344→  const summaryCards = [
+   345→    {
+   346→      label: 'Total Appropriation',
+   347→      value: `${entityConfig.currency} ${formatNum(totalAppropriation)}`,
+   348→      icon: <PieChart className="h-5 w-5" />,
+   349→      color: 'text-blue-600',
+   350→      bg: 'bg-blue-50 dark:bg-blue-950/40',
+   351→      border: 'border-blue-200 dark:border-blue-800/50',
+   352→    },
+   353→    {
+   354→      label: 'Total Commitments',
+   355→      value: `${entityConfig.currency} ${formatNum(totalCommitments)}`,
+   356→      icon: <BookOpen className="h-5 w-5" />,
+   357→      color: 'text-indigo-600',
+   358→      bg: 'bg-indigo-50 dark:bg-indigo-950/40',
+   359→      border: 'border-indigo-200 dark:border-indigo-800/50',
+   360→    },
+   361→    {
+   362→      label: 'Total Expenditures',
+   363→      value: `${entityConfig.currency} ${formatNum(totalExpenditures)}`,
+   364→      icon: <Vote className="h-5 w-5" />,
+   365→      color: 'text-orange-600',
+   366→      bg: 'bg-orange-50 dark:bg-orange-950/40',
+   367→      border: 'border-orange-200 dark:border-orange-800/50',
+   368→    },
+   369→    {
+   370→      label: 'Available Balance',
+   371→      value: `${entityConfig.currency} ${formatNum(totalAvailableBalance)}`,
+   372→      icon: <CheckCircle2 className="h-5 w-5" />,
+   373→      color: totalAvailableBalance >= 0 ? 'text-emerald-600' : 'text-red-600',
+   374→      bg: totalAvailableBalance >= 0
+   375→        ? 'bg-emerald-50 dark:bg-emerald-950/40'
+   376→        : 'bg-red-50 dark:bg-red-950/40',
+   377→      border: totalAvailableBalance >= 0
+   378→        ? 'border-emerald-200 dark:border-emerald-800/50'
+   379→        : 'border-red-200 dark:border-red-800/50',
+   380→    },
+   381→    {
+   382→      label: 'Total Encumbrances',
+   383→      value: `${entityConfig.currency} ${formatNum(totalEncumbrances)}`,
+   384→      icon: <AlertTriangle className="h-5 w-5" />,
+   385→      color: 'text-amber-600',
+   386→      bg: 'bg-amber-50 dark:bg-amber-950/40',
+   387→      border: 'border-amber-200 dark:border-amber-800/50',
+   388→    },
+   389→    {
+   390→      label: 'Exhausted Votes',
+   391→      value: String(exhaustedCount),
+   392→      icon: <ShieldAlert className="h-5 w-5" />,
+   393→      color: 'text-red-600',
+   394→      bg: 'bg-red-50 dark:bg-red-950/40',
+   395→      border: 'border-red-200 dark:border-red-800/50',
+   396→    },
+   397→  ]
+   398→
+   399→  // ── Render ───────────────────────────────────────────────────
+   400→  return (
+   401→    <TooltipProvider>
+   402→      <motion.div
+   403→        variants={pageVariants}
+   404→        initial="initial"
+   405→        animate="animate"
+   406→        exit="exit"
+   407→        transition={{ duration: 0.3, ease: 'easeOut' }}
+   408→        className="space-y-6"
+   409→      >
+   410→        {/* ------------------------------------------------------------------ */}
+   411→        {/* HEADER */}
+   412→        {/* ---------------------------------------------------------- */}
+   413→        <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+   414→          <div>
+   415→            <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+   416→              <BookOpen className="h-6 w-6 text-primary" />
+   417→              Votebook
+   418→            </h2>
+   419→            <p className="text-sm text-muted-foreground mt-1 max-w-xl">
+   420→              Track budget appropriations against commitments, expenditures, and available
+   421→              balances for each vote/item. Monitor utilisation rates and identify exhausted
+   422→              or at-risk allocations across all government entities.
+   423→            </p>
+   424→          </div>
+   425→          <Badge
+   426→            variant="outline"
+   427→            className="w-fit text-xs font-medium shrink-0 mt-2 sm:mt-0"
+   428→          >
+   429→            Step 6 of 10
+   430→          </Badge>
+   431→        </div>
+   432→
+   433→        {/* ---------------------------------------------------------------- */}
+   434→        {/* SUMMARY CARDS */
+   435→        {/* --------------------------------------------------------- */}
+   436→        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+   437→          {summaryCards.map((card) => (
+   438→            <Card
+   439→              key={card.label}
+   440→              className={`${card.bg} ${card.border} border`}
+   441→            >
+   442→              <CardContent className="p-3.5">
+   443→                <div className="flex items-center justify-between mb-1.5">
+   444→                  <span className={`text-[11px] font-medium uppercase tracking-wider ${card.color}`}>
+   445→                    {card.label}
+   446→                  </span>
+   447→                  <span className={card.color}>{card.icon}</span>
+   448→                </div>
+   449→                <p className="text-base font-bold text-foreground truncate">{card.value}</p>
+   450→              </CardContent>
+   451→            </Card>
+   452→          ))}
+   453→        </div>
+   454→
+   455→        {/* ---------------------------------------------------------------- */}
+   456→        {/* ACTION BUTTONS */
+   457→        {/* --------------------------------------------------------- */}
+   458→        <div className="flex flex-wrap items-center gap-2">
+   459→          <Button
+   460→            variant="outline"
+   461→            size="sm"
+   462→            onClick={() => setShowForm((p) => !p)}
+   463→            className="gap-1.5"
+   464→            disabled={isLoading}
+   465→          >
+   466→            {showForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+   467→            {showForm ? 'Cancel' : 'Add Vote'}
+   468→          </Button>
+   469→
+   470→          <Button
+   471→            variant="outline"
+   472→            size="sm"
+   473→            onClick={handleImport}
+   474→            disabled={isLoading || importing}
+   475→            className="gap-1.5"
+   476→          >
+   477→            {importing ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />}
+   478→            Import from Budget
+   479→          </Button>
+   480→
+   481→          <Button
+   482→            variant="outline"
+   483→            size="sm"
+   484→            onClick={handleRecalculate}
+   485→            disabled={isLoading || recalculating || votebookEntries.length === 0}
+   486→            className="gap-1.5"
+   487→          >
+   488→            {recalculating ? <Loader2 className="h-4 w-4 animate-spin" /> : <PieChart className="h-4 w-4" />}
+   489→            Recalculate
+   490→          </Button>
+   491→
+   492→          <Button
+   493→            size="sm"
+   494→            onClick={handleSave}
+   495→            disabled={isLoading || saving || votebookEntries.length === 0}
+   496→            className="gap-1.5"
+   497→          >
+   498→            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+   499→            Save
+   500→          </Button>
+   501→
+   502→          <Button
+   503→            variant="ghost"
+   504→            size="sm"
+   505→            onClick={() => setClearDialogOpen(true)}
+   506→            disabled={isLoading || votebookEntries.length === 0}
+   507→            className="gap-1.5 text-muted-foreground hover:text-destructive"
+   508→          >
+   509→            <Trash2 className="h-4 w-4" />
+   510→            Clear All
+   511→          </Button>
+   512→        </div>
+   513→
+   514→        {/* ---------------------------------------------------------------- */}
+   515→        {/* ADD VOTE INLINE FORM */
+   516→        {/* --------------------------------------------------------- */}
+   517→        {showForm && (
+   518→          <motion.div
+   519→            initial={{ opacity: 0, height: 0 }}
+   520→            animate={{ opacity: 1, height: 'auto' }}
+   521→            exit={{ opacity: 0, height: 0 }}
+   522→            transition={{ duration: 0.2 }}
+   523→          >
+   524→            <Card className="border-primary/30">
+   525→              <CardHeader className="pb-3">
+   526→                <CardTitle className="text-base">New Vote Entry</CardTitle>
+   527→                <CardDescription>
+   528→                  Enter the vote details below. Total Appropriation is auto-calculated from Annual + Supplementary.
+   529→                </CardDescription>
+   530→              </CardHeader>
+   531→              <CardContent>
+   532→                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+   533→                  {/* Vote Code */}
+   534→                  <div className="space-y-1.5">
+   535→                    <Label htmlFor="voteCode" className="text-xs font-medium">
+   536→                      Vote Code <span className="text-destructive">*</span>
+   537→                    </Label>
+   538→                    <Input
+   539→                      id="voteCode"
+   540→                      value={form.voteCode}
+   541→                      onChange={(e) => setForm((p) => ({ ...p, voteCode: e.target.value }))}
+   542→                      placeholder="e.g. V-101"
+   543→                      className="h-9 text-sm"
+   544→                    />
+   545→                  </div>
+   546→
+   547→                  {/* Vote Description */}
+   548→                  <div className="space-y-1.5 sm:col-span-2 lg:col-span-2">
+   549→                    <Label htmlFor="voteDesc" className="text-xs font-medium">
+   550→                      Vote Description <span className="text-destructive">*</span>
+   551→                    </Label>
+   552→                    <Input
+   553→                      id="voteDesc"
+   554→                      value={form.voteDescription}
+   555→                      onChange={(e) => setForm((p) => ({ ...p, voteDescription: e.target.value }))}
+   556→                      placeholder="e.g. Personnel Emoluments"
+   557→                      className="h-9 text-sm"
+   558→                    />
+   559→                  </div>
+   560→
+   561→                  {/* Annual Appropriation */}
+   562→                  <div className="space-y-1.5">
+   563→                    <Label htmlFor="annualAppr" className="text-xs font-medium">
+   564→                      Annual Appropriation
+   565→                    </Label>
+   566→                    <Input
+   567→                      id="annualAppr"
+   568→                      type="number"
+   569→                      min="0"
+   570→                      value={form.annualAppropriation}
+   571→                      onChange={(e) => setForm((p) => ({ ...p, annualAppropriation: e.target.value }))}
+   572→                      placeholder="0"
+   573→                      className="h-9 text-sm font-mono"
+   574→                    />
+   575→                  </div>
+   576→
+   577→                  {/* Supplementary Appropriation */}
+   578→                  <div className="space-y-1.5">
+   579→                    <Label htmlFor="supplAppr" className="text-xs font-medium">
+   580→                      Supplementary Appropriation
+   581→                    </Label>
+   582→                    <Input
+   583→                      id="supplAppr"
+   584→                      type="number"
+   585→                      min="0"
+   586→                      value={form.supplementaryAppropriation}
+   587→                      onChange={(e) => setForm((p) => ({ ...p, supplementaryAppropriation: e.target.value }))}
+   588→                      placeholder="0"
+   589→                      className="h-9 text-sm font-mono"
+   590→                    />
+   591→                  </div>
+   592→
+   593→                  {/* Auto-calculated Total Appropriation */}
+   594→                  <div className="space-y-1.5">
+   595→                    <Label className="text-xs font-medium text-muted-foreground">
+   596→                      Total Appropriation (auto)
+   597→                    </Label>
+   598→                    <div className="h-9 rounded-md border bg-muted/60 px-3 flex items-center text-sm font-mono font-semibold text-foreground">
+   599→                      {entityConfig.currency} {formatNum(formTotalAppr)}
+   600→                    </div>
+   601→                  </div>
+   602→
+   603→                  {/* Commitments */}
+   604→                  <div className="space-y-1.5">
+   605→                    <Label htmlFor="commitments" className="text-xs font-medium">
+   606→                      Commitments
+   607→                    </Label>
+   608→                    <Input
+   609→                      id="commitments"
+   610→                      type="number"
+   611→                      min="0"
+   612→                      value={form.commitments}
+   613→                      onChange={(e) => setForm((p) => ({ ...p, commitments: e.target.value }))}
+   614→                      placeholder="0"
+   615→                      className="h-9 text-sm font-mono"
+   616→                    />
+   617→                  </div>
+   618→
+   619→                  {/* Expenditures */}
+   620→                  <div className="space-y-1.5">
+   621→                    <Label htmlFor="expenditures" className="text-xs font-medium">
+   622→                      Expenditures
+   623→                    </Label>
+   624→                    <Input
+   625→                      id="expenditures"
+   626→                      type="number"
+   627→                      min="0"
+   628→                      value={form.expenditures}
+   629→                      onChange={(e) => setForm((p) => ({ ...p, expenditures: e.target.value }))}
+   630→                      placeholder="0"
+   631→                      className="h-9 text-sm font-mono"
+   632→                    />
+   633→                  </div>
+   634→
+   635→                  {/* Encumbrances */}
+   636→                  <div className="space-y-1.5">
+   637→                    <Label htmlFor="encumbrances" className="text-xs font-medium">
+   638→                      Encumbrances
+   639→                    </Label>
+   640→                    <Input
+   641→                      id="encumbrances"
+   642→                      type="number"
+   643→                      min="0"
+   644→                      value={form.encumbrances}
+   645→                      onChange={(e) => setForm((p) => ({ ...p, encumbrances: e.target.value }))}
+   646→                      placeholder="0"
+   647→                      className="h-9 text-sm font-mono"
+   648→                    />
+   649→                  </div>
+   650→
+   651→                  {/* Quarter */}
+   652→                  <div className="space-y-1.5">
+   653→                    <Label className="text-xs font-medium">Quarter</Label>
+   654→                    <Select
+   655→                      value={form.quarter}
+   656→                      onValueChange={(v) => setForm((p) => ({ ...p, quarter: v }))}
+   657→                    >
+   658→                      <SelectTrigger className="h-9 text-sm">
+   659→                        <SelectValue placeholder="Select quarter" />
+   660→                      </SelectTrigger>
+   661→                      <SelectContent>
+   662→                        {QUARTERS.map((q) => (
+   663→                          <SelectItem key={q} value={q}>{q}</SelectItem>
+   664→                        ))}
+   665→                      </SelectContent>
+   666→                    </Select>
+   667→                  </div>
+   668→
+   669→                  {/* Status */}
+   670→                  <div className="space-y-1.5">
+   671→                    <Label className="text-xs font-medium">Status</Label>
+   672→                    <Select
+   673→                      value={form.status}
+   674→                      onValueChange={(v) => setForm((p) => ({ ...p, status: v as VoteStatus }))}
+   675→                    >
+   676→                      <SelectTrigger className="h-9 text-sm">
+   677→                        <SelectValue />
+   678→                      </SelectTrigger>
+   679→                      <SelectContent>
+   680→                        <SelectItem value="active">Active</SelectItem>
+   681→                        <SelectItem value="exhausted">Exhausted</SelectItem>
+   682→                        <SelectItem value="suspended">Suspended</SelectItem>
+   683→                        <SelectItem value="lapsed">Lapsed</SelectItem>
+   684→                      </SelectContent>
+   685→                    </Select>
+   686→                  </div>
+   687→
+   688→                  {/* Notes */}
+   689→                  <div className="space-y-1.5 sm:col-span-2 lg:col-span-2">
+   690→                    <Label htmlFor="notes" className="text-xs font-medium">
+   691→                      Notes
+   692→                    </Label>
+   693→                    <Input
+   694→                      id="notes"
+   695→                      value={form.notes}
+   696→                      onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
+   697→                      placeholder="Optional notes or remarks"
+   698→                      className="h-9 text-sm"
+   699→                    />
+   700→                  </div>
+   701→                </div>
+   702→
+   703→                {/* Form actions */}
+   704→                <div className="flex justify-end gap-2 mt-4 pt-3 border-t">
+   705→                  <Button variant="ghost" size="sm" onClick={resetForm} className="gap-1.5">
+   706→                    <X className="h-4 w-4" />
+   707→                    Cancel
+   708→                  </Button>
+   709→                  <Button size="sm" onClick={handleSubmit} className="gap-1.5">
+   710→                    <Plus className="h-4 w-4" />
+   711→                    Add Vote
+   712→                  </Button>
+   713→                </div>
+   714→              </CardContent>
+   715→            </Card>
+   716→          </motion.div>
+   717→        )}
+   718→
+   719→        {/* ---------------------------------------------------------------- */}
+   720→        {/* FILTER BAR */
+   721→        {/* --------------------------------------------------------- */}
+   722→        <Card className="border-dashed">
+   723→          <CardContent className="p-3">
+   724→            <div className="flex flex-wrap items-center gap-2">
+   725→              <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
+   726→
+   727→              <Select value={filterStatus} onValueChange={setFilterStatus}>
+   728→                <SelectTrigger className="h-8 w-[130px] text-xs">
+   729→                  <SelectValue />
+   730→                </SelectTrigger>
+   731→                <SelectContent>
+   732→                  <SelectItem value="all">All Statuses</SelectItem>
+   733→                  <SelectItem value="active">Active</SelectItem>
+   734→                  <SelectItem value="exhausted">Exhausted</SelectItem>
+   735→                  <SelectItem value="suspended">Suspended</SelectItem>
+   736→                  <SelectItem value="lapsed">Lapsed</SelectItem>
+   737→                </SelectContent>
+   738→              </Select>
+   739→
+   740→              <Select value={filterQuarter} onValueChange={setFilterQuarter}>
+   741→                <SelectTrigger className="h-8 w-[110px] text-xs">
+   742→                  <SelectValue />
+   743→                </SelectTrigger>
+   744→                <SelectContent>
+   745→                  <SelectItem value="all">All Quarters</SelectItem>
+   746→                  {QUARTERS.map((q) => (
+   747→                    <SelectItem key={q} value={q}>{q}</SelectItem>
+   748→                  ))}
+   749→                </SelectContent>
+   750→              </Select>
+   751→
+   752→              <div className="relative flex-1 min-w-[180px] max-w-[280px]">
+   753→                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+   754→                <Input
+   755→                  value={searchQuery}
+   756→                  onChange={(e) => setSearchQuery(e.target.value)}
+   757→                  placeholder="Search code, description, notes…"
+   758→                  className="h-8 text-xs pl-7 pr-7"
+   759→                />
+   760→                {searchQuery && (
+   761→                  <button
+   762→                    onClick={() => setSearchQuery('')}
+   763→                    className="absolute right-2 top-1/2 -translate-y-1/2"
+   764→                  >
+   765→                    <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+   766→                  </button>
+   767→                )}
+   768→              </div>
+   769→
+   770→              {hasActiveFilters && (
+   771→                <Button
+   772→                  variant="ghost"
+   773→                  size="sm"
+   774→                  onClick={clearFilters}
+   775→                  className="h-8 text-xs text-muted-foreground hover:text-foreground gap-1"
+   776→                >
+   777→                  <X className="h-3 w-3" />
+   778→                  Clear
+   779→                </Button>
+   780→              )}
+   781→
+   782→              <span className="text-xs text-muted-foreground ml-auto">
+   783→                {filteredEntries.length} of {votebookEntries.length} votes
+   784→              </span>
+   785→            </div>
+   786→          </CardContent>
+   787→        </Card>
+   788→
+   789→        {/* ---------------------------------------------------------------- */}
+   790→        {/* DATA TABLE */
+   791→        {/* --------------------------------------------------------- */}
+   792→        <Card>
+   793→          <CardContent className="p-0">
+   794→            {votebookEntries.length === 0 ? (
+   795→              /* ── EMPTY STATE ──────────────────────────────────────── */
+   796→              <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+   797→                <div className="rounded-full bg-muted p-4 mb-4">
+   798→                  <Vote className="h-10 w-10 text-muted-foreground" />
+   799→                </div>
+   800→                <h3 className="text-sm font-semibold text-foreground">No vote entries yet</h3>
+   801→                <p className="text-xs text-muted-foreground mt-1 max-w-sm">
+   802→                  Add vote entries manually or import from your approved budget to populate the
+   803→                  votebook with appropriation and expenditure tracking data.
+   804→                </p>
+   805→                <div className="flex gap-2 mt-4">
+   806→                  <Button
+   807→                    variant="outline"
+   808→                    size="sm"
+   809→                    onClick={() => setShowForm(true)}
+   810→                    className="gap-1.5"
+   811→                  >
+   812→                    <Plus className="h-4 w-4" />
+   813→                    Add Vote
+   814→                  </Button>
+   815→                  <Button
+   816→                    variant="outline"
+   817→                    size="sm"
+   818→                    onClick={handleImport}
+   819→                    disabled={importing}
+   820→                    className="gap-1.5"
+   821→                  >
+   822→                    {importing ? (
+   823→                      <Loader2 className="h-4 w-4 animate-spin" />
+   824→                    ) : (
+   825→                      <BookOpen className="h-4 w-4" />
+   826→                    )}
+   827→                    Import from Budget
+   828→                  </Button>
+   829→                </div>
+   830→              </div>
+   831→            ) : (
+   832→              /* ── TABLE ─────────────────────────────────────────────── */
+   833→              <div className="overflow-x-auto">
+   834→                <table className="w-full text-xs">
+   835→                  <thead>
+   836→                    <tr className="border-b bg-muted/50">
+   837→                      <th className="text-left px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap">
+   838→                        Vote Code
+   839→                      </th>
+   840→                      <th className="text-left px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap min-w-[140px]">
+   841→                        Description
+   842→                      </th>
+   843→                      <th className="text-right px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap">
+   844→                        Annual Appr.
+   845→                      </th>
+   846→                      <th className="text-right px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap">
+   847→                        Suppl. Appr.
+   848→                      </th>
+   849→                      <th className="text-right px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap">
+   850→                        Total Appr.
+   851→                      </th>
+   852→                      <th className="text-right px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap">
+   853→                        Commitments
+   854→                      </th>
+   855→                      <th className="text-right px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap">
+   856→                        Expenditures
+   857→                      </th>
+   858→                      <th className="text-right px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap">
+   859→                        Unspent Bal.
+   860→                      </th>
+   861→                      <th className="text-right px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap">
+   862→                        Available Bal.
+   863→                      </th>
+   864→                      <th className="text-right px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap">
+   865→                        Encumbrances
+   866→                      </th>
+   867→                      <th className="text-center px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap">
+   868→                        Quarter
+   869→                      </th>
+   870→                      <th className="text-center px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap">
+   871→                        Status
+   872→                      </th>
+   873→                      <th className="text-center px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap min-w-[100px]">
+   874→                        Utilisation
+   875→                      </th>
+   876→                      <th className="text-center px-3 py-2.5 font-semibold text-muted-foreground whitespace-nowrap">
+   877→                        Actions
+   878→                      </th>
+   879→                    </tr>
+   880→                  </thead>
+   881→                  <tbody>
+   882→                    {filteredEntries.map((entry, idx) => {
+   883→                      const isEven = idx % 2 === 0
+   884→                      const pct = getExpenditurePercent(entry)
+   885→                      const sc = STATUS_CONFIG[entry.status]
+   886→                      return (
+   887→                        <tr
+   888→                          key={entry._id ?? idx}
+   889→                          className={`
+   890→                            border-b transition-colors hover:bg-muted/40
+   891→                            ${isEven ? 'bg-background' : 'bg-muted/20'}
+   892→                          `}
+   893→                        >
+   894→                          {/* Vote Code */}
+   895→                          <td className="px-3 py-2 whitespace-nowrap font-mono font-semibold">
+   896→                            {entry.voteCode}
+   897→                          </td>
+   898→
+   899→                          {/* Description */}
+   900→                          <td className="px-3 py-2">
+   901→                            <span className="font-medium">{entry.voteDescription}</span>
+   902→                            {entry.notes && (
+   903→                              <Tooltip>
+   904→                                <TooltipTrigger asChild>
+   905→                                  <span className="ml-1.5 text-muted-foreground cursor-help">
+   906→                                    ℹ
+   907→                                  </span>
+   908→                                </TooltipTrigger>
+   909→                                <TooltipContent side="bottom" className="max-w-xs">
+   910→                                  <p className="text-xs">{entry.notes}</p>
+   911→                                </TooltipContent>
+   912→                              </Tooltip>
+   913→                            )}
+   914→                          </td>
+   915→
+   916→                          {/* Annual Appr. */}
+   917→                          <td className="px-3 py-2 text-right font-mono whitespace-nowrap">
+   918→                            {formatNum(entry.annualAppropriation)}
+   919→                          </td>
+   920→
+   921→                          {/* Suppl. Appr. */}
+   922→                          <td className="px-3 py-2 text-right font-mono whitespace-nowrap">
+   923→                            {entry.supplementaryAppropriation > 0
+   924→                              ? formatNum(entry.supplementaryAppropriation)
+   925→                              : '—'}
+   926→                          </td>
+   927→
+   928→                          {/* Total Appr. */}
+   929→                          <td className="px-3 py-2 text-right font-mono font-semibold whitespace-nowrap">
+   930→                            {formatNum(entry.totalAppropriation)}
+   931→                          </td>
+   932→
+   933→                          {/* Commitments */}
+   934→                          <td className="px-3 py-2 text-right font-mono whitespace-nowrap text-indigo-600 dark:text-indigo-400">
+   935→                            {entry.commitments > 0 ? formatNum(entry.commitments) : '—'}
+   936→                          </td>
+   937→
+   938→                          {/* Expenditures */}
+   939→                          <td className="px-3 py-2 text-right font-mono whitespace-nowrap text-orange-600 dark:text-orange-400">
+   940→                            {formatNum(entry.expenditures)}
+   941→                          </td>
+   942→
+   943→                          {/* Unspent Balance */}
+   944→                          <td
+   945→                            className={`px-3 py-2 text-right font-mono whitespace-nowrap font-medium ${
+   946→                              entry.unspentBalance <= 0
+   947→                                ? 'text-red-600 dark:text-red-400'
+   948→                                : 'text-emerald-600 dark:text-emerald-400'
+   949→                            }`}
+   950→                          >
+   951→                            {entry.unspentBalance < 0 ? '(' : ''}
+   952→                            {formatNum(entry.unspentBalance)}
+   953→                            {entry.unspentBalance < 0 ? ')' : ''}
+   954→                          </td>
+   955→
+   956→                          {/* Available Balance */}
+   957→                          <td
+   958→                            className={`px-3 py-2 text-right font-mono whitespace-nowrap font-semibold ${
+   959→                              entry.availableBalance <= 0
+   960→                                ? 'text-red-600 dark:text-red-400'
+   961→                                : 'text-foreground'
+   962→                            }`}
+   963→                          >
+   964→                            {formatNum(entry.availableBalance)}
+   965→                          </td>
+   966→
+   967→                          {/* Encumbrances */}
+   968→                          <td className="px-3 py-2 text-right font-mono whitespace-nowrap text-amber-600 dark:text-amber-400">
+   969→                            {entry.encumbrances > 0 ? formatNum(entry.encumbrances) : '—'}
+   970→                          </td>
+   971→
+   972→                          {/* Quarter */}
+   973→                          <td className="px-3 py-2 text-center whitespace-nowrap">
+   974→                            {entry.quarter ? (
+   975→                              <Badge variant="outline" className="text-[10px] font-mono">
+   976→                                {entry.quarter}
+   977→                              </Badge>
+   978→                            ) : (
+   979→                              <span className="text-muted-foreground">—</span>
+   980→                            )}
+   981→                          </td>
+   982→
+   983→                          {/* Status */}
+   984→                          <td className="px-3 py-2 text-center whitespace-nowrap">
+   985→                            <Badge
+   986→                              variant="secondary"
+   987→                              className={`text-[10px] font-semibold uppercase tracking-wider border ${sc.bg} ${sc.text} ${sc.border}`}
+   988→                            >
+   989→                              {sc.label}
+   990→                            </Badge>
+   991→                          </td>
+   992→
+   993→                          {/* Utilisation Progress */}
+   994→                          <td className="px-3 py-2 whitespace-nowrap">
+   995→                            <div className="flex items-center gap-1.5 justify-center">
+   996→                              {getWarningIcon(pct)}
+   997→                              <div className="w-16">
+   998→                                <Progress
+   999→                                  value={pct}
+  1000→                                  className={`h-1.5 ${getProgressColor(pct)}`}
+  1001→                                />
+  1002→                              </div>
+  1003→                              <span
+  1004→                                className={`text-[10px] font-mono font-medium min-w-[28px] text-right ${
+  1005→                                  pct >= 95
+  1006→                                    ? 'text-red-600 dark:text-red-400'
+  1007→                                    : pct >= 80
+  1008→                                      ? 'text-amber-600 dark:text-amber-400'
+  1009→                                      : 'text-muted-foreground'
+  1010→                                }`}
+  1011→                              >
+  1012→                                {pct.toFixed(0)}%
+  1013→                              </span>
+  1014→                            </div>
+  1015→                          </td>
+  1016→
+  1017→                          {/* Actions */}
+  1018→                          <td className="px-3 py-2 text-center whitespace-nowrap">
+  1019→                            <Tooltip>
+  1020→                              <TooltipTrigger asChild>
+  1021→                                <Button
+  1022→                                  variant="ghost"
+  1023→                                  size="icon"
+  1024→                                  className="h-7 w-7 text-muted-foreground hover:text-destructive"
+  1025→                                  onClick={() => {
+  1026→                                    const originalIndex = votebookEntries.findIndex(
+  1027→                                      (e) => e._id === entry._id,
+  1028→                                    )
+  1029→                                    if (originalIndex !== -1) handleDelete(originalIndex)
+  1030→                                  }}
+  1031→                                >
+  1032→                                  <Trash2 className="h-3.5 w-3.5" />
+  1033→                                </Button>
+  1034→                              </TooltipTrigger>
+  1035→                              <TooltipContent>Delete vote entry</TooltipContent>
+  1036→                            </Tooltip>
+  1037→                          </td>
+  1038→                        </tr>
+  1039→                      )
+  1040→                    })}
+  1041→                  </tbody>
+  1042→
+  1043→                  {/* ── FOOTER TOTALS ────────────────────────────────────── */}
+  1044→                  <tfoot>
+  1045→                    <tr className="border-t-2 border-foreground/10 bg-muted/50 font-semibold">
+  1046→                      <td className="px-3 py-2.5" colSpan={2}>
+  1047→                        Totals ({filteredEntries.length} votes)
+  1048→                      </td>
+  1049→                      <td className="px-3 py-2.5 text-right font-mono">
+  1050→                        {formatNum(filteredEntries.reduce((s, v) => s + (v.annualAppropriation || 0), 0))}
+  1051→                      </td>
+  1052→                      <td className="px-3 py-2.5 text-right font-mono">
+  1053→                        {formatNum(filteredEntries.reduce((s, v) => s + (v.supplementaryAppropriation || 0), 0))}
+  1054→                      </td>
+  1055→                      <td className="px-3 py-2.5 text-right font-mono">
+  1056→                        {formatNum(filteredEntries.reduce((s, v) => s + (v.totalAppropriation || 0), 0))}
+  1057→                      </td>
+  1058→                      <td className="px-3 py-2.5 text-right font-mono text-indigo-600 dark:text-indigo-400">
+  1059→                        {formatNum(filteredEntries.reduce((s, v) => s + (v.commitments || 0), 0))}
+  1060→                      </td>
+  1061→                      <td className="px-3 py-2.5 text-right font-mono text-orange-600 dark:text-orange-400">
+  1062→                        {formatNum(filteredEntries.reduce((s, v) => s + (v.expenditures || 0), 0))}
+  1063→                      </td>
+  1064→                      <td className="px-3 py-2.5 text-right font-mono">
+  1065→                        {formatNum(filteredEntries.reduce((s, v) => s + (v.unspentBalance || 0), 0))}
+  1066→                      </td>
+  1067→                      <td className="px-3 py-2.5 text-right font-mono">
+  1068→                        {formatNum(filteredEntries.reduce((s, v) => s + (v.availableBalance || 0), 0))}
+  1069→                      </td>
+  1070→                      <td className="px-3 py-2.5 text-right font-mono text-amber-600 dark:text-amber-400">
+  1071→                        {formatNum(filteredEntries.reduce((s, v) => s + (v.encumbrances || 0), 0))}
+  1072→                      </td>
+  1073→                      <td colSpan={3} />
+  1074→                    </tr>
+  1075→                  </tfoot>
+  1076→                </table>
+  1077→              </div>
+  1078→            )}
+  1079→          </CardContent>
+  1080→        </Card>
+  1081→
+  1082→        {/* ---------------------------------------------------------------- */}
+  1083→        {/* NAVIGATION */
+  1084→        {/* --------------------------------------------------------- */}
+  1085→        <div className="flex items-center justify-between pt-2">
+  1086→          <Button
+  1087→            variant="outline"
+  1088→            onClick={() => setWizardStep(5)}
+  1089→            className="gap-2"
+  1090→            disabled={isLoading}
+  1091→          >
+  1092→            <ArrowLeft className="h-4 w-4" />
+  1093→            Back to Trial Balance
+  1094→          </Button>
+  1095→
+  1096→          <Button
+  1097→            onClick={() => setWizardStep(7)}
+  1098→            className="gap-2"
+  1099→            disabled={isLoading}
+  1100→          >
+  1101→            Continue to Abstract
+  1102→            <ArrowRight className="h-4 w-4" />
+  1103→          </Button>
+  1104→        </div>
+  1105→
+  1106→        {/* ---------------------------------------------------------------- */}
+  1107→        {/* CLEAR CONFIRMATION DIALOG */
+  1108→        {/* --------------------------------------------------------- */}
+  1109→        <Dialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
+  1110→          <DialogContent>
+  1111→            <DialogHeader>
+  1112→              <DialogTitle>Clear All Vote Entries?</DialogTitle>
+  1113→              <DialogDescription>
+  1114→                This will permanently remove all {votebookEntries.length} vote entr{votebookEntries.length !== 1 ? 'ies' : 'y'}. This action cannot be undone.
+  1115→              </DialogDescription>
+  1116→            </DialogHeader>
+  1117→            <DialogFooter className="gap-2 sm:gap-0">
+  1118→              <Button
+  1119→                variant="ghost"
+  1120→                onClick={() => setClearDialogOpen(false)}
+  1121→              >
+  1122→                Cancel
+  1123→              </Button>
+  1124→              <Button
+  1125→                variant="destructive"
+  1126→                onClick={handleClearAll}
+  1127→                className="gap-1.5"
+  1128→              >
+  1129→                <Trash2 className="h-4 w-4" />
+  1130→                Yes, Clear All
+  1131→              </Button>
+  1132→            </DialogFooter>
+  1133→          </DialogContent>
+  1134→        </Dialog>
+  1135→      </motion.div>
+  1136→    </TooltipProvider>
+  1137→  )
+  1138→}
+  1139→
