@@ -18,7 +18,9 @@ export function proxy(request: NextRequest) {
     pathname.startsWith('/public') ||
     pathname === '/favicon.ico' ||
     pathname === '/robots.txt' ||
-    pathname === '/logo.svg'
+    pathname === '/logo.svg' ||
+    pathname === '/api' ||
+    pathname.startsWith('/api/')
   ) {
     return NextResponse.next()
   }
@@ -39,6 +41,6 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!login|api/auth|_next|public|favicon\\.ico|robots\\.txt|logo\\.svg).*)',
+    '/((?!login|api|_next|public|favicon\\.ico|robots\\.txt|logo\\.svg).*)',
   ],
 }

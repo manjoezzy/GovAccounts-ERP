@@ -2,8 +2,6 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "next-themes"
-import { getServerSession } from "next-auth"
-import { authOptions } from '@/lib/auth'
 import { AuthProvider } from "@/components/auth-provider"
 
 const geistSans = Geist({
@@ -27,7 +25,16 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const session = await getServerSession(authOptions)
+  // Try to get server session, but don't crash if DB is unreachable
+  // (e.g., on first Vercel deployment before env vars are set)
+  let session = null
+  try {
+    const { getServerSession } = await import("next-auth")
+    const { authOptions } = await import("@/lib/auth")
+    session = await getServerSession(authOptions)
+  } catch (error) {
+    console.error("[Layout] getServerSession failed (DB may be unreachable):", error)
+  }
 
   return (
     <html lang="en" suppressHydrationWarning>
