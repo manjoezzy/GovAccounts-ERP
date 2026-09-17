@@ -59,3 +59,7 @@ prompt
 server.log
 # Skills directory
 /skills/
+# Tool results
+/tool-results/
+# Analysis
+/scripts/analysis_results.json
