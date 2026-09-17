@@ -5,7 +5,7 @@ import { toast, Toaster } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSession, signOut } from 'next-auth/react'
 import {
-  Sun, Moon, Menu, Landmark, Plus, Bell, X, LogOut, User,
+  Sun, Moon, Menu, Landmark, Plus, Bell, X, LogOut, User, ArrowRight,
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 
@@ -246,6 +246,10 @@ export default function AccountingERPPage() {
   ])
   const [showNotifications, setShowNotifications] = useState(false)
   const [reports, setReports] = useState<Array<{id: string; entityName: string; periodLabel: string; status: string}>>([])
+  const [carryForwardDialogOpen, setCarryForwardDialogOpen] = useState(false)
+  const [carryForwardPeriodEnd, setCarryForwardPeriodEnd] = useState('2026-06-30')
+  const [carryForwardPeriodLabel, setCarryForwardPeriodLabel] = useState('30 June 2026')
+  const [carryForwardLoading, setCarryForwardLoading] = useState(false)
 
   // Fetch available reports
   useEffect(() => {
@@ -357,6 +361,22 @@ export default function AccountingERPPage() {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent><p>New Report</p></TooltipContent>
+              </Tooltip>
+              {/* Carry Forward button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="hidden sm:flex h-8 text-xs gap-1.5"
+                    onClick={() => setCarryForwardDialogOpen(true)}
+                    disabled={reports.length === 0}
+                  >
+                    <ArrowRight className="h-3 w-3" />
+                    <span className="hidden md:inline">Carry Forward</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent><p>New Period (Carry Forward)</p></TooltipContent>
               </Tooltip>
               {/* Notifications */}
               <div className="relative">
@@ -516,6 +536,88 @@ export default function AccountingERPPage() {
           </div>
         </footer>
       </div>
+
+      {/* ── Carry Forward Dialog ────────────────────────────── */}
+      <Dialog open={carryForwardDialogOpen} onOpenChange={setCarryForwardDialogOpen}>
+        <DialogContent className="sm:max-w-[440px]">
+          <DialogHeader>
+            <DialogTitle>New Period (Carry Forward)</DialogTitle>
+          </DialogHeader>
+          <div className="py-2 space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Carry forward balances from the current report into a new reporting period.
+              Revenue &amp; expense accounts reset to zero; assets &amp; liabilities carry forward.
+            </p>
+            <div className="space-y-2">
+              <Label htmlFor="cf-source">Source Report</Label>
+              <div className="text-sm font-medium px-3 py-2 rounded-md bg-muted">
+                {reports.find(r => r.id === reportId)?.entityName || 'Current'} — {reports.find(r => r.id === reportId)?.periodLabel || 'N/A'}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cf-period-end">New Period End Date</Label>
+              <Input
+                id="cf-period-end"
+                placeholder="2026-06-30"
+                value={carryForwardPeriodEnd}
+                onChange={(e) => setCarryForwardPeriodEnd(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cf-period-label">New Period Label</Label>
+              <Input
+                id="cf-period-label"
+                placeholder="30 June 2026"
+                value={carryForwardPeriodLabel}
+                onChange={(e) => setCarryForwardPeriodLabel(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCarryForwardDialogOpen(false)} disabled={carryForwardLoading}>Cancel</Button>
+            <Button
+              onClick={async () => {
+                if (!carryForwardPeriodEnd.trim() || !carryForwardPeriodLabel.trim()) {
+                  toast.error('Please fill in all fields')
+                  return
+                }
+                setCarryForwardLoading(true)
+                try {
+                  const res = await fetch('/api/reports/carry-forward', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      sourceReportId: reportId,
+                      newPeriodEnd: carryForwardPeriodEnd.trim(),
+                      newPeriodLabel: carryForwardPeriodLabel.trim(),
+                    }),
+                  })
+                  if (!res.ok) {
+                    const err = await res.json().catch(() => ({}))
+                    throw new Error(err.error || 'Carry forward failed')
+                  }
+                  const newReport = await res.json()
+                  setReportId(newReport.id)
+                  localStorage.setItem('gov-erp-report-id', newReport.id)
+                  // Refresh the report list
+                  const listRes = await fetch('/api/reports')
+                  const listData = await listRes.json()
+                  if (Array.isArray(listData)) setReports(listData)
+                  setCarryForwardDialogOpen(false)
+                  toast.success(`Carry forward complete: ${carryForwardPeriodLabel}`)
+                } catch (err: any) {
+                  toast.error(err.message || 'Carry forward failed')
+                } finally {
+                  setCarryForwardLoading(false)
+                }
+              }}
+              disabled={carryForwardLoading}
+            >
+              {carryForwardLoading ? 'Processing...' : 'Carry Forward'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* ── Report Switcher Dialog ──────────────────────────── */}
       <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
