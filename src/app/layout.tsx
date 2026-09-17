@@ -25,15 +25,16 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  // Try to get server session, but don't crash if DB is unreachable
-  // (e.g., on first Vercel deployment before env vars are set)
+  // Try to get server session, but never crash — even if DB is unreachable
+  // (e.g., on first Vercel deployment before env vars are configured)
   let session = null
   try {
     const { getServerSession } = await import("next-auth")
     const { authOptions } = await import("@/lib/auth")
     session = await getServerSession(authOptions)
-  } catch (error) {
-    console.error("[Layout] getServerSession failed (DB may be unreachable):", error)
+  } catch {
+    // Silently fail — app will render without session
+    // Users will see the login page via proxy.ts redirect
   }
 
   return (

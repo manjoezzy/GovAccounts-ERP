@@ -15,6 +15,7 @@ export function proxy(request: NextRequest) {
     pathname.startsWith('/login') ||
     pathname.startsWith('/api/auth') ||
     pathname.startsWith('/_next') ||
+    pathname.startsWith('/_next/') ||
     pathname.startsWith('/public') ||
     pathname === '/favicon.ico' ||
     pathname === '/robots.txt' ||

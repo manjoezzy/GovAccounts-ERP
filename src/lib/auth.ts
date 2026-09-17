@@ -1,19 +1,10 @@
 import { NextAuthOptions } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
-import { PrismaAdapter } from '@auth/prisma-adapter'
-import { db } from '@/lib/db'
 
 export const authOptions: NextAuthOptions = {
-  // Prisma adapter handles User + Account + Session models.
-  // Wrapped in try/catch so the app doesn't crash if DB is unreachable
-  // (e.g., on first Vercel deployment before env vars are set).
-  adapter: (() => {
-    try {
-      return PrismaAdapter(db) as any
-    } catch {
-      return undefined
-    }
-  })(),
+  // PrismaAdapter is only used when database is reachable.
+  // On Vercel before env vars are set, this safely falls back to undefined.
+  adapter: undefined as any, // Will be set lazily below
 
   providers: [
     GoogleProvider({
@@ -73,4 +64,16 @@ export const authOptions: NextAuthOptions = {
       }
     },
   },
+}
+
+// Lazily set the PrismaAdapter when database is reachable.
+// This avoids crashing at module-evaluation time on Vercel.
+try {
+  const { PrismaAdapter } = require('@auth/prisma-adapter')
+  const { db } = require('@/lib/db')
+  if (db) {
+    authOptions.adapter = PrismaAdapter(db) as any
+  }
+} catch (error) {
+  console.warn('[Auth] PrismaAdapter not available — running without DB adapter')
 }
