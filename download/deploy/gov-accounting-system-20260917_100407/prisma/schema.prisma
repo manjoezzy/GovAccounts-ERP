@@ -1,0 +1,712 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AUTH: USER & ACCOUNT (NextAuth / Google OAuth)
+// ═══════════════════════════════════════════════════════════════
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  role          String    @default("accountant") // accountant | admin | viewer
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type              String  @default("oauth")
+  provider          String  @default("google")
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expiresAt    DateTime
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CORE: FINANCIAL REPORT / PERIOD
+// ═══════════════════════════════════════════════════════════════
+
+model FinancialReport {
+  id             String   @id @default(cuid())
+  entityName     String   @default("Government Entity")
+  periodEnd      String
+  periodLabel    String   @default("30 June 2025")
+  currency       String   @default("Shs")
+  status         String   @default("draft")
+  version        Int      @default(1)
+  versionLabel   String   @default("")
+  parentVersionId String?
+  fiscalYear     String   @default("")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  entries        TrialBalanceEntry[]
+  auditLog       AuditLog[]
+  supplementary  SupplementaryData?
+  approvalWorkflow ApprovalWorkflow?
+}
+
+model TrialBalanceEntry {
+  id            String  @id @default(cuid())
+  reportId      String
+  report        FinancialReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  accountCode   String
+  accountName   String
+  classification String
+  category      String  @default("")
+  noteRef       String  @default("")
+  debitCurrent  Float   @default(0)
+  creditCurrent Float   @default(0)
+  debitPrior    Float   @default(0)
+  creditPrior   Float   @default(0)
+  budgetInitial  Float   @default(0)
+  budgetAdjusted Float   @default(0)
+  sortOrder     Int     @default(0)
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  reportId  String
+  report    FinancialReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  action    String
+  field     String   @default("")
+  oldValue  String   @default("")
+  newValue  String   @default("")
+  userId    String   @default("system")
+  timestamp DateTime @default(now())
+}
+
+model SupplementaryData {
+  id                        String  @id @default(cuid())
+  reportId                  String  @unique
+  report                    FinancialReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  advancesRecovered         Float   @default(0)
+  advancesRecoveredPrior    Float   @default(0)
+  depositsReceived          Float   @default(0)
+  depositsReceivedPrior     Float   @default(0)
+  transfersToTreasury       Float   @default(0)
+  transfersToTreasuryPrior  Float   @default(0)
+  revenueInKindTaxWaivers       Float   @default(0)
+  revenueInKindTaxWaiversPrior  Float   @default(0)
+  ppeOpeningCurrent         Float   @default(0)
+  ppeAdditionsCurrent       Float   @default(0)
+  ppeDisposalsCurrent       Float   @default(0)
+  ppeOpeningPrior           Float   @default(0)
+  ppeAdditionsPrior         Float   @default(0)
+  ppeDisposalsPrior         Float   @default(0)
+  depreciationRate          Float   @default(0)
+  depreciationMethod        String  @default("straight-line")
+  employeeCount             Int     @default(0)
+  salariesWages             Float   @default(0)
+  pensionContributions      Float   @default(0)
+  payrollTaxes              Float   @default(0)
+  otherEmployeeBenefits     Float   @default(0)
+  priorYearAdjustments      Float   @default(0)
+  revaluationReserves       Float   @default(0)
+  transfersToUCF            Float   @default(0)
+  accountingOfficer         String   @default("")
+  chiefFinanceOfficer       String   @default("")
+  internalAuditHead         String   @default("")
+  signatoryDate             String   @default("")
+  ipsasBasis                String   @default("IPSAS Accrual Basis")
+  accountingPolicies        String   @default("")
+  exchangeRateUSD           Float   @default(1)
+  exchangeRateEUR           Float   @default(1)
+}
+
+model ApprovalWorkflow {
+  id                String    @id @default(cuid())
+  reportId          String    @unique
+  report            FinancialReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  currentStep       String    @default("draft")
+  preparerName      String    @default("")
+  preparerApprovedAt DateTime?
+  reviewerName      String    @default("")
+  reviewerApprovedAt DateTime?
+  cfoName           String    @default("")
+  cfoApprovedAt     DateTime?
+  comments          String    @default("")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 1: FUND STRUCTURE & BUDGET SETUP
+// ═══════════════════════════════════════════════════════════════
+
+model Fund {
+  id          String   @id @default(cuid())
+  reportId    String
+  name        String
+  fundType    String   @default("general")
+  code        String   @default("")
+  description String   @default("")
+  isActive    Boolean  @default(true)
+  openingBalance Float @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 2: VOTEBOOK + WARRANT + VIREMENT
+// ═══════════════════════════════════════════════════════════════
+
+model VotebookEntry {
+  id                String   @id @default(cuid())
+  reportId          String
+  voteCode          String
+  voteName          String
+  originalAppropriation Float @default(0)
+  supplementaryAppropriation Float @default(0)
+  totalAppropriation Float @default(0)
+  actualExpenditure Float @default(0)
+  balance           Float @default(0)
+  commitDate        String   @default("")
+  notes             String   @default("")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Warrant {
+  id          String   @id @default(cuid())
+  reportId    String
+  warrantNo   String
+  voteCode    String
+  amount      Float
+  authority   String   @default("")
+  issueDate   String   @default("")
+  expiryDate  String   @default("")
+  status      String   @default("active")
+  utilized    Float    @default(0)
+  balance     Float    @default(0)
+  createdAt   DateTime @default(now())
+}
+
+model Virement {
+  id          String   @id @default(cuid())
+  reportId    String
+  fromVote    String
+  toVote      String
+  amount      Float
+  reason      String   @default("")
+ authBy      String   @default("")
+ authDate    String   @default("")
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 3: COMMITMENT REGISTER & PROCUREMENT
+// ═══════════════════════════════════════════════════════════════
+
+model Commitment {
+  id          String   @id @default(cuid())
+  reportId    String
+  poNumber    String   @default("")
+  voteCode    String
+  supplier    String   @default("")
+  description String   @default("")
+  commitDate  String   @default("")
+  committedAmount Float @default(0)
+  expendedAmount  Float @default(0)
+  balance         Float @default(0)
+  status      String   @default("open")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ProcurementPlan {
+  id          String   @id @default(cuid())
+  reportId    String
+  itemDescription String
+  voteCode    String
+  estimatedCost Float
+  procurementMethod String @default("open")
+  plannedDate String   @default("")
+  status      String   @default("planned")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 4: JOURNAL BOOK
+// ═══════════════════════════════════════════════════════════════
+
+model JournalEntry {
+  id          String   @id @default(cuid())
+  reportId    String
+  entryNo     String   @default("")
+  entryDate   String   @default("")
+  narration   String   @default("")
+  entryType   String   @default("general")
+  reference   String   @default("")
+  status      String   @default("draft")
+  postedAt    DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lines       JournalLine[]
+}
+
+model JournalLine {
+  id          String   @id @default(cuid())
+  journalId   String
+  journal     JournalEntry @relation(fields: [journalId], references: [id], onDelete: Cascade)
+  accountCode String
+  accountName String   @default("")
+  debit       Float   @default(0)
+  credit      Float   @default(0)
+  sortOrder   Int     @default(0)
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 5: PETTY CASH & IMPREST
+// ═══════════════════════════════════════════════════════════════
+
+model PettyCashTransaction {
+  id          String   @id @default(cuid())
+  reportId    String
+  date        String   @default("")
+  description String   @default("")
+  voucherNo   String   @default("")
+  receipt     Float   @default(0)
+  payment     Float   @default(0)
+  balance     Float   @default(0)
+  category    String   @default("")
+  createdAt   DateTime @default(now())
+}
+
+model Imprest {
+  id          String   @id @default(cuid())
+  reportId    String
+  imprestNo   String   @default("")
+  holderName  String   @default("")
+  purpose     String   @default("")
+  amountIssued Float   @default(0)
+  amountSurrendered Float @default(0)
+  balance     Float   @default(0)
+  issueDate   String   @default("")
+  dueDate     String   @default("")
+  surrenderDate String  @default("")
+  status      String   @default("outstanding")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 6: CASHBOOK & BANK RECONCILIATION
+// ═══════════════════════════════════════════════════════════════
+
+model CashbookEntry {
+  id          String   @id @default(cuid())
+  reportId    String
+  date        String   @default("")
+  description String   @default("")
+  reference   String   @default("")
+  receipt     Float   @default(0)
+  payment     Float   @default(0)
+  balance     Float   @default(0)
+  accountCode String   @default("")
+  bankAccount String   @default("main")
+  createdAt   DateTime @default(now())
+}
+
+model CashbookOpeningBalance {
+  id          String   @id @default(cuid())
+  reportId    String
+  bankAccount String   @default("main")
+  amount      Float   @default(0)
+  asOfDate    String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([reportId, bankAccount])
+}
+
+model BankReconciliation {
+  id                  String   @id @default(cuid())
+  reportId            String
+  bankAccount         String   @default("main")
+  periodEnd           String   @default("")
+  balancePerBooks     Float   @default(0)
+  balancePerBank      Float   @default(0)
+  outstandingDeposits Float   @default(0)
+  outstandingCheques  Float   @default(0)
+  bankCharges         Float   @default(0)
+  bankInterest        Float   @default(0)
+  otherAdjustments    Float   @default(0)
+  adjustedBalance     Float   @default(0)
+  status              String   @default("draft")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 7: GENERAL LEDGER
+// ═══════════════════════════════════════════════════════════════
+
+model LedgerAccount {
+  id            String   @id @default(cuid())
+  reportId      String
+  accountCode   String
+  accountName   String
+  accountType   String   @default("asset")
+  openingDebit  Float   @default(0)
+  openingCredit Float   @default(0)
+  totalDebit    Float   @default(0)
+  totalCredit   Float   @default(0)
+  closingDebit  Float   @default(0)
+  closingCredit Float   @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  transactions  LedgerTransaction[]
+}
+
+model LedgerTransaction {
+  id            String   @id @default(cuid())
+  accountId     String
+  account       LedgerAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  date          String   @default("")
+  narration     String   @default("")
+  reference     String   @default("")
+  debit         Float   @default(0)
+  credit        Float   @default(0)
+  balance       Float   @default(0)
+  createdAt     DateTime @default(now())
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 8: PAYROLL & TAX
+// ═══════════════════════════════════════════════════════════════
+
+model PayrollEntry {
+  id                  String   @id @default(cuid())
+  reportId            String
+  employeeName        String   @default("")
+  employeeNumber      String   @default("")
+  department          String   @default("")
+  payPeriod           String   @default("")
+  grossPay            Float   @default(0)
+  payeTax             Float   @default(0)
+  pensionEmployee     Float   @default(0)
+  pensionEmployer     Float   @default(0)
+  nssf                Float   @default(0)
+  otherDeductions     Float   @default(0)
+  netPay              Float   @default(0)
+  bankAccount         String   @default("")
+  createdAt           DateTime @default(now())
+}
+
+model TaxEntry {
+  id          String   @id @default(cuid())
+  reportId    String
+  taxType     String   @default("")
+  taxPeriod   String   @default("")
+  collected   Float   @default(0)
+  remitted    Float   @default(0)
+  balance     Float   @default(0)
+  dueDate     String   @default("")
+  remittanceDate String  @default("")
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 9: GRANTS & DEBT
+// ═══════════════════════════════════════════════════════════════
+
+model GrantEntry {
+  id              String   @id @default(cuid())
+  reportId        String
+  grantName       String   @default("")
+  donor           String   @default("")
+  grantType       String   @default("development")
+  totalAmount     Float   @default(0)
+  drawnDown       Float   @default(0)
+  expended       Float   @default(0)
+  balance         Float   @default(0)
+  conditions      String   @default("")
+  startDate       String   @default("")
+  endDate         String   @default("")
+  status          String   @default("active")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model DebtEntry {
+  id              String   @id @default(cuid())
+  reportId        String
+  lender          String   @default("")
+  loanType        String   @default("external")
+  principalAmount Float   @default(0)
+  interestRate    Float   @default(0)
+  outstandingPrincipal Float @default(0)
+  totalServiceCost Float @default(0)
+  repaymentsMade Float   @default(0)
+  balance         Float   @default(0)
+  disbursementDate String  @default("")
+  maturityDate    String   @default("")
+  status          String   @default("active")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 10: CHEQUE/PAYMENT REGISTER & SUSPENSE
+// ═══════════════════════════════════════════════════════════════
+
+model ChequeEntry {
+  id              String   @id @default(cuid())
+  reportId        String
+  chequeNumber    String   @default("")
+  payee           String   @default("")
+  amount          Float   @default(0)
+  voteCode        String   @default("")
+  issueDate       String   @default("")
+  bankAccount     String   @default("main")
+  status          String   @default("issued")
+  presentedDate   String   @default("")
+  cancelledReason String   @default("")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model SuspenseAccount {
+  id          String   @id @default(cuid())
+  reportId    String
+  description String   @default("")
+  debitAmount Float   @default(0)
+  creditAmount Float  @default(0)
+  balance     Float   @default(0)
+  date        String   @default("")
+  reason      String   @default("")
+  resolution  String   @default("")
+  resolutionDate String @default("")
+  status      String   @default("open")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 11: REVENUE & EXPENDITURE CAPTURE
+// ═══════════════════════════════════════════════════════════════
+
+model RevenueEntry {
+  id            String   @id @default(cuid())
+  reportId      String
+  date          String   @default("")
+  revenueType   String   @default("")
+  accountCode   String   @default("")
+  description   String   @default("")
+  amount        Float   @default(0)
+  taxComponent  Float   @default(0)
+  netAmount     Float   @default(0)
+  collectedBy   String   @default("")
+  receiptNumber String   @default("")
+  status        String   @default("recorded")
+  createdAt     DateTime @default(now())
+}
+
+model ExpenditureEntry {
+  id            String   @id @default(cuid())
+  reportId      String
+  date          String   @default("")
+  expenditureType String @default("")
+  accountCode   String   @default("")
+  voteCode      String   @default("")
+  description   String   @default("")
+  amount        Float   @default(0)
+  supplier      String   @default("")
+  invoiceNumber String   @default("")
+  paymentRef    String   @default("")
+  status        String   @default("recorded")
+  createdAt     DateTime @default(now())
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 12: APPROPRIATION & INTER-FUND TRANSFERS
+// ═══════════════════════════════════════════════════════════════
+
+model AppropriationAccount {
+  id                String   @id @default(cuid())
+  reportId          String
+  voteCode          String
+  voteName          String
+  initialAppropriation Float @default(0)
+  supplementaryAppropriation Float @default(0)
+  virementIn        Float   @default(0)
+  virementOut       Float   @default(0)
+  revisedAppropriation Float @default(0)
+  actualExpenditure Float   @default(0)
+  savingsOverSpent  Float   @default(0)
+  status            String   @default("draft")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model InterFundTransfer {
+  id          String   @id @default(cuid())
+  reportId    String
+  fromFund    String   @default("")
+  toFund      String   @default("")
+  amount      Float   @default(0)
+  description String   @default("")
+  authBy      String   @default("")
+  transferDate String  @default("")
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 13: ASSET REGISTER
+// ═══════════════════════════════════════════════════════════════
+
+model AssetRegister {
+  id              String   @id @default(cuid())
+  reportId        String
+  assetNumber     String   @default("")
+  description     String   @default("")
+  category        String   @default("ppe")
+  location        String   @default("")
+  dateAcquired    String   @default("")
+  acquisitionCost Float   @default(0)
+  accumulatedDep  Float   @default(0)
+  netBookValue    Float   @default(0)
+  depreciationRate Float  @default(0)
+  usefulLife      Int     @default(0)
+  disposalDate    String   @default("")
+  disposalValue   Float   @default(0)
+  status          String   @default("active")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 14: INVENTORY / STORES LEDGER
+// ═══════════════════════════════════════════════════════════════
+
+model InventoryItem {
+  id              String   @id @default(cuid())
+  reportId        String
+  itemCode        String   @default("")
+  itemDescription String   @default("")
+  unitOfMeasure   String   @default("")
+  unitCost        Float   @default(0)
+  openingQty      Float   @default(0)
+  openingValue    Float   @default(0)
+  receivedQty     Float   @default(0)
+  receivedValue   Float   @default(0)
+  issuedQty       Float   @default(0)
+  issuedValue     Float   @default(0)
+  closingQty      Float   @default(0)
+  closingValue    Float   @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 15: DEBTORS & CREDITORS
+// ═══════════════════════════════════════════════════════════════
+
+model DebtorAccount {
+  id              String   @id @default(cuid())
+  reportId        String
+  name            String   @default("")
+  accountCode     String   @default("")
+  invoiceNumber   String   @default("")
+  invoiceAmount   Float   @default(0)
+  amountPaid      Float   @default(0)
+  balance         Float   @default(0)
+  invoiceDate     String   @default("")
+  dueDate         String   @default("")
+  agingDays       Int     @default(0)
+  status          String   @default("outstanding")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model CreditorAccount {
+  id              String   @id @default(cuid())
+  reportId        String
+  name            String   @default("")
+  accountCode     String   @default("")
+  invoiceNumber   String   @default("")
+  invoiceAmount   Float   @default(0)
+  amountPaid      Float   @default(0)
+  balance         Float   @default(0)
+  invoiceDate     String   @default("")
+  dueDate         String   @default("")
+  agingDays       Int     @default(0)
+  status          String   @default("outstanding")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 16: YEAR-END PROCEDURES
+// ═══════════════════════════════════════════════════════════════
+
+model ClosingEntry {
+  id          String   @id @default(cuid())
+  reportId    String
+  entryDate   String   @default("")
+  narration   String   @default("")
+  accountCode String   @default("")
+  accountName String   @default("")
+  debit       Float   @default(0)
+  credit      Float   @default(0)
+  entryType   String   @default("closing")
+  posted      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model YearEndChecklist {
+  id          String   @id @default(cuid())
+  reportId    String
+  task        String   @default("")
+  category    String   @default("")
+  isCompleted Boolean  @default(false)
+  completedBy String   @default("")
+  completedAt DateTime?
+  notes       String   @default("")
+  sortOrder   Int     @default(0)
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 17: NOTIFICATIONS
+// ═══════════════════════════════════════════════════════════════
+
+model Notification {
+  id          String   @id @default(cuid())
+  reportId    String   @default("")
+  title       String   @default("")
+  message     String   @default("")
+  type        String   @default("info")
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}

@@ -1,0 +1,677 @@
+     1→'use client'
+     2→
+     3→import { useState, useEffect, useCallback, useSyncExternalStore } from 'react'
+     4→import { toast, Toaster } from 'sonner'
+     5→import { motion, AnimatePresence } from 'framer-motion'
+     6→import { useSession, signOut } from 'next-auth/react'
+     7→import {
+     8→  Sun, Moon, Menu, Landmark, Plus, Bell, X, LogOut, User, ArrowRight,
+     9→} from 'lucide-react'
+    10→import { useTheme } from 'next-themes'
+    11→
+    12→import { Button } from '@/components/ui/button'
+    13→import { Separator } from '@/components/ui/separator'
+    14→import {
+    15→  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
+    16→} from '@/components/ui/tooltip'
+    17→import {
+    18→  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+    19→} from '@/components/ui/dialog'
+    20→import {
+    21→  DropdownMenu,
+    22→  DropdownMenuContent,
+    23→  DropdownMenuItem,
+    24→  DropdownMenuSeparator,
+    25→  DropdownMenuTrigger,
+    26→} from '@/components/ui/dropdown-menu'
+    27→import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+    28→import { Input } from '@/components/ui/input'
+    29→import { Label } from '@/components/ui/label'
+    30→import { useIsMobile } from '@/hooks/use-mobile'
+    31→import { Badge } from '@/components/ui/badge'
+    32→import { ScrollArea } from '@/components/ui/scroll-area'
+    33→
+    34→import AccountingSidebar from '@/components/accounting/sidebar'
+    35→
+    36→// ═══════════════════════════════════════════════════════════════════
+    37→// MODULE IMPORTS
+    38→// ═══════════════════════════════════════════════════════════════════
+    39→import Dashboard from '@/components/accounting/dashboard'
+    40→import FundSetup from '@/components/accounting/fund-setup'
+    41→import Votebook from '@/components/accounting/votebook'
+    42→import Warrants from '@/components/accounting/warrants'
+    43→import Virements from '@/components/accounting/virements'
+    44→import CommitmentRegister from '@/components/accounting/commitment-register'
+    45→import Procurement from '@/components/accounting/procurement'
+    46→import JournalBook from '@/components/accounting/journal-book'
+    47→import PurchasesJournal from '@/components/accounting/purchases-journal'
+    48→import RevenueJournal from '@/components/accounting/revenue-journal'
+    49→import Cashbook from '@/components/accounting/cashbook'
+    50→import PettyCash from '@/components/accounting/petty-cash'
+    51→import ImprestRegister from '@/components/accounting/imprest-register'
+    52→import GeneralLedger from '@/components/accounting/ledger'
+    53→import DebtorsLedger from '@/components/accounting/debtors-ledger'
+    54→import CreditorsLedger from '@/components/accounting/creditors-ledger'
+    55→import AssetRegister from '@/components/accounting/asset-register'
+    56→import InventoryLedger from '@/components/accounting/inventory'
+    57→import RevenueCapture from '@/components/accounting/revenue-capture'
+    58→import ExpenditureCapture from '@/components/accounting/expenditure-capture'
+    59→import ChequeRegister from '@/components/accounting/cheque-register'
+    60→import SuspenseAccounts from '@/components/accounting/suspense-accounts'
+    61→import TaxRegister from '@/components/accounting/tax-register'
+    62→import GrantRegister from '@/components/accounting/grant-register'
+    63→import DebtRegister from '@/components/accounting/debt-register'
+    64→import TrialBalance from '@/components/accounting/trial-balance'
+    65→import Appropriation from '@/components/accounting/appropriation'
+    66→import InterFund from '@/components/accounting/inter-fund'
+    67→import BankRecon from '@/components/accounting/bank-recon'
+    68→import ClosingEntries from '@/components/accounting/closing-entries'
+    69→import YearEndChecklist from '@/components/accounting/year-end-checklist'
+    70→import Statements from '@/components/accounting/statements'
+    71→import KPIDashboard from '@/components/accounting/kpi-dashboard'
+    72→import AuditTrail from '@/components/accounting/audit-trail'
+    73→import Compliance from '@/components/accounting/compliance'
+    74→import Approval from '@/components/accounting/approval'
+    75→import ExportCenter from '@/components/accounting/export'
+    76→
+    77→// ═══════════════════════════════════════════════════════════════════
+    78→// MODULE LABELS
+    79→// ═══════════════════════════════════════════════════════════════════
+    80→
+    81→const MODULE_LABELS: Record<string, string> = {
+    82→  'dashboard': 'Dashboard',
+    83→  'fund-setup': 'Fund Setup',
+    84→  'votebook': 'Votebook',
+    85→  'warrants': 'Warrants',
+    86→  'virements': 'Virements',
+    87→  'commitments': 'Commitments',
+    88→  'procurement': 'Procurement',
+    89→  'journal': 'Journal Book',
+    90→  'purchases-journal': 'Purchases Journal',
+    91→  'revenue-journal': 'Revenue Journal',
+    92→  'cashbook': 'Cashbook',
+    93→  'petty-cash': 'Petty Cash',
+    94→  'imprest': 'Imprest Register',
+    95→  'ledger': 'General Ledger',
+    96→  'debtors': 'Debtors Ledger',
+    97→  'creditors': 'Creditors Ledger',
+    98→  'asset-register': 'Asset Register',
+    99→  'inventory': 'Inventory Ledger',
+   100→  'revenue-capture': 'Revenue Capture',
+   101→  'expenditure-capture': 'Expenditure Capture',
+   102→  'cheque-register': 'Cheque Register',
+   103→  'suspense': 'Suspense Accounts',
+   104→  'tax-register': 'Tax Register',
+   105→  'grant-register': 'Grant Register',
+   106→  'debt-register': 'Debt Register',
+   107→  'trial-balance': 'Trial Balance',
+   108→  'appropriation': 'Appropriation',
+   109→  'inter-fund': 'Inter-Fund Transfers',
+   110→  'bank-recon': 'Bank Reconciliation',
+   111→  'closing-entries': 'Closing Entries',
+   112→  'year-end': 'Year-End Checklist',
+   113→  'statements': 'Financial Statements',
+   114→  'kpi-dashboard': 'KPI Dashboard',
+   115→  'audit-trail': 'Audit Trail',
+   116→  'compliance': 'Compliance',
+   117→  'approval': 'Approval',
+   118→  'export': 'Export Center',
+   119→}
+   120→
+   121→// ═══════════════════════════════════════════════════════════════════
+   122→// MODULE ROUTER
+   123→// ═══════════════════════════════════════════════════════════════════
+   124→
+   125→function ModuleRenderer({ activeModule, reportId, onNavigate }: { activeModule: string; reportId: string; onNavigate: (mod: string) => void }) {
+   126→  const commonProps = { reportId }
+   127→
+   128→  switch (activeModule) {
+   129→    case 'dashboard':
+   130→      return <Dashboard reportId={reportId} onNavigate={onNavigate} />
+   131→    case 'fund-setup':
+   132→      return <FundSetup {...commonProps} />
+   133→    case 'votebook':
+   134→      return <Votebook {...commonProps} />
+   135→    case 'warrants':
+   136→      return <Warrants {...commonProps} />
+   137→    case 'virements':
+   138→      return <Virements {...commonProps} />
+   139→    case 'commitments':
+   140→      return <CommitmentRegister {...commonProps} />
+   141→    case 'procurement':
+   142→      return <Procurement {...commonProps} />
+   143→    case 'journal':
+   144→      return <JournalBook {...commonProps} />
+   145→    case 'purchases-journal':
+   146→      return <PurchasesJournal {...commonProps} />
+   147→    case 'revenue-journal':
+   148→      return <RevenueJournal {...commonProps} />
+   149→    case 'cashbook':
+   150→      return <Cashbook {...commonProps} />
+   151→    case 'petty-cash':
+   152→      return <PettyCash {...commonProps} />
+   153→    case 'imprest':
+   154→      return <ImprestRegister {...commonProps} />
+   155→    case 'ledger':
+   156→      return <GeneralLedger {...commonProps} />
+   157→    case 'debtors':
+   158→      return <DebtorsLedger {...commonProps} />
+   159→    case 'creditors':
+   160→      return <CreditorsLedger {...commonProps} />
+   161→    case 'asset-register':
+   162→      return <AssetRegister {...commonProps} />
+   163→    case 'inventory':
+   164→      return <InventoryLedger {...commonProps} />
+   165→    case 'revenue-capture':
+   166→      return <RevenueCapture {...commonProps} />
+   167→    case 'expenditure-capture':
+   168→      return <ExpenditureCapture {...commonProps} />
+   169→    case 'cheque-register':
+   170→      return <ChequeRegister {...commonProps} />
+   171→    case 'suspense':
+   172→      return <SuspenseAccounts {...commonProps} />
+   173→    case 'tax-register':
+   174→      return <TaxRegister {...commonProps} />
+   175→    case 'grant-register':
+   176→      return <GrantRegister {...commonProps} />
+   177→    case 'debt-register':
+   178→      return <DebtRegister {...commonProps} />
+   179→    case 'trial-balance':
+   180→      return <TrialBalance {...commonProps} />
+   181→    case 'appropriation':
+   182→      return <Appropriation {...commonProps} />
+   183→    case 'inter-fund':
+   184→      return <InterFund {...commonProps} />
+   185→    case 'bank-recon':
+   186→      return <BankRecon {...commonProps} />
+   187→    case 'closing-entries':
+   188→      return <ClosingEntries {...commonProps} />
+   189→    case 'year-end':
+   190→      return <YearEndChecklist {...commonProps} />
+   191→    case 'statements':
+   192→      return <Statements {...commonProps} />
+   193→    case 'kpi-dashboard':
+   194→      return <KPIDashboard {...commonProps} />
+   195→    case 'audit-trail':
+   196→      return <AuditTrail {...commonProps} />
+   197→    case 'compliance':
+   198→      return <Compliance {...commonProps} />
+   199→    case 'approval':
+   200→      return <Approval {...commonProps} />
+   201→    case 'export':
+   202→      return <ExportCenter {...commonProps} />
+   203→    default:
+   204→      return (
+   205→        <div className="flex flex-col items-center justify-center py-24 text-center">
+   206→          <div className="mb-4 h-16 w-16 rounded-2xl bg-muted flex items-center justify-center">
+   207→            <Landmark className="h-8 w-8 text-muted-foreground" />
+   208→          </div>
+   209→          <h2 className="text-xl font-bold">{MODULE_LABELS[activeModule] || 'Unknown Module'}</h2>
+   210→          <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+   211→            This module is currently being developed.
+   212→          </p>
+   213→        </div>
+   214→      )
+   215→  }
+   216→}
+   217→
+   218→// ═══════════════════════════════════════════════════════════════════
+   219→// MAIN PAGE
+   220→// ═══════════════════════════════════════════════════════════════════
+   221→
+   222→export default function AccountingERPPage() {
+   223→  const { data: session } = useSession()
+   224→  const { theme, setTheme } = useTheme()
+   225→  const mounted = useSyncExternalStore(
+   226→    () => () => {},
+   227→    () => true,
+   228→    () => false,
+   229→  )
+   230→  const isMobile = useIsMobile()
+   231→  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+   232→  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+   233→  const [activeModule, setActiveModule] = useState('dashboard')
+   234→  const [reportId, setReportId] = useState<string>(() => {
+   235→    if (typeof window !== 'undefined') {
+   236→      return localStorage.getItem('gov-erp-report-id') || 'default-report'
+   237→    }
+   238→    return 'default-report'
+   239→  })
+   240→  const [reportIdInput, setReportIdInput] = useState('')
+   241→  const [reportDialogOpen, setReportDialogOpen] = useState(false)
+   242→  const [notifications, setNotifications] = useState([
+   243→    { id: 1, title: '3 imprests overdue', read: false },
+   244→    { id: 2, title: 'Budget at 92% utilization', read: false },
+   245→    { id: 3, title: 'Bank recon pending', read: true },
+   246→  ])
+   247→  const [showNotifications, setShowNotifications] = useState(false)
+   248→  const [reports, setReports] = useState<Array<{id: string; entityName: string; periodLabel: string; status: string}>>([])
+   249→  const [carryForwardDialogOpen, setCarryForwardDialogOpen] = useState(false)
+   250→  const [carryForwardPeriodEnd, setCarryForwardPeriodEnd] = useState('2026-06-30')
+   251→  const [carryForwardPeriodLabel, setCarryForwardPeriodLabel] = useState('30 June 2026')
+   252→  const [carryForwardLoading, setCarryForwardLoading] = useState(false)
+   253→
+   254→  // Fetch available reports
+   255→  useEffect(() => {
+   256→    fetch('/api/reports')
+   257→      .then(r => r.json())
+   258→      .then(data => setReports(Array.isArray(data) ? data : []))
+   259→      .catch(() => {})
+   260→  }, [])
+   261→
+   262→  const handleSetReport = () => {
+   263→    if (!reportIdInput.trim()) {
+   264→      toast.error('Please enter a report ID')
+   265→      return
+   266→    }
+   267→    const id = reportIdInput.trim()
+   268→    setReportId(id)
+   269→    localStorage.setItem('gov-erp-report-id', id)
+   270→    setReportDialogOpen(false)
+   271→    setReportIdInput('')
+   272→    toast.success(`Switched to report: ${id}`)
+   273→  }
+   274→
+   275→  const handleModuleChange = useCallback((mod: string) => {
+   276→    setActiveModule(mod)
+   277→    setMobileMenuOpen(false)
+   278→  }, [])
+   279→
+   280→  const unreadCount = notifications.filter(n => !n.read).length
+   281→
+   282→  return (
+   283→    <TooltipProvider>
+   284→      <Toaster position="top-right" richColors />
+   285→      <div className="min-h-screen flex flex-col bg-background">
+   286→        {/* ── Top Bar ──────────────────────────────────────── */}
+   287→        <header className="sticky top-0 z-40 bg-card border-b border-border shadow-sm">
+   288→          <div className="flex h-14 items-center justify-between px-4">
+   289→            <div className="flex items-center gap-3">
+   290→              <Button
+   291→                variant="ghost"
+   292→                size="icon"
+   293→                className="lg:hidden h-8 w-8"
+   294→                onClick={() => setMobileMenuOpen(true)}
+   295→                aria-label="Open navigation"
+   296→              >
+   297→                <Menu className="h-4 w-4" />
+   298→              </Button>
+   299→              <div className="flex items-center gap-2">
+   300→                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+   301→                  <Landmark className="h-4 w-4 text-primary-foreground" />
+   302→                </div>
+   303→                <span className="font-bold text-base tracking-tight hidden sm:inline">
+   304→                  GovAccounts <span className="text-primary">ERP</span>
+   305→                </span>
+   306→              </div>
+   307→              <Separator orientation="vertical" className="h-6 hidden md:block" />
+   308→              <span className="text-sm font-medium text-foreground hidden md:inline">
+   309→                {MODULE_LABELS[activeModule] || ''}
+   310→              </span>
+   311→            </div>
+   312→            <div className="flex items-center gap-1.5">
+   313→              {/* Report switcher */}
+   314→              <Tooltip>
+   315→                <TooltipTrigger asChild>
+   316→                  <Button
+   317→                    variant="outline"
+   318→                    size="sm"
+   319→                    className="hidden sm:flex h-8 text-xs font-mono gap-1.5"
+   320→                    onClick={() => setReportDialogOpen(true)}
+   321→                  >
+   322→                    <Landmark className="h-3 w-3" />
+   323→                    {reports.length > 0
+   324→                      ? reports.find(r => r.id === reportId)?.entityName || reportId
+   325→                      : reportId}
+   326→                  </Button>
+   327→                </TooltipTrigger>
+   328→                <TooltipContent><p>Switch Report / Period</p></TooltipContent>
+   329→              </Tooltip>
+   330→              {/* New report button */}
+   331→              <Tooltip>
+   332→                <TooltipTrigger asChild>
+   333→                  <Button
+   334→                    variant="outline"
+   335→                    size="icon"
+   336→                    className="h-8 w-8 hidden sm:flex"
+   337→                    onClick={async () => {
+   338→                      try {
+   339→                        const res = await fetch('/api/reports', {
+   340→                          method: 'POST',
+   341→                          headers: { 'Content-Type': 'application/json' },
+   342→                          body: JSON.stringify({
+   343→                            entityName: 'Government Entity',
+   344→                            periodEnd: '2025-06-30',
+   345→                            periodLabel: '30 June 2025',
+   346→                            currency: 'Shs',
+   347→                          }),
+   348→                        })
+   349→                        if (!res.ok) throw new Error()
+   350→                        const report = await res.json()
+   351→                        setReportId(report.id)
+   352→                        localStorage.setItem('gov-erp-report-id', report.id)
+   353→                        setReports(prev => [report, ...prev])
+   354→                        toast.success('New report created')
+   355→                      } catch {
+   356→                        toast.error('Failed to create report')
+   357→                      }
+   358→                    }}
+   359→                  >
+   360→                    <Plus className="h-3.5 w-3.5" />
+   361→                  </Button>
+   362→                </TooltipTrigger>
+   363→                <TooltipContent><p>New Report</p></TooltipContent>
+   364→              </Tooltip>
+   365→              {/* Carry Forward button */}
+   366→              <Tooltip>
+   367→                <TooltipTrigger asChild>
+   368→                  <Button
+   369→                    variant="outline"
+   370→                    size="sm"
+   371→                    className="hidden sm:flex h-8 text-xs gap-1.5"
+   372→                    onClick={() => setCarryForwardDialogOpen(true)}
+   373→                    disabled={reports.length === 0}
+   374→                  >
+   375→                    <ArrowRight className="h-3 w-3" />
+   376→                    <span className="hidden md:inline">Carry Forward</span>
+   377→                  </Button>
+   378→                </TooltipTrigger>
+   379→                <TooltipContent><p>New Period (Carry Forward)</p></TooltipContent>
+   380→              </Tooltip>
+   381→              {/* Notifications */}
+   382→              <div className="relative">
+   383→                <Tooltip>
+   384→                  <TooltipTrigger asChild>
+   385→                    <Button
+   386→                      variant="ghost"
+   387→                      size="icon"
+   388→                      className="h-8 w-8 relative"
+   389→                      onClick={() => setShowNotifications(!showNotifications)}
+   390→                    >
+   391→                      <Bell className="h-4 w-4" />
+   392→                      {unreadCount > 0 && (
+   393→                        <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
+   394→                          {unreadCount}
+   395→                        </span>
+   396→                      )}
+   397→                    </Button>
+   398→                  </TooltipTrigger>
+   399→                  <TooltipContent><p>Notifications</p></TooltipContent>
+   400→                </Tooltip>
+   401→                {showNotifications && (
+   402→                  <div className="absolute right-0 top-full mt-2 w-72 bg-card border border-border rounded-lg shadow-lg z-50">
+   403→                    <div className="flex items-center justify-between px-3 py-2 border-b border-border">
+   404→                      <span className="text-sm font-semibold">Notifications</span>
+   405→                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setShowNotifications(false)}>
+   406→                        <X className="h-3.5 w-3.5" />
+   407→                      </Button>
+   408→                    </div>
+   409→                    <ScrollArea className="max-h-60">
+   410→                      {notifications.map(n => (
+   411→                        <div
+   412→                          key={n.id}
+   413→                          className={`px-3 py-2 border-b border-border/50 last:border-0 cursor-pointer hover:bg-muted/50 transition-colors ${!n.read ? 'bg-primary/5' : ''}`}
+   414→                          onClick={() => {
+   415→                            setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x))
+   416→                          }}
+   417→                        >
+   418→                          <div className="flex items-center gap-2">
+   419→                            {!n.read && <div className="h-2 w-2 rounded-full bg-primary flex-shrink-0" />}
+   420→                            <span className={`text-sm ${!n.read ? 'font-medium' : 'text-muted-foreground'}`}>{n.title}</span>
+   421→                          </div>
+   422→                        </div>
+   423→                      ))}
+   424→                    </ScrollArea>
+   425→                  </div>
+   426→                )}
+   427→              </div>
+   428→              {/* User Menu */ }
+   429→              <DropdownMenu>
+   430→                <DropdownMenuTrigger asChild>
+   431→                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+   432→                    <Avatar className="h-7 w-7">
+   433→                      <AvatarImage src={session?.user?.image || ''} alt={session?.user?.name || ''} />
+   434→                      <AvatarFallback className="text-xs font-semibold bg-primary/10 text-primary">
+   435→                        {session?.user?.name
+   436→                          ? session.user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+   437→                          : <User className="h-3.5 w-3.5" />}
+   438→                      </AvatarFallback>
+   439→                    </Avatar>
+   440→                  </Button>
+   441→                </DropdownMenuTrigger>
+   442→                <DropdownMenuContent align="end" className="w-56">
+   443→                  <div className="px-2 py-1.5">
+   444→                    <p className="text-sm font-medium truncate">{session?.user?.name || 'User'}</p>
+   445→                    <p className="text-xs text-muted-foreground truncate">{session?.user?.email || ''}</p>
+   446→                  </div>
+   447→                  <DropdownMenuSeparator />
+   448→                  <DropdownMenuItem className="text-xs text-muted-foreground cursor-default">
+   449→                    Role: {(session?.user as any)?.role || 'accountant'}
+   450→                  </DropdownMenuItem>
+   451→                  <DropdownMenuSeparator />
+   452→                  <DropdownMenuItem
+   453→                    className="text-red-600 focus:text-red-600 cursor-pointer"
+   454→                    onClick={() => signOut({ callbackUrl: '/login' })}
+   455→                  >
+   456→                    <LogOut className="mr-2 h-4 w-4" />
+   457→                    Sign out
+   458→                  </DropdownMenuItem>
+   459→                </DropdownMenuContent>
+   460→              </DropdownMenu>
+   461→              {/* Theme toggle */}
+   462→              <Tooltip>
+   463→                <TooltipTrigger asChild>
+   464→                  <Button
+   465→                    variant="ghost"
+   466→                    size="icon"
+   467→                    className="h-8 w-8"
+   468→                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+   469→                  >
+   470→                    {mounted && (theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />)}
+   471→                  </Button>
+   472→                </TooltipTrigger>
+   473→                <TooltipContent><p>Toggle theme</p></TooltipContent>
+   474→              </Tooltip>
+   475→            </div>
+   476→          </div>
+   477→        </header>
+   478→
+   479→        {/* ── Body ──────────────────────────────────────────── */}
+   480→        <div className="flex flex-1">
+   481→          {/* Desktop Sidebar */}
+   482→          <div className="hidden lg:block">
+   483→            <AccountingSidebar
+   484→              activeModule={activeModule}
+   485→              onModuleChange={handleModuleChange}
+   486→              isCollapsed={sidebarCollapsed}
+   487→              onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+   488→            />
+   489→          </div>
+   490→          {/* Mobile Sidebar */}
+   491→          <div className="lg:hidden">
+   492→            <AccountingSidebar
+   493→              activeModule={activeModule}
+   494→              onModuleChange={handleModuleChange}
+   495→              isCollapsed={!mobileMenuOpen}
+   496→              onToggleCollapse={() => setMobileMenuOpen(false)}
+   497→            />
+   498→          </div>
+   499→          {/* Main Content */}
+   500→          <motion.main
+   501→            className="flex-1 min-w-0"
+   502→            animate={{ marginLeft: isMobile ? 0 : (sidebarCollapsed ? 64 : 256) }}
+   503→            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+   504→          >
+   505→            <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px]">
+   506→              <AnimatePresence mode="wait">
+   507→                <motion.div
+   508→                  key={activeModule}
+   509→                  initial={{ opacity: 0, y: 8 }}
+   510→                  animate={{ opacity: 1, y: 0 }}
+   511→                  exit={{ opacity: 0, y: -8 }}
+   512→                  transition={{ duration: 0.15 }}
+   513→                >
+   514→                  <ModuleRenderer
+   515→                    activeModule={activeModule}
+   516→                    reportId={reportId}
+   517→                    onNavigate={handleModuleChange}
+   518→                  />
+   519→                </motion.div>
+   520→              </AnimatePresence>
+   521→            </div>
+   522→          </motion.main>
+   523→        </div>
+   524→
+   525→        {/* ── Footer — matches sidebar margin so nothing is overlaid ── */}
+   526→        <footer
+   527→          className="border-t border-border mt-auto transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+   528→          style={{ marginLeft: isMobile ? 0 : (sidebarCollapsed ? 64 : 256) }}
+   529→        >
+   530→          <div className="px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
+   531→            <span>GovAccounts ERP — Government Accounting System</span>
+   532→            <div className="flex items-center gap-3">
+   533→              <span>IPSAS Compliant</span>
+   534→              <Badge variant="outline" className="text-[10px]">v2.0</Badge>
+   535→            </div>
+   536→          </div>
+   537→        </footer>
+   538→      </div>
+   539→
+   540→      {/* ── Carry Forward Dialog ────────────────────────────── */}
+   541→      <Dialog open={carryForwardDialogOpen} onOpenChange={setCarryForwardDialogOpen}>
+   542→        <DialogContent className="sm:max-w-[440px]">
+   543→          <DialogHeader>
+   544→            <DialogTitle>New Period (Carry Forward)</DialogTitle>
+   545→          </DialogHeader>
+   546→          <div className="py-2 space-y-4">
+   547→            <p className="text-sm text-muted-foreground">
+   548→              Carry forward balances from the current report into a new reporting period.
+   549→              Revenue &amp; expense accounts reset to zero; assets &amp; liabilities carry forward.
+   550→            </p>
+   551→            <div className="space-y-2">
+   552→              <Label htmlFor="cf-source">Source Report</Label>
+   553→              <div className="text-sm font-medium px-3 py-2 rounded-md bg-muted">
+   554→                {reports.find(r => r.id === reportId)?.entityName || 'Current'} — {reports.find(r => r.id === reportId)?.periodLabel || 'N/A'}
+   555→              </div>
+   556→            </div>
+   557→            <div className="space-y-2">
+   558→              <Label htmlFor="cf-period-end">New Period End Date</Label>
+   559→              <Input
+   560→                id="cf-period-end"
+   561→                placeholder="2026-06-30"
+   562→                value={carryForwardPeriodEnd}
+   563→                onChange={(e) => setCarryForwardPeriodEnd(e.target.value)}
+   564→              />
+   565→            </div>
+   566→            <div className="space-y-2">
+   567→              <Label htmlFor="cf-period-label">New Period Label</Label>
+   568→              <Input
+   569→                id="cf-period-label"
+   570→                placeholder="30 June 2026"
+   571→                value={carryForwardPeriodLabel}
+   572→                onChange={(e) => setCarryForwardPeriodLabel(e.target.value)}
+   573→              />
+   574→            </div>
+   575→          </div>
+   576→          <DialogFooter>
+   577→            <Button variant="outline" onClick={() => setCarryForwardDialogOpen(false)} disabled={carryForwardLoading}>Cancel</Button>
+   578→            <Button
+   579→              onClick={async () => {
+   580→                if (!carryForwardPeriodEnd.trim() || !carryForwardPeriodLabel.trim()) {
+   581→                  toast.error('Please fill in all fields')
+   582→                  return
+   583→                }
+   584→                setCarryForwardLoading(true)
+   585→                try {
+   586→                  const res = await fetch('/api/reports/carry-forward', {
+   587→                    method: 'POST',
+   588→                    headers: { 'Content-Type': 'application/json' },
+   589→                    body: JSON.stringify({
+   590→                      sourceReportId: reportId,
+   591→                      newPeriodEnd: carryForwardPeriodEnd.trim(),
+   592→                      newPeriodLabel: carryForwardPeriodLabel.trim(),
+   593→                    }),
+   594→                  })
+   595→                  if (!res.ok) {
+   596→                    const err = await res.json().catch(() => ({}))
+   597→                    throw new Error(err.error || 'Carry forward failed')
+   598→                  }
+   599→                  const newReport = await res.json()
+   600→                  setReportId(newReport.id)
+   601→                  localStorage.setItem('gov-erp-report-id', newReport.id)
+   602→                  // Refresh the report list
+   603→                  const listRes = await fetch('/api/reports')
+   604→                  const listData = await listRes.json()
+   605→                  if (Array.isArray(listData)) setReports(listData)
+   606→                  setCarryForwardDialogOpen(false)
+   607→                  toast.success(`Carry forward complete: ${carryForwardPeriodLabel}`)
+   608→                } catch (err: any) {
+   609→                  toast.error(err.message || 'Carry forward failed')
+   610→                } finally {
+   611→                  setCarryForwardLoading(false)
+   612→                }
+   613→              }}
+   614→              disabled={carryForwardLoading}
+   615→            >
+   616→              {carryForwardLoading ? 'Processing...' : 'Carry Forward'}
+   617→            </Button>
+   618→          </DialogFooter>
+   619→        </DialogContent>
+   620→      </Dialog>
+   621→
+   622→      {/* ── Report Switcher Dialog ──────────────────────────── */}
+   623→      <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
+   624→        <DialogContent className="sm:max-w-[480px]">
+   625→          <DialogHeader>
+   626→            <DialogTitle>Switch Report</DialogTitle>
+   627→          </DialogHeader>
+   628→          <div className="py-2 space-y-4">
+   629→            {reports.length > 0 && (
+   630→              <div className="space-y-2">
+   631→                <Label className="text-xs text-muted-foreground">Existing Reports</Label>
+   632→                <ScrollArea className="max-h-40">
+   633→                  {reports.map(r => (
+   634→                    <button
+   635→                      key={r.id}
+   636→                      className={`w-full text-left px-3 py-2 rounded-md text-sm flex items-center justify-between hover:bg-muted/50 transition-colors ${r.id === reportId ? 'bg-primary/10 border border-primary/20' : ''}`}
+   637→                      onClick={() => {
+   638→                        setReportId(r.id)
+   639→                        localStorage.setItem('gov-erp-report-id', r.id)
+   640→                        setReportDialogOpen(false)
+   641→                        toast.success(`Switched to: ${r.entityName}`)
+   642→                      }}
+   643→                    >
+   644→                      <div>
+   645→                        <div className="font-medium">{r.entityName}</div>
+   646→                        <div className="text-xs text-muted-foreground">{r.periodLabel}</div>
+   647→                      </div>
+   648→                      <Badge variant={r.id === reportId ? 'default' : 'outline'} className="text-[10px]">
+   649→                        {r.status}
+   650→                      </Badge>
+   651→                    </button>
+   652→                  ))}
+   653→                </ScrollArea>
+   654→              </div>
+   655→            )}
+   656→            <Separator />
+   657→            <div className="space-y-2">
+   658→              <Label htmlFor="report-id-input">Or enter Report ID manually</Label>
+   659→              <Input
+   660→                id="report-id-input"
+   661→                placeholder="Enter report ID"
+   662→                value={reportIdInput}
+   663→                onChange={(e) => setReportIdInput(e.target.value)}
+   664→                onKeyDown={(e) => e.key === 'Enter' && handleSetReport()}
+   665→              />
+   666→            </div>
+   667→          </div>
+   668→          <DialogFooter>
+   669→            <Button variant="outline" onClick={() => setReportDialogOpen(false)}>Cancel</Button>
+   670→            <Button onClick={handleSetReport}>Switch</Button>
+   671→          </DialogFooter>
+   672→        </DialogContent>
+   673→      </Dialog>
+   674→    </TooltipProvider>
+   675→  )
+   676→}
+   677→
