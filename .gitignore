@@ -62,4 +62,4 @@ server.log
 # Tool results
 /tool-results/
 # Analysis
-/scripts/analysis_results.json
+/scripts/analysis_results.jsonsrc/middleware.ts
